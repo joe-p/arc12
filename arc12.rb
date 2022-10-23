@@ -67,8 +67,8 @@ class Vault < TEALrb::Contract
   # @param asa [asset] The ASA to send
   # @param mbr_funder [account] The account that funded the MBR for the ASA
   def claim(asa, mbr_funder)
-    assert Box[itob(asa)]
-    # assert Txn.sender == Box['receiver']
+    assert box_exists?(itob(asa))
+    assert Txn.sender == Box['receiver']
 
     $asa_mbr_funder = box_extract(itob(asa), 0, 32)
     $asa_mbr_amount = box_extract(itob(asa), 32, 8)

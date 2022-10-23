@@ -183,9 +183,18 @@ claim: // claim(asa, mbr_funder)
 	load 9 // claim: asa [asset] The ASA to send
 	itob
 	box_get
+	swap
+	pop
 	assert
 
 	// src_map:arc12.rb:71
+	txn Sender
+	byte "receiver"
+	box_get
+	pop
+	==
+	assert
+
 	// src_map:arc12.rb:73
 	load 9 // claim: asa [asset] The ASA to send
 	itob
