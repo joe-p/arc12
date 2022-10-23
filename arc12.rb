@@ -3,20 +3,8 @@
 require 'tealrb'
 require 'pry'
 
-class Vault < TEALrb::Contract
-  @version = 8
-
-  # @subroutine
-  # @param [account] receiver
-  # @param [uint64] amount
-  def send_payment(receiver, amount)
-    InnerTxn.begin
-    InnerTxn.type_enum = TxnType.pay
-    InnerTxn.receiver = receiver
-    InnerTxn.amount = amount
-    InnerTxn.fee = 0
-    InnerTxn.submit
-  end
+module CommonSubroutines
+  include TEALrb::Opcodes
 
   # @subroutine
   # @param [asset] asa
@@ -32,26 +20,50 @@ class Vault < TEALrb::Contract
     InnerTxn.submit
   end
 
+  # @subroutine
+  # @param [account] receiver
+  # @param [uint64] amount
+  def send_payment(receiver, amount)
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.pay
+    InnerTxn.receiver = receiver
+    InnerTxn.amount = amount
+    InnerTxn.fee = 0
+    InnerTxn.submit
+  end
+end
+
+class Vault < TEALrb::Contract
+  @version = 8
+
+  include CommonSubroutines
+
   # @abi
   # Method called for creation of the vault
   # @param receiver [account] The account that can claim ASAs from this vault
-  # @param mbr_payment [pay] The payment that covers the MBR for the vault MBR
-  def create(receiver, mbr_payment)
-    box_create 'creator', 40
-    box_create 'receiver', 32
-
-    Box['creator'] = concat(mbr_payment.sender, itob(mbr_payment.amount))
-    Box['receiver'] = receiver
+  # @param sender [account]
+  def create(receiver, sender)
+    assert Txn.application_id == 0
+    Global['assets'] = 0
+    Global['creator'] = sender
+    Global['receiver'] = receiver
   end
 
   # @abi
   # Opts into the given asa
-  # @param mbr_amount [uint64] The amount of uALGO being sent to the contract to cover the MBR
-  # @param mbr_funder [address] The address of the funder of the MBR
+  # @param sender [account] The account that is sending the ASA
   # @param asa [asset] The asset to opt-in to
-  def opt_in(mbr_amount, mbr_funder, asa)
-    box_create(itob(asa), 40)
-    Box[itob(asa)] = concat(mbr_funder, itob(mbr_amount))
+  # @param mbr_payment [pay] The payment to cover this contracts MBR
+  def opt_in(sender, asa, mbr_payment)
+    assert mbr_payment.sender == sender
+    assert mbr_payment.receiver == Global.current_application_address
+    assert Global.current_application_address.balance == mbr_payment.amount
+
+    Global['assets'] = Global['assets'] + 1
+
+    $asa_bytes = itob(asa)
+    box_create($asa_bytes, 32)
+    Box[$asa_bytes] = sender
 
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.asset_transfer
@@ -67,30 +79,27 @@ class Vault < TEALrb::Contract
   # @param asa [asset] The ASA to send
   # @param mbr_funder [account] The account that funded the MBR for the ASA
   def claim(asa, mbr_funder)
-    assert box_exists?(itob(asa))
-    assert Txn.sender == Box['receiver']
+    $asa_bytes = itob(asa)
+    assert box_exists?($asa_bytes)
+    assert Txn.sender == Global['receiver']
 
-    $asa_mbr_funder = box_extract(itob(asa), 0, 32)
-    $asa_mbr_amount = box_extract(itob(asa), 32, 8)
-    box_del itob(asa)
+    assert mbr_funder == Box[$asa_bytes]
+    box_del $asa_bytes
+    send_asa(asa, Txn.sender)
 
-    $vault_mbr_funder = box_extract('creator', 0, 32)
-    $vault_mbr_amount = box_extract('creator', 32, 8)
+    available_balance = Global.current_application_address.balance - Global.current_application_address.min_balance
+    send_payment(mbr_funder, available_balance)
+    Global['assets'] = Global['assets'] - 1
 
-    assert mbr_funder == $asa_mbr_funder
-    send_asa(itob(asa), Txn.sender)
-    send_payment($asa_mbr_funder, $asa_mbr_amount)
-
-    if Global.current_application_address.balance == $vault_mbr_amount
-      assert Txn.on_completion == int('DeleteApplication')
+    if Global['assets'] == 0
       box_del 'creator'
 
       InnerTxn.begin
       InnerTxn.type_enum = TxnType.pay
-      InnerTxn.receiver = $vault_mbr_funder
+      InnerTxn.receiver = mbr_funder
       InnerTxn.amount = Global.current_application_address.balance
       InnerTxn.fee = 0
-      InnerTxn.close_remainder_to = $vault_mbr_funder
+      InnerTxn.close_remainder_to = mbr_funder
       InnerTxn.submit
     end
   end

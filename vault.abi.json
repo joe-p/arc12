@@ -13,9 +13,9 @@
           "desc": "The account that can claim ASAs from this vault"
         },
         {
-          "name": "mbr_payment",
-          "type": "pay",
-          "desc": "The payment that covers the MBR for the vault MBR"
+          "name": "sender",
+          "type": "account",
+          "desc": ""
         }
       ],
       "returns": {
@@ -29,19 +29,19 @@
       "desc": "Opts into the given asa",
       "args": [
         {
-          "name": "mbr_amount",
-          "type": "uint64",
-          "desc": "The amount of uALGO being sent to the contract to cover the MBR"
-        },
-        {
-          "name": "mbr_funder",
-          "type": "address",
-          "desc": "The address of the funder of the MBR"
+          "name": "sender",
+          "type": "account",
+          "desc": "The account that is sending the ASA"
         },
         {
           "name": "asa",
           "type": "asset",
           "desc": "The asset to opt-in to"
+        },
+        {
+          "name": "mbr_payment",
+          "type": "pay",
+          "desc": "The payment to cover this contracts MBR"
         }
       ],
       "returns": {
