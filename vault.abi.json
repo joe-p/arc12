@@ -1,0 +1,75 @@
+{
+  "name": "Vault",
+  "networks": {
+  },
+  "methods": [
+    {
+      "name": "create",
+      "desc": "Method called for creation of the vault",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": "The account that can claim ASAs from this vault"
+        },
+        {
+          "name": "mbr_payment",
+          "type": "pay",
+          "desc": "The payment that covers the MBR for the vault MBR"
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    },
+    {
+      "name": "opt_in",
+      "desc": "Opts into the given asa",
+      "args": [
+        {
+          "name": "mbr_amount",
+          "type": "uint64",
+          "desc": "The amount of uALGO being sent to the contract to cover the MBR"
+        },
+        {
+          "name": "mbr_funder",
+          "type": "address",
+          "desc": "The address of the funder of the MBR"
+        },
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": "The asset to opt-in to"
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    },
+    {
+      "name": "claim",
+      "desc": "Sends the ASA to the intended receiver",
+      "args": [
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": "The ASA to send"
+        },
+        {
+          "name": "mbr_funder",
+          "type": "account",
+          "desc": "The account that funded the MBR for the ASA"
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    }
+  ]
+}
