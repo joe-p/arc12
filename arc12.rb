@@ -10,26 +10,26 @@ class Vault < TEALrb::Contract
   # @param [account] receiver
   # @param [uint64] amount
   def send_payment(receiver, amount)
-    itxn_begin
-    ItxnField.type_enum = TxnType.pay
-    ItxnField.receiver = receiver
-    ItxnField.amount = amount
-    ItxnField.fee = 0
-    itxn_submit
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.pay
+    InnerTxn.receiver = receiver
+    InnerTxn.amount = amount
+    InnerTxn.fee = 0
+    InnerTxn.submit
   end
 
   # @subroutine
   # @param [asset] asa
   # @param [account] receiver
   def send_asa(asa, receiver)
-    itxn_begin
-    ItxnField.type_enum = TxnType.asset_transfer
-    ItxnField.asset_receiver = receiver
-    ItxnField.fee = 0
-    ItxnField.asset_amount = Txn.sender.asset_balance(asa)
-    ItxnField.xfer_asset = asa
-    ItxnField.asset_close_to = receiver
-    itxn_submit
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.asset_transfer
+    InnerTxn.asset_receiver = receiver
+    InnerTxn.fee = 0
+    InnerTxn.asset_amount = Txn.sender.asset_balance(asa)
+    InnerTxn.xfer_asset = asa
+    InnerTxn.asset_close_to = receiver
+    InnerTxn.submit
   end
 
   # @abi
@@ -53,13 +53,13 @@ class Vault < TEALrb::Contract
     box_create(itob(asa), 40)
     Box[itob(asa)] = concat(mbr_funder, itob(mbr_amount))
 
-    itxn_begin
-    ItxnField.type_enum = TxnType.asset_transfer
-    ItxnField.asset_receiver = Global.current_application_address
-    ItxnField.asset_amount = 0
-    ItxnField.fee = 0
-    ItxnField.xfer_asset = asa
-    itxn_submit
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.asset_transfer
+    InnerTxn.asset_receiver = Global.current_application_address
+    InnerTxn.asset_amount = 0
+    InnerTxn.fee = 0
+    InnerTxn.xfer_asset = asa
+    InnerTxn.submit
   end
 
   # @abi
@@ -85,13 +85,13 @@ class Vault < TEALrb::Contract
       assert Txn.on_completion == int('DeleteApplication')
       box_del 'creator'
 
-      itxn_begin
-      ItxnField.type_enum = TxnType.pay
-      ItxnField.receiver = $vault_mbr_funder
-      ItxnField.amount = Global.current_application_address.balance
-      ItxnField.fee = 0
-      ItxnField.close_remainder_to = $vault_mbr_funder
-      itxn_submit
+      InnerTxn.begin
+      InnerTxn.type_enum = TxnType.pay
+      InnerTxn.receiver = $vault_mbr_funder
+      InnerTxn.amount = Global.current_application_address.balance
+      InnerTxn.fee = 0
+      InnerTxn.close_remainder_to = $vault_mbr_funder
+      InnerTxn.submit
     end
   end
 
