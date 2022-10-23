@@ -7,8 +7,8 @@ module CommonSubroutines
   include TEALrb::Opcodes
 
   # @subroutine
-  # @param [asset] asa
-  # @param [account] receiver
+  # @param [Asset] asa
+  # @param [Account] receiver
   def send_asa(asa, receiver)
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.asset_transfer
@@ -21,8 +21,8 @@ module CommonSubroutines
   end
 
   # @subroutine
-  # @param [account] receiver
-  # @param [uint64] amount
+  # @param [Account] receiver
+  # @param [Uint64] amount
   def send_payment(receiver, amount)
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.pay
@@ -40,8 +40,8 @@ class Vault < TEALrb::Contract
 
   # @abi
   # Method called for creation of the vault
-  # @param receiver [account] The account that can claim ASAs from this vault
-  # @param sender [account]
+  # @param receiver [Account] The account that can claim ASAs from this vault
+  # @param sender [Account]
   def create(receiver, sender)
     assert Txn.application_id == 0
     Global['assets'] = 0
@@ -51,9 +51,9 @@ class Vault < TEALrb::Contract
 
   # @abi
   # Opts into the given asa
-  # @param sender [account] The account that is sending the ASA
-  # @param asa [asset] The asset to opt-in to
-  # @param mbr_payment [pay] The payment to cover this contracts MBR
+  # @param sender [Account] The account that is sending the ASA
+  # @param asa [Asset] The asset to opt-in to
+  # @param mbr_payment [Pay] The payment to cover this contracts MBR
   def opt_in(sender, asa, mbr_payment)
     assert mbr_payment.sender == sender
     assert mbr_payment.receiver == Global.current_application_address
@@ -76,8 +76,8 @@ class Vault < TEALrb::Contract
 
   # @abi
   # Sends the ASA to the intended receiver
-  # @param asa [asset] The ASA to send
-  # @param mbr_funder [account] The account that funded the MBR for the ASA
+  # @param asa [Asset] The ASA to send
+  # @param mbr_funder [Account] The account that funded the MBR for the ASA
   def claim(asa, mbr_funder)
     $asa_bytes = itob(asa)
     assert box_exists?($asa_bytes)
