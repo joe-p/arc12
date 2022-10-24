@@ -4,10 +4,10 @@
 b main
 
 // src_map:arc12.rb:12
-send_asa: // send_asa(asa, receiver)
-	store 0 // send_asa: receiver [account]
+inner_axfer: // inner_axfer(asa, receiver)
+	store 0 // inner_axfer: receiver [account]
 
-	store 1 // send_asa: asa [asset]
+	store 1 // inner_axfer: asa [asset]
 
 	// src_map:arc12.rb:13
 	itxn_begin
@@ -17,7 +17,7 @@ send_asa: // send_asa(asa, receiver)
 	itxn_field TypeEnum
 
 	// src_map:arc12.rb:15
-	load 0 // send_asa: receiver [account]
+	load 0 // inner_axfer: receiver [account]
 	itxn_field AssetReceiver
 
 	// src_map:arc12.rb:16
@@ -26,18 +26,18 @@ send_asa: // send_asa(asa, receiver)
 
 	// src_map:arc12.rb:17
 	txn Sender
-	load 1 // send_asa: asa [asset]
+	load 1 // inner_axfer: asa [asset]
 	asset_holding_get AssetBalance
 	swap
 	pop
 	itxn_field AssetAmount
 
 	// src_map:arc12.rb:18
-	load 1 // send_asa: asa [asset]
+	load 1 // inner_axfer: asa [asset]
 	itxn_field XferAsset
 
 	// src_map:arc12.rb:19
-	load 0 // send_asa: receiver [account]
+	load 0 // inner_axfer: receiver [account]
 	itxn_field AssetCloseTo
 
 	// src_map:arc12.rb:20
@@ -239,7 +239,7 @@ claim: // claim(asa, mbr_funder)
 	// src_map:arc12.rb:88
 	load 10 // claim: asa [asset] The ASA to send
 	txn Sender
-	callsub send_asa
+	callsub inner_axfer
 
 	// src_map:arc12.rb:91
 	load 11 // claim: mbr_funder [account] The account that funded the MBR for the ASA

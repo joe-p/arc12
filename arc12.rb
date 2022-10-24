@@ -9,7 +9,7 @@ module CommonSubroutines
   # @subroutine
   # @param [Asset] asa
   # @param [Account] receiver
-  def send_asa(asa, receiver)
+  def inner_axfer(asa, receiver)
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.asset_transfer
     InnerTxn.asset_receiver = receiver
@@ -85,7 +85,7 @@ class Vault < TEALrb::Contract
 
     assert mbr_funder == Box[$asa_bytes]
     box_del $asa_bytes
-    send_asa(asa, Txn.sender)
+    inner_axfer(asa, Txn.sender)
 
     available_balance = Global.current_application_address.balance - Global.current_application_address.min_balance
     send_payment(mbr_funder, available_balance)
@@ -106,6 +106,26 @@ class Vault < TEALrb::Contract
 
   def main
     nil
+  end
+end
+
+class Master < TEALrb::Contract
+  include CommonSubroutines
+  # @abi
+  # @param asa [Asset]
+  # @param receiver [Account]
+  # @param asa_transfer [Axfer]
+  # @param vault [Application]
+  def send_asa(asa, receiver, asa_transfer, vault)
+    assert asa_transfer.xfer_asset == asa
+
+    if box_exists? receiver
+      # Call Vault.opt_in
+      inner_axfer(asa, vault.address)
+    else
+      # Create Vault
+      inner_axfer(asa, vault.address)
+    end
   end
 end
 
