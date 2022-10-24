@@ -1,0 +1,153 @@
+#pragma version 8
+
+// src_map:arc12.rb:132
+b main
+
+// src_map:arc12.rb:12
+inner_axfer: // inner_axfer(asa, receiver)
+	store 0 // inner_axfer: receiver [account]
+
+	store 1 // inner_axfer: asa [asset]
+
+	// src_map:arc12.rb:13
+	itxn_begin
+
+	// src_map:arc12.rb:14
+	int axfer
+	itxn_field TypeEnum
+
+	// src_map:arc12.rb:15
+	load 0 // inner_axfer: receiver [account]
+	itxn_field AssetReceiver
+
+	// src_map:arc12.rb:16
+	int 0
+	itxn_field Fee
+
+	// src_map:arc12.rb:17
+	txn Sender
+	load 1 // inner_axfer: asa [asset]
+	asset_holding_get AssetBalance
+	swap
+	pop
+	itxn_field AssetAmount
+
+	// src_map:arc12.rb:18
+	load 1 // inner_axfer: asa [asset]
+	itxn_field XferAsset
+
+	// src_map:arc12.rb:19
+	load 0 // inner_axfer: receiver [account]
+	itxn_field AssetCloseTo
+
+	// src_map:arc12.rb:20
+	itxn_submit
+
+	// src_map:arc12.rb:21
+	retsub
+
+// src_map:arc12.rb:26
+send_payment: // send_payment(receiver, amount)
+	store 2 // send_payment: amount [uint64]
+
+	store 3 // send_payment: receiver [account]
+
+	// src_map:arc12.rb:27
+	itxn_begin
+
+	// src_map:arc12.rb:28
+	int pay
+	itxn_field TypeEnum
+
+	// src_map:arc12.rb:29
+	load 3 // send_payment: receiver [account]
+	itxn_field Receiver
+
+	// src_map:arc12.rb:30
+	load 2 // send_payment: amount [uint64]
+	itxn_field Amount
+
+	// src_map:arc12.rb:31
+	int 0
+	itxn_field Fee
+
+	// src_map:arc12.rb:32
+	itxn_submit
+
+	// src_map:arc12.rb:33
+	retsub
+
+// src_map:arc12.rb:120
+send_asa: // send_asa(asa, receiver, asa_transfer, vault)
+	txna Assets 0
+	store 4 // send_asa: asa [asset]
+
+	txna Accounts 1
+	store 5 // send_asa: receiver [account]
+
+	txn GroupIndex
+	int 1
+	-
+	store 6 // send_asa: asa_transfer [axfer]
+
+	txna Applications 0
+	store 7 // send_asa: vault [application]
+
+	// src_map:arc12.rb:121
+	load 6 // send_asa: asa_transfer [axfer]
+	gtxns XferAsset
+	load 4 // send_asa: asa [asset]
+	==
+	assert
+
+	// src_map:arc12.rb:123
+	load 5 // send_asa: receiver [account]
+	box_get
+	swap
+	pop
+	bz if0_else0
+
+	// src_map:arc12.rb:124
+	// src_map:arc12.rb:125
+	load 4 // send_asa: asa [asset]
+	load 7 // send_asa: vault [application]
+	app_params_get AppAddress
+	pop
+	callsub inner_axfer
+
+	// src_map:arc12.rb:126
+	b if0_end
+
+if0_else0:
+
+	// src_map:arc12.rb:127
+	// src_map:arc12.rb:128
+	load 4 // send_asa: asa [asset]
+	load 7 // send_asa: vault [application]
+	app_params_get AppAddress
+	pop
+	callsub inner_axfer
+
+// src_map:arc12.rb:129
+if0_end:
+
+	// src_map:arc12.rb:130
+	retsub
+
+main:
+	txna ApplicationArgs 0
+	byte "97a9fb55"
+	==
+	bz if1_else0
+
+	callsub send_asa
+
+	int 1
+	return
+
+	b if1_end
+
+if1_else0:
+
+// src_map:arc12.rb:132
+if1_end:

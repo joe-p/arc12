@@ -1,0 +1,659 @@
+{
+  "4": {
+    "location": "arc12.rb:132",
+    "pcs": [
+      5,
+      6,
+      7
+    ]
+  },
+  "5": {
+    "location": "arc12.rb:132"
+  },
+  "7": {
+    "location": "arc12.rb:12"
+  },
+  "8": {
+    "location": "arc12.rb:12",
+    "pcs": [
+      8,
+      9
+    ]
+  },
+  "9": {
+    "location": "arc12.rb:12"
+  },
+  "10": {
+    "location": "arc12.rb:12",
+    "pcs": [
+      10,
+      11
+    ]
+  },
+  "11": {
+    "location": "arc12.rb:12"
+  },
+  "13": {
+    "location": "arc12.rb:13",
+    "pcs": [
+      12
+    ]
+  },
+  "14": {
+    "location": "arc12.rb:13"
+  },
+  "16": {
+    "location": "arc12.rb:14",
+    "pcs": [
+      13,
+      14
+    ]
+  },
+  "17": {
+    "location": "arc12.rb:14",
+    "pcs": [
+      15,
+      16
+    ]
+  },
+  "18": {
+    "location": "arc12.rb:14"
+  },
+  "20": {
+    "location": "arc12.rb:15",
+    "pcs": [
+      17,
+      18
+    ]
+  },
+  "21": {
+    "location": "arc12.rb:15",
+    "pcs": [
+      19,
+      20
+    ]
+  },
+  "22": {
+    "location": "arc12.rb:15"
+  },
+  "24": {
+    "location": "arc12.rb:16",
+    "pcs": [
+      21
+    ]
+  },
+  "25": {
+    "location": "arc12.rb:16",
+    "pcs": [
+      22,
+      23
+    ]
+  },
+  "26": {
+    "location": "arc12.rb:16"
+  },
+  "28": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      24,
+      25
+    ]
+  },
+  "29": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      26,
+      27
+    ]
+  },
+  "30": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      28,
+      29
+    ]
+  },
+  "31": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      30
+    ]
+  },
+  "32": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      31
+    ]
+  },
+  "33": {
+    "location": "arc12.rb:17",
+    "pcs": [
+      32,
+      33
+    ]
+  },
+  "34": {
+    "location": "arc12.rb:17"
+  },
+  "36": {
+    "location": "arc12.rb:18",
+    "pcs": [
+      34,
+      35
+    ]
+  },
+  "37": {
+    "location": "arc12.rb:18",
+    "pcs": [
+      36,
+      37
+    ]
+  },
+  "38": {
+    "location": "arc12.rb:18"
+  },
+  "40": {
+    "location": "arc12.rb:19",
+    "pcs": [
+      38,
+      39
+    ]
+  },
+  "41": {
+    "location": "arc12.rb:19",
+    "pcs": [
+      40,
+      41
+    ]
+  },
+  "42": {
+    "location": "arc12.rb:19"
+  },
+  "44": {
+    "location": "arc12.rb:20",
+    "pcs": [
+      42
+    ]
+  },
+  "45": {
+    "location": "arc12.rb:20"
+  },
+  "47": {
+    "location": "arc12.rb:21",
+    "pcs": [
+      43
+    ]
+  },
+  "48": {
+    "location": "arc12.rb:21"
+  },
+  "50": {
+    "location": "arc12.rb:26"
+  },
+  "51": {
+    "location": "arc12.rb:26",
+    "pcs": [
+      44,
+      45
+    ]
+  },
+  "52": {
+    "location": "arc12.rb:26"
+  },
+  "53": {
+    "location": "arc12.rb:26",
+    "pcs": [
+      46,
+      47
+    ]
+  },
+  "54": {
+    "location": "arc12.rb:26"
+  },
+  "56": {
+    "location": "arc12.rb:27",
+    "pcs": [
+      48
+    ]
+  },
+  "57": {
+    "location": "arc12.rb:27"
+  },
+  "59": {
+    "location": "arc12.rb:28",
+    "pcs": [
+      49
+    ]
+  },
+  "60": {
+    "location": "arc12.rb:28",
+    "pcs": [
+      50,
+      51
+    ]
+  },
+  "61": {
+    "location": "arc12.rb:28"
+  },
+  "63": {
+    "location": "arc12.rb:29",
+    "pcs": [
+      52,
+      53
+    ]
+  },
+  "64": {
+    "location": "arc12.rb:29",
+    "pcs": [
+      54,
+      55
+    ]
+  },
+  "65": {
+    "location": "arc12.rb:29"
+  },
+  "67": {
+    "location": "arc12.rb:30",
+    "pcs": [
+      56,
+      57
+    ]
+  },
+  "68": {
+    "location": "arc12.rb:30",
+    "pcs": [
+      58,
+      59
+    ]
+  },
+  "69": {
+    "location": "arc12.rb:30"
+  },
+  "71": {
+    "location": "arc12.rb:31",
+    "pcs": [
+      60
+    ]
+  },
+  "72": {
+    "location": "arc12.rb:31",
+    "pcs": [
+      61,
+      62
+    ]
+  },
+  "73": {
+    "location": "arc12.rb:31"
+  },
+  "75": {
+    "location": "arc12.rb:32",
+    "pcs": [
+      63
+    ]
+  },
+  "76": {
+    "location": "arc12.rb:32"
+  },
+  "78": {
+    "location": "arc12.rb:33",
+    "pcs": [
+      64
+    ]
+  },
+  "79": {
+    "location": "arc12.rb:33"
+  },
+  "81": {
+    "location": "arc12.rb:120"
+  },
+  "82": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      65,
+      66,
+      67
+    ]
+  },
+  "83": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      68,
+      69
+    ]
+  },
+  "84": {
+    "location": "arc12.rb:120"
+  },
+  "85": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      70,
+      71,
+      72
+    ]
+  },
+  "86": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      73,
+      74
+    ]
+  },
+  "87": {
+    "location": "arc12.rb:120"
+  },
+  "88": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      75,
+      76
+    ]
+  },
+  "89": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      77
+    ]
+  },
+  "90": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      78
+    ]
+  },
+  "91": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      79,
+      80
+    ]
+  },
+  "92": {
+    "location": "arc12.rb:120"
+  },
+  "93": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      81,
+      82,
+      83
+    ]
+  },
+  "94": {
+    "location": "arc12.rb:120",
+    "pcs": [
+      84,
+      85
+    ]
+  },
+  "95": {
+    "location": "arc12.rb:120"
+  },
+  "97": {
+    "location": "arc12.rb:121",
+    "pcs": [
+      86,
+      87
+    ]
+  },
+  "98": {
+    "location": "arc12.rb:121",
+    "pcs": [
+      88,
+      89
+    ]
+  },
+  "99": {
+    "location": "arc12.rb:121",
+    "pcs": [
+      90,
+      91
+    ]
+  },
+  "100": {
+    "location": "arc12.rb:121",
+    "pcs": [
+      92
+    ]
+  },
+  "101": {
+    "location": "arc12.rb:121",
+    "pcs": [
+      93
+    ]
+  },
+  "102": {
+    "location": "arc12.rb:121"
+  },
+  "104": {
+    "location": "arc12.rb:123",
+    "pcs": [
+      94,
+      95
+    ]
+  },
+  "105": {
+    "location": "arc12.rb:123",
+    "pcs": [
+      96
+    ]
+  },
+  "106": {
+    "location": "arc12.rb:123",
+    "pcs": [
+      97
+    ]
+  },
+  "107": {
+    "location": "arc12.rb:123",
+    "pcs": [
+      98
+    ]
+  },
+  "108": {
+    "location": "arc12.rb:123",
+    "pcs": [
+      99,
+      100,
+      101
+    ]
+  },
+  "109": {
+    "location": "arc12.rb:123"
+  },
+  "112": {
+    "location": "arc12.rb:125",
+    "pcs": [
+      102,
+      103
+    ]
+  },
+  "113": {
+    "location": "arc12.rb:125",
+    "pcs": [
+      104,
+      105
+    ]
+  },
+  "114": {
+    "location": "arc12.rb:125",
+    "pcs": [
+      106,
+      107
+    ]
+  },
+  "115": {
+    "location": "arc12.rb:125",
+    "pcs": [
+      108
+    ]
+  },
+  "116": {
+    "location": "arc12.rb:125",
+    "pcs": [
+      109,
+      110,
+      111
+    ]
+  },
+  "117": {
+    "location": "arc12.rb:125"
+  },
+  "119": {
+    "location": "arc12.rb:126",
+    "pcs": [
+      112,
+      113,
+      114
+    ]
+  },
+  "120": {
+    "location": "arc12.rb:126"
+  },
+  "121": {
+    "location": "arc12.rb:126"
+  },
+  "122": {
+    "location": "arc12.rb:126"
+  },
+  "125": {
+    "location": "arc12.rb:128",
+    "pcs": [
+      115,
+      116
+    ]
+  },
+  "126": {
+    "location": "arc12.rb:128",
+    "pcs": [
+      117,
+      118
+    ]
+  },
+  "127": {
+    "location": "arc12.rb:128",
+    "pcs": [
+      119,
+      120
+    ]
+  },
+  "128": {
+    "location": "arc12.rb:128",
+    "pcs": [
+      121
+    ]
+  },
+  "129": {
+    "location": "arc12.rb:128",
+    "pcs": [
+      122,
+      123,
+      124
+    ]
+  },
+  "130": {
+    "location": "arc12.rb:128"
+  },
+  "132": {
+    "location": "arc12.rb:129"
+  },
+  "133": {
+    "location": "arc12.rb:129"
+  },
+  "135": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      125
+    ]
+  },
+  "136": {
+    "location": "arc12.rb:130"
+  },
+  "137": {
+    "location": "arc12.rb:130"
+  },
+  "138": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      126,
+      127,
+      128
+    ]
+  },
+  "139": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135,
+      136,
+      137,
+      138
+    ]
+  },
+  "140": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      139
+    ]
+  },
+  "141": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      140,
+      141,
+      142
+    ]
+  },
+  "142": {
+    "location": "arc12.rb:130"
+  },
+  "143": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      143,
+      144,
+      145
+    ]
+  },
+  "144": {
+    "location": "arc12.rb:130"
+  },
+  "145": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      146
+    ]
+  },
+  "146": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      147
+    ]
+  },
+  "147": {
+    "location": "arc12.rb:130"
+  },
+  "148": {
+    "location": "arc12.rb:130",
+    "pcs": [
+      148
+    ]
+  },
+  "149": {
+    "location": "arc12.rb:130"
+  },
+  "150": {
+    "location": "arc12.rb:130"
+  },
+  "151": {
+    "location": "arc12.rb:130"
+  },
+  "153": {
+    "location": "arc12.rb:132"
+  }
+}

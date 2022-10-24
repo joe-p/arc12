@@ -110,7 +110,10 @@ class Vault < TEALrb::Contract
 end
 
 class Master < TEALrb::Contract
+  @version = 8
+
   include CommonSubroutines
+
   # @abi
   # @param asa [Asset]
   # @param receiver [Account]
@@ -127,8 +130,16 @@ class Master < TEALrb::Contract
       inner_axfer(asa, vault.address)
     end
   end
+
+  def main
+    nil
+  end
 end
 
 vault = Vault.new
 vault.compile
 vault.dump
+
+master = Master.new
+master.compile
+master.dump

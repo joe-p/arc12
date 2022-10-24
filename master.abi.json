@@ -1,0 +1,38 @@
+{
+  "name": "Master",
+  "networks": {
+  },
+  "methods": [
+    {
+      "name": "send_asa",
+      "desc": "",
+      "args": [
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": ""
+        },
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "asa_transfer",
+          "type": "axfer",
+          "desc": ""
+        },
+        {
+          "name": "vault",
+          "type": "application",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    }
+  ]
+}
