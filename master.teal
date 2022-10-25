@@ -1,146 +1,204 @@
 #pragma version 8
 
-// src_map:arc12.rb:132
+// src_map:arc12.rb:173
 b main
 
-// src_map:arc12.rb:12
-inner_axfer: // inner_axfer(asa, receiver)
-	store 0 // inner_axfer: receiver [account]
+// src_map:arc12.rb:122
+create_vault: // create_vault(receiver)
+	txna Accounts 1
+	store 0 // create_vault: receiver [account]
 
-	store 1 // inner_axfer: asa [asset]
+	// src_map:arc12.rb:123
+	load 0 // create_vault: receiver [account]
+	box_get
+	swap
+	pop
+	!
+	assert
 
-	// src_map:arc12.rb:13
+	// src_map:arc12.rb:125
 	itxn_begin
 
-	// src_map:arc12.rb:14
-	int axfer
+	// src_map:arc12.rb:126
+	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:15
-	load 0 // inner_axfer: receiver [account]
-	itxn_field AssetReceiver
+	// src_map:arc12.rb:127
+	int 0
+	itxn_field ApplicationID
 
-	// src_map:arc12.rb:16
+	// src_map:arc12.rb:128
+	int NoOp
+	itxn_field OnCompletion
+
+	// src_map:arc12.rb:129
+	load 0 // create_vault: receiver [account]
+	itxn_field Accounts
+
+	// src_map:arc12.rb:130
+	txn Sender
+	itxn_field Accounts
+
+	// src_map:arc12.rb:131
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:17
-	txn Sender
-	load 1 // inner_axfer: asa [asset]
-	asset_holding_get AssetBalance
-	swap
-	pop
-	itxn_field AssetAmount
-
-	// src_map:arc12.rb:18
-	load 1 // inner_axfer: asa [asset]
-	itxn_field XferAsset
-
-	// src_map:arc12.rb:19
-	load 0 // inner_axfer: receiver [account]
-	itxn_field AssetCloseTo
-
-	// src_map:arc12.rb:20
+	// src_map:arc12.rb:132
+	// src_map:arc12.rb:133
 	itxn_submit
 
-	// src_map:arc12.rb:21
-	retsub
-
-// src_map:arc12.rb:26
-send_payment: // send_payment(receiver, amount)
-	store 2 // send_payment: amount [uint64]
-
-	store 3 // send_payment: receiver [account]
-
-	// src_map:arc12.rb:27
+	// src_map:arc12.rb:135
 	itxn_begin
 
-	// src_map:arc12.rb:28
+	// src_map:arc12.rb:136
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:29
-	load 3 // send_payment: receiver [account]
+	// src_map:arc12.rb:137
+	txn CreatedApplicationID
+	app_params_get AppAddress
+	pop
 	itxn_field Receiver
 
-	// src_map:arc12.rb:30
-	load 2 // send_payment: amount [uint64]
+	// src_map:arc12.rb:138
+	global MinBalance
 	itxn_field Amount
 
-	// src_map:arc12.rb:31
+	// src_map:arc12.rb:139
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:32
+	// src_map:arc12.rb:140
 	itxn_submit
 
-	// src_map:arc12.rb:33
+	// src_map:arc12.rb:142
+	load 0 // create_vault: receiver [account]
+	int 32
+	box_create
+
+	// src_map:arc12.rb:143
+	load 0 // create_vault: receiver [account]
+	txn CreatedApplicationID
+	itob
+	box_put
+
+	// src_map:arc12.rb:145
+	txn CreatedApplicationID
+	itob
+	byte "151f7c75"
+	concat
+	log
+
+	// src_map:arc12.rb:146
 	retsub
 
-// src_map:arc12.rb:120
-send_asa: // send_asa(asa, receiver, asa_transfer, vault)
-	txna Assets 0
-	store 4 // send_asa: asa [asset]
-
+// src_map:arc12.rb:151
+verify_axfer: // verify_axfer(receiver, vault_axfer)
 	txna Accounts 1
-	store 5 // send_asa: receiver [account]
+	store 1 // verify_axfer: receiver [account]
 
 	txn GroupIndex
 	int 1
 	-
-	store 6 // send_asa: asa_transfer [axfer]
+	store 2 // verify_axfer: vault_axfer [axfer]
 
-	txna Applications 0
-	store 7 // send_asa: vault [application]
-
-	// src_map:arc12.rb:121
-	load 6 // send_asa: asa_transfer [axfer]
-	gtxns XferAsset
-	load 4 // send_asa: asa [asset]
-	==
-	assert
-
-	// src_map:arc12.rb:123
-	load 5 // send_asa: receiver [account]
+	// src_map:arc12.rb:152
+	load 1 // verify_axfer: receiver [account]
 	box_get
 	swap
 	pop
-	bz if0_else0
+	assert
 
-	// src_map:arc12.rb:124
-	// src_map:arc12.rb:125
-	load 4 // send_asa: asa [asset]
-	load 7 // send_asa: vault [application]
+	// src_map:arc12.rb:153
+	load 2 // verify_axfer: vault_axfer [axfer]
+	gtxns Receiver
+	load 1 // verify_axfer: receiver [account]
+	box_get
+	pop
+	==
+	assert
+
+	// src_map:arc12.rb:154
+	load 2 // verify_axfer: vault_axfer [axfer]
+	gtxns CloseRemainderTo
+	global ZeroAddress
+	==
+	assert
+
+	// src_map:arc12.rb:155
+	retsub
+
+// src_map:arc12.rb:160
+get_vault_id: // get_vault_id(receiver)
+	txna Accounts 1
+	store 3 // get_vault_id: receiver [account]
+
+	// src_map:arc12.rb:161
+	load 3 // get_vault_id: receiver [account]
+	box_get
+	swap
+	pop
+	assert
+
+	// src_map:arc12.rb:162
+	load 3 // get_vault_id: receiver [account]
+	box_get
+	pop
+	byte "151f7c75"
+	concat
+	log
+
+	// src_map:arc12.rb:163
+	retsub
+
+// src_map:arc12.rb:168
+get_vault_addr: // get_vault_addr(receiver)
+	txna Accounts 1
+	store 4 // get_vault_addr: receiver [account]
+
+	// src_map:arc12.rb:169
+	load 4 // get_vault_addr: receiver [account]
+	box_get
+	swap
+	pop
+	assert
+
+	// src_map:arc12.rb:170
+	load 4 // get_vault_addr: receiver [account]
+	box_get
+	pop
+	btoi
 	app_params_get AppAddress
 	pop
-	callsub inner_axfer
+	byte "151f7c75"
+	concat
+	log
 
-	// src_map:arc12.rb:126
-	b if0_end
-
-if0_else0:
-
-	// src_map:arc12.rb:127
-	// src_map:arc12.rb:128
-	load 4 // send_asa: asa [asset]
-	load 7 // send_asa: vault [application]
-	app_params_get AppAddress
-	pop
-	callsub inner_axfer
-
-// src_map:arc12.rb:129
-if0_end:
-
-	// src_map:arc12.rb:130
+	// src_map:arc12.rb:171
 	retsub
 
 main:
 	txna ApplicationArgs 0
-	byte "97a9fb55"
+	byte "3df94bae"
+	==
+	bz if0_else0
+
+	callsub create_vault
+
+	int 1
+	return
+
+	b if0_end
+
+if0_else0:
+
+if0_end:
+	txna ApplicationArgs 0
+	byte "e99f0c84"
 	==
 	bz if1_else0
 
-	callsub send_asa
+	callsub verify_axfer
 
 	int 1
 	return
@@ -149,5 +207,35 @@ main:
 
 if1_else0:
 
-// src_map:arc12.rb:132
 if1_end:
+	txna ApplicationArgs 0
+	byte "ef7d7c77"
+	==
+	bz if2_else0
+
+	callsub get_vault_id
+
+	int 1
+	return
+
+	b if2_end
+
+if2_else0:
+
+if2_end:
+	txna ApplicationArgs 0
+	byte "546d3c21"
+	==
+	bz if3_else0
+
+	callsub get_vault_addr
+
+	int 1
+	return
+
+	b if3_end
+
+if3_else0:
+
+// src_map:arc12.rb:173
+if3_end:

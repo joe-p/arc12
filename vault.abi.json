@@ -60,7 +60,17 @@
           "desc": "The ASA to send"
         },
         {
-          "name": "mbr_funder",
+          "name": "creator",
+          "type": "account",
+          "desc": "The account that funded the MBR for the application"
+        },
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": "The account that can claim from this vault"
+        },
+        {
+          "name": "asa_mbr_funder",
           "type": "account",
           "desc": "The account that funded the MBR for the ASA"
         }

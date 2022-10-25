@@ -4,33 +4,71 @@
   },
   "methods": [
     {
-      "name": "send_asa",
-      "desc": "",
+      "name": "create_vault",
+      "desc": "Create Vault",
       "args": [
         {
-          "name": "asa",
-          "type": "asset",
+          "name": "receiver",
+          "type": "account",
           "desc": ""
-        },
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "uint64"
+        }
+      }
+    },
+    {
+      "name": "verify_axfer",
+      "desc": "",
+      "args": [
         {
           "name": "receiver",
           "type": "account",
           "desc": ""
         },
         {
-          "name": "asa_transfer",
+          "name": "vault_axfer",
           "type": "axfer",
-          "desc": ""
-        },
-        {
-          "name": "vault",
-          "type": "application",
           "desc": ""
         }
       ],
       "returns": {
         "type": {
           "type": "void"
+        }
+      }
+    },
+    {
+      "name": "get_vault_id",
+      "desc": "",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "uint64"
+        }
+      }
+    },
+    {
+      "name": "get_vault_addr",
+      "desc": "",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "address"
         }
       }
     }
