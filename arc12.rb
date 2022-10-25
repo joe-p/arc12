@@ -33,12 +33,12 @@ class Vault < TEALrb::Contract
   end
 
   # @abi
+  # @create
   # Method called for creation of the vault
   # @param receiver [Account] The account that can claim ASAs from this vault
   # @param sender [Account]
   def create(receiver, sender)
     # TODO: assert Global.caller_application_id.approval_program == b64(Master.compiled_program)
-    assert Txn.application_id == 0
     Global['assets'] = 0
     Global['creator'] = sender
     Global['receiver'] = receiver
@@ -74,6 +74,7 @@ class Vault < TEALrb::Contract
   end
 
   # @abi
+  # @on_completion [NoOp, DeleteApplication]
   # Sends the ASA to the intended receiver
   # @param asa [Asset] The ASA to send
   # @param creator [Account] The account that funded the MBR for the application

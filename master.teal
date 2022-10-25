@@ -1,14 +1,19 @@
 #pragma version 8
 
-// src_map:arc12.rb:173
+// src_map:arc12.rb:174
 b main
 
-// src_map:arc12.rb:122
+// src_map:arc12.rb:123
 create_vault: // create_vault(receiver)
+	txn OnCompletion
+	int NoOp
+	==
+	assert
+
 	txna Accounts 1
 	store 0 // create_vault: receiver [account]
 
-	// src_map:arc12.rb:123
+	// src_map:arc12.rb:124
 	load 0 // create_vault: receiver [account]
 	box_get
 	swap
@@ -16,84 +21,89 @@ create_vault: // create_vault(receiver)
 	!
 	assert
 
-	// src_map:arc12.rb:125
+	// src_map:arc12.rb:126
 	itxn_begin
 
-	// src_map:arc12.rb:126
+	// src_map:arc12.rb:127
 	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:127
+	// src_map:arc12.rb:128
 	int 0
 	itxn_field ApplicationID
 
-	// src_map:arc12.rb:128
+	// src_map:arc12.rb:129
 	int NoOp
 	itxn_field OnCompletion
 
-	// src_map:arc12.rb:129
+	// src_map:arc12.rb:130
 	load 0 // create_vault: receiver [account]
 	itxn_field Accounts
 
-	// src_map:arc12.rb:130
+	// src_map:arc12.rb:131
 	txn Sender
 	itxn_field Accounts
 
-	// src_map:arc12.rb:131
+	// src_map:arc12.rb:132
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:132
 	// src_map:arc12.rb:133
+	// src_map:arc12.rb:134
 	itxn_submit
 
-	// src_map:arc12.rb:135
+	// src_map:arc12.rb:136
 	itxn_begin
 
-	// src_map:arc12.rb:136
+	// src_map:arc12.rb:137
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:137
+	// src_map:arc12.rb:138
 	txn CreatedApplicationID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// src_map:arc12.rb:138
+	// src_map:arc12.rb:139
 	global MinBalance
 	itxn_field Amount
 
-	// src_map:arc12.rb:139
+	// src_map:arc12.rb:140
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:140
+	// src_map:arc12.rb:141
 	itxn_submit
 
-	// src_map:arc12.rb:142
+	// src_map:arc12.rb:143
 	load 0 // create_vault: receiver [account]
 	int 32
 	box_create
 
-	// src_map:arc12.rb:143
+	// src_map:arc12.rb:144
 	load 0 // create_vault: receiver [account]
 	txn CreatedApplicationID
 	itob
 	box_put
 
-	// src_map:arc12.rb:145
+	// src_map:arc12.rb:146
 	txn CreatedApplicationID
 	itob
 	byte "151f7c75"
 	concat
 	log
 
-	// src_map:arc12.rb:146
+	// src_map:arc12.rb:147
 	retsub
 
-// src_map:arc12.rb:151
+// src_map:arc12.rb:152
 verify_axfer: // verify_axfer(receiver, vault_axfer)
+	txn OnCompletion
+	int NoOp
+	==
+	assert
+
 	txna Accounts 1
 	store 1 // verify_axfer: receiver [account]
 
@@ -102,14 +112,14 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	-
 	store 2 // verify_axfer: vault_axfer [axfer]
 
-	// src_map:arc12.rb:152
+	// src_map:arc12.rb:153
 	load 1 // verify_axfer: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:153
+	// src_map:arc12.rb:154
 	load 2 // verify_axfer: vault_axfer [axfer]
 	gtxns Receiver
 	load 1 // verify_axfer: receiver [account]
@@ -118,29 +128,34 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	==
 	assert
 
-	// src_map:arc12.rb:154
+	// src_map:arc12.rb:155
 	load 2 // verify_axfer: vault_axfer [axfer]
 	gtxns CloseRemainderTo
 	global ZeroAddress
 	==
 	assert
 
-	// src_map:arc12.rb:155
+	// src_map:arc12.rb:156
 	retsub
 
-// src_map:arc12.rb:160
+// src_map:arc12.rb:161
 get_vault_id: // get_vault_id(receiver)
+	txn OnCompletion
+	int NoOp
+	==
+	assert
+
 	txna Accounts 1
 	store 3 // get_vault_id: receiver [account]
 
-	// src_map:arc12.rb:161
+	// src_map:arc12.rb:162
 	load 3 // get_vault_id: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:162
+	// src_map:arc12.rb:163
 	load 3 // get_vault_id: receiver [account]
 	box_get
 	pop
@@ -148,22 +163,27 @@ get_vault_id: // get_vault_id(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:163
+	// src_map:arc12.rb:164
 	retsub
 
-// src_map:arc12.rb:168
+// src_map:arc12.rb:169
 get_vault_addr: // get_vault_addr(receiver)
+	txn OnCompletion
+	int NoOp
+	==
+	assert
+
 	txna Accounts 1
 	store 4 // get_vault_addr: receiver [account]
 
-	// src_map:arc12.rb:169
+	// src_map:arc12.rb:170
 	load 4 // get_vault_addr: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:170
+	// src_map:arc12.rb:171
 	load 4 // get_vault_addr: receiver [account]
 	box_get
 	pop
@@ -174,7 +194,7 @@ get_vault_addr: // get_vault_addr(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:171
+	// src_map:arc12.rb:172
 	retsub
 
 main:
@@ -237,5 +257,5 @@ if2_end:
 
 if3_else0:
 
-// src_map:arc12.rb:173
+// src_map:arc12.rb:174
 if3_end:
