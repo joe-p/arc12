@@ -6,6 +6,11 @@ require 'pry'
 class Vault < TEALrb::Contract
   @version = 8
 
+  def initialize(master_program)
+    @master_program = -> { master_program }
+    super()
+  end
+
   # @subroutine
   # @param [Asset] asa
   # @param [Account] receiver
@@ -38,7 +43,7 @@ class Vault < TEALrb::Contract
   # @param receiver [Account] The account that can claim ASAs from this vault
   # @param sender [Account]
   def create(receiver, sender)
-    # TODO: assert Global.caller_application_id.approval_program == b64(Master.compiled_program)
+    assert Global.caller_application_id.approval_program == byte_b64(@master_program)
     Global['assets'] = 0
     Global['creator'] = sender
     Global['receiver'] = receiver
@@ -176,10 +181,7 @@ class Master < TEALrb::Contract
   end
 end
 
-vault = Vault.new
-vault.compile
-vault.dump
-
 master = Master.new
-master.compile
 master.dump
+
+Vault.new(master.compiled_program).dump
