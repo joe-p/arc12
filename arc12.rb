@@ -6,11 +6,6 @@ require 'pry'
 class Vault < TEALrb::Contract
   @version = 8
 
-  def initialize(master_program)
-    @master_program = -> { master_program }
-    super()
-  end
-
   # @subroutine
   # @param [Asset] asa
   # @param [Account] receiver
@@ -43,7 +38,6 @@ class Vault < TEALrb::Contract
   # @param receiver [Account] The account that can claim ASAs from this vault
   # @param sender [Account]
   def create(receiver, sender)
-    assert Global.caller_application_id.approval_program == byte_b64(@master_program)
     Global['assets'] = 0
     Global['creator'] = sender
     Global['receiver'] = receiver
@@ -121,6 +115,11 @@ end
 class Master < TEALrb::Contract
   @version = 8
 
+  def initialize(vault_program)
+    @vault_program = -> { vault_program }
+    super()
+  end
+
   # @abi
   # Create Vault
   # @param receiver [Account]
@@ -128,9 +127,11 @@ class Master < TEALrb::Contract
   def create_vault(receiver)
     assert !box_exists?(receiver)
 
+    # // Create vault
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.application_call
     InnerTxn.application_id = 0
+    InnerTxn.approval_program = byte_b64 @vault_program
     InnerTxn.on_completion = int('NoOp')
     InnerTxn.accounts = receiver
     InnerTxn.accounts = Txn.sender
@@ -138,6 +139,7 @@ class Master < TEALrb::Contract
     # TODO: InnerTxn.application_args = Vault.create
     InnerTxn.submit
 
+    # // Fund vault with account MBR
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.pay
     InnerTxn.receiver = Txn.created_application_id.address
@@ -181,7 +183,7 @@ class Master < TEALrb::Contract
   end
 end
 
-master = Master.new
-master.dump
+vault = Vault.new
+vault.dump
 
-Vault.new(master.compiled_program).dump
+Master.new(vault.compiled_program).dump
