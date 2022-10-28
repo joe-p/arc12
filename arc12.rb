@@ -6,32 +6,6 @@ require 'pry'
 class Vault < TEALrb::Contract
   @version = 8
 
-  # @subroutine
-  # @param [Asset] asa
-  # @param [Account] receiver
-  def inner_asa_close(asa, receiver)
-    InnerTxn.begin
-    InnerTxn.type_enum = TxnType.asset_transfer
-    InnerTxn.asset_receiver = receiver
-    InnerTxn.fee = 0
-    InnerTxn.asset_amount = Txn.sender.asset_balance(asa)
-    InnerTxn.xfer_asset = asa
-    InnerTxn.asset_close_to = receiver
-    InnerTxn.submit
-  end
-
-  # @subroutine
-  # @param [Account] receiver
-  # @param [Uint64] amount
-  def inner_payment(receiver, amount)
-    InnerTxn.begin
-    InnerTxn.type_enum = TxnType.pay
-    InnerTxn.receiver = receiver
-    InnerTxn.amount = amount
-    InnerTxn.fee = 0
-    InnerTxn.submit
-  end
-
   # @abi
   # @create
   # Method called for creation of the vault
@@ -61,6 +35,7 @@ class Vault < TEALrb::Contract
     box_create($asa_bytes, 32)
     Box[$asa_bytes] = sender
 
+    # // Opt into ASA
     InnerTxn.begin
     InnerTxn.type_enum = TxnType.asset_transfer
     InnerTxn.asset_receiver = Global.current_application_address
@@ -91,9 +66,25 @@ class Vault < TEALrb::Contract
     $initial_mbr = Global.current_application_address.min_balance
 
     box_del $asa_bytes
-    inner_asa_close(asa, Txn.sender)
 
-    inner_payment(asa_mbr_funder, Global.current_application_address.min_balance - $initial_mbr)
+    # // Close ASA to receiver
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.asset_transfer
+    InnerTxn.asset_receiver = receiver
+    InnerTxn.fee = 0
+    InnerTxn.asset_amount = Txn.sender.asset_balance(asa)
+    InnerTxn.xfer_asset = asa
+    InnerTxn.asset_close_to = receiver
+    InnerTxn.submit
+
+    # // Send ASA MBR to funder
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.pay
+    InnerTxn.receiver = asa_mbr_funder
+    InnerTxn.amount = Global.current_application_address.min_balance - $initial_mbr
+    InnerTxn.fee = 0
+    InnerTxn.submit
+
     Global['assets'] = Global['assets'] - 1
 
     if Global['assets'] == 0
