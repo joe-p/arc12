@@ -15,6 +15,7 @@ class Vault < TEALrb::Contract
     Global['assets'] = 0
     Global['creator'] = sender
     Global['receiver'] = receiver
+    Global['master'] = Global.caller_application_id
   end
 
   # @abi
@@ -45,6 +46,13 @@ class Vault < TEALrb::Contract
     InnerTxn.submit
 
     assert mbr_payment.amount == Global.current_application_address.min_balance - $pre_mbr
+  end
+
+  # @abi
+  # @delete
+  def delete
+    assert Global.current_application_address.balance == 0
+    assert Global.caller_application_id == Global['master']
   end
 
   # @abi
@@ -95,6 +103,10 @@ class Vault < TEALrb::Contract
       InnerTxn.fee = 0
       InnerTxn.close_remainder_to = receiver
       InnerTxn.submit
+
+      $delete_vault_txn = Gtxns[Txn.group_index + 1]
+      assert $delete_vault_txn.application_id == Global['master']
+      assert $delete_vault_txn.on_completion == int('DeleteApplication')
     end
   end
 
@@ -167,6 +179,35 @@ class Master < TEALrb::Contract
   def get_vault_addr(receiver)
     assert box_exists?(receiver)
     return Application.new(btoi(Box[receiver])).address
+  end
+
+  # @abi
+  # @param receiver [Account]
+  # @param vault [Application]
+  # @param creator [Account]
+  def delete_vault(receiver, vault, creator)
+    assert box_exists?(receiver)
+    assert vault == btoi(Box[receiver])
+    $vault_creator = vault.global_value('creator')
+    assert $vault_creator == creator
+
+    $pre_delete_mbr = Global.current_application_address.min_balance
+
+    # // Delete vault
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.application_call
+    InnerTxn.application_id = btoi(Box[receiver])
+    InnerTxn.on_completion = int('DeleteApplication')
+    InnerTxn.fee = 0
+    InnerTxn.submit
+
+    # // Send vault MBR to creator
+    InnerTxn.begin
+    InnerTxn.type_enum = TxnType.pay
+    InnerTxn.receiver = $vault_creator
+    InnerTxn.amount = Global.current_application_address.min_balance - $pre_delete_mbr
+    InnerTxn.fee = 0
+    InnerTxn.submit
   end
 
   def main

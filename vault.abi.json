@@ -51,6 +51,18 @@
       }
     },
     {
+      "name": "delete",
+      "desc": "",
+      "args": [
+
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    },
+    {
       "name": "claim",
       "desc": "Sends the ASA to the intended receiver",
       "args": [

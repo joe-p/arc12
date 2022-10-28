@@ -1,9 +1,9 @@
 #pragma version 8
 
-// src_map:arc12.rb:172
+// src_map:arc12.rb:213
 b main
 
-// src_map:arc12.rb:118
+// src_map:arc12.rb:130
 create_vault: // create_vault(receiver)
 	txn OnCompletion
 	int NoOp
@@ -13,7 +13,7 @@ create_vault: // create_vault(receiver)
 	txna Accounts 1
 	store 0 // create_vault: receiver [account]
 
-	// src_map:arc12.rb:119
+	// src_map:arc12.rb:131
 	load 0 // create_vault: receiver [account]
 	box_get
 	swap
@@ -21,91 +21,91 @@ create_vault: // create_vault(receiver)
 	!
 	assert
 
-	// src_map:arc12.rb:121
-	// Create vault
-	// src_map:arc12.rb:122
-	itxn_begin
-
-	// src_map:arc12.rb:123
-	int appl
-	itxn_field TypeEnum
-
-	// src_map:arc12.rb:124
-	int 0
-	itxn_field ApplicationID
-
-	// src_map:arc12.rb:125
-	byte b64 CCADAAEEJgMGYXNzZXRzB2NyZWF0b3IIcmVjZWl2ZXJCATQxGSISRDEYIhJENhwBNQA2HAI1ASgiZyk0AWcqNABniTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSISMRmBBRIRRDYwADUHNhwBNQg2HAI1CTYcAzUKNAcWNQU0Bb5MSEQ0CjQFvkgSRDQIKmQSRDQJKWQSRDEANAgSRDIKcwFINQs0BbyxJLIQNAiyFCKyATEANAdwAExIshI0B7IRNAiyFbOxI7IQNAqyBzIKcwFINAsJsggisgGzKChkIwlnKGQiEkEAGrEjshA0CbIHMgpzAUiyCCKyATQIsgmzQgAAiTYaAIAIMDUxOGZkMTISQQAIiP64I0NCAAA2GgCACDJjY2U2M2U1EkEACIj+vyNDQgAANhoAgAhjMjkwMmNhMBJBAAiI/xAjQ0IAAA==
-	itxn_field ApprovalProgram
-
-	// src_map:arc12.rb:126
-	int NoOp
-	itxn_field OnCompletion
-
-	// src_map:arc12.rb:127
-	load 0 // create_vault: receiver [account]
-	itxn_field Accounts
-
-	// src_map:arc12.rb:128
-	txn Sender
-	itxn_field Accounts
-
-	// src_map:arc12.rb:129
-	int 0
-	itxn_field Fee
-
-	// src_map:arc12.rb:130
-	// src_map:arc12.rb:131
-	itxn_submit
-
 	// src_map:arc12.rb:133
-	// Fund vault with account MBR
+	// Create vault
 	// src_map:arc12.rb:134
 	itxn_begin
 
 	// src_map:arc12.rb:135
-	int pay
+	int appl
 	itxn_field TypeEnum
 
 	// src_map:arc12.rb:136
+	int 0
+	itxn_field ApplicationID
+
+	// src_map:arc12.rb:137
+	byte b64 CCAEAAEEBSYEBmFzc2V0cwZtYXN0ZXIHY3JlYXRvcghyZWNlaXZlckIBYDEZIhJEMRgiEkQ2HAE1ADYcAjUBKCJnKjQBZys0AGcpMg1niTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSISRDIKcwBIIhJEMg0pZBJEiTEZIhIxGSUSEUQ2MAA1BzYcATUINhwCNQk2HAM1CjQHFjUFNAW+TEhENAo0Bb5IEkQ0CCtkEkQ0CSpkEkQxADQIEkQyCnMBSDULNAW8sSSyEDQIshQisgExADQHcABMSLISNAeyETQIshWzsSOyEDQKsgcyCnMBSDQLCbIIIrIBsygoZCMJZyhkIhJBAC+xI7IQNAmyBzIKcwFIsggisgE0CLIJszEWIwg1DDQMOBgpZBJENAw4GSUSREIAAIk2GgCACDA1MThmZDEyEkEACIj+jCNDQgAANhoAgAgyY2NlNjNlNRJBAAiI/pcjQ0IAADYaAIAINmU4NjA4NWMSQQAIiP7oI0NCAAA2GgCACGMyOTAyY2EwEkEACIj+4yNDQgAA
+	itxn_field ApprovalProgram
+
+	// src_map:arc12.rb:138
+	int NoOp
+	itxn_field OnCompletion
+
+	// src_map:arc12.rb:139
+	load 0 // create_vault: receiver [account]
+	itxn_field Accounts
+
+	// src_map:arc12.rb:140
+	txn Sender
+	itxn_field Accounts
+
+	// src_map:arc12.rb:141
+	int 0
+	itxn_field Fee
+
+	// src_map:arc12.rb:142
+	// src_map:arc12.rb:143
+	itxn_submit
+
+	// src_map:arc12.rb:145
+	// Fund vault with account MBR
+	// src_map:arc12.rb:146
+	itxn_begin
+
+	// src_map:arc12.rb:147
+	int pay
+	itxn_field TypeEnum
+
+	// src_map:arc12.rb:148
 	txn CreatedApplicationID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// src_map:arc12.rb:137
+	// src_map:arc12.rb:149
 	global MinBalance
 	itxn_field Amount
 
-	// src_map:arc12.rb:138
+	// src_map:arc12.rb:150
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:139
+	// src_map:arc12.rb:151
 	itxn_submit
 
-	// src_map:arc12.rb:141
+	// src_map:arc12.rb:153
 	load 0 // create_vault: receiver [account]
 	int 32
 	box_create
 
-	// src_map:arc12.rb:142
+	// src_map:arc12.rb:154
 	load 0 // create_vault: receiver [account]
 	txn CreatedApplicationID
 	itob
 	box_put
 
-	// src_map:arc12.rb:144
+	// src_map:arc12.rb:156
 	txn CreatedApplicationID
 	itob
 	byte "151f7c75"
 	concat
 	log
 
-	// src_map:arc12.rb:145
+	// src_map:arc12.rb:157
 	retsub
 
-// src_map:arc12.rb:150
+// src_map:arc12.rb:162
 verify_axfer: // verify_axfer(receiver, vault_axfer)
 	txn OnCompletion
 	int NoOp
@@ -120,14 +120,14 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	-
 	store 2 // verify_axfer: vault_axfer [axfer]
 
-	// src_map:arc12.rb:151
+	// src_map:arc12.rb:163
 	load 1 // verify_axfer: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:152
+	// src_map:arc12.rb:164
 	load 2 // verify_axfer: vault_axfer [axfer]
 	gtxns Receiver
 	load 1 // verify_axfer: receiver [account]
@@ -136,17 +136,17 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	==
 	assert
 
-	// src_map:arc12.rb:153
+	// src_map:arc12.rb:165
 	load 2 // verify_axfer: vault_axfer [axfer]
 	gtxns CloseRemainderTo
 	global ZeroAddress
 	==
 	assert
 
-	// src_map:arc12.rb:154
+	// src_map:arc12.rb:166
 	retsub
 
-// src_map:arc12.rb:159
+// src_map:arc12.rb:171
 get_vault_id: // get_vault_id(receiver)
 	txn OnCompletion
 	int NoOp
@@ -156,14 +156,14 @@ get_vault_id: // get_vault_id(receiver)
 	txna Accounts 1
 	store 3 // get_vault_id: receiver [account]
 
-	// src_map:arc12.rb:160
+	// src_map:arc12.rb:172
 	load 3 // get_vault_id: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:161
+	// src_map:arc12.rb:173
 	load 3 // get_vault_id: receiver [account]
 	box_get
 	pop
@@ -171,10 +171,10 @@ get_vault_id: // get_vault_id(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:162
+	// src_map:arc12.rb:174
 	retsub
 
-// src_map:arc12.rb:167
+// src_map:arc12.rb:179
 get_vault_addr: // get_vault_addr(receiver)
 	txn OnCompletion
 	int NoOp
@@ -184,14 +184,14 @@ get_vault_addr: // get_vault_addr(receiver)
 	txna Accounts 1
 	store 4 // get_vault_addr: receiver [account]
 
-	// src_map:arc12.rb:168
+	// src_map:arc12.rb:180
 	load 4 // get_vault_addr: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:169
+	// src_map:arc12.rb:181
 	load 4 // get_vault_addr: receiver [account]
 	box_get
 	pop
@@ -202,7 +202,116 @@ get_vault_addr: // get_vault_addr(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:170
+	// src_map:arc12.rb:182
+	retsub
+
+// src_map:arc12.rb:188
+delete_vault: // delete_vault(receiver, vault, creator)
+	txn OnCompletion
+	int NoOp
+	==
+	assert
+
+	txna Accounts 1
+	store 5 // delete_vault: receiver [account]
+
+	txna Applications 0
+	store 6 // delete_vault: vault [application]
+
+	txna Accounts 2
+	store 7 // delete_vault: creator [account]
+
+	// src_map:arc12.rb:189
+	load 5 // delete_vault: receiver [account]
+	box_get
+	swap
+	pop
+	assert
+
+	// src_map:arc12.rb:190
+	load 6 // delete_vault: vault [application]
+	load 5 // delete_vault: receiver [account]
+	box_get
+	pop
+	btoi
+	==
+	assert
+
+	// src_map:arc12.rb:191
+	load 6 // delete_vault: vault [application]
+	byte "creator"
+	app_global_get_ex
+	pop
+	store 8 // vault_creator
+
+	// src_map:arc12.rb:192
+	load 8 // vault_creator
+	load 7 // delete_vault: creator [account]
+	==
+	assert
+
+	// src_map:arc12.rb:194
+	global CurrentApplicationAddress
+	acct_params_get AcctMinBalance
+	pop
+	store 9 // pre_delete_mbr
+
+	// src_map:arc12.rb:196
+	// Delete vault
+	// src_map:arc12.rb:197
+	itxn_begin
+
+	// src_map:arc12.rb:198
+	int appl
+	itxn_field TypeEnum
+
+	// src_map:arc12.rb:199
+	load 5 // delete_vault: receiver [account]
+	box_get
+	pop
+	btoi
+	itxn_field ApplicationID
+
+	// src_map:arc12.rb:200
+	int DeleteApplication
+	itxn_field OnCompletion
+
+	// src_map:arc12.rb:201
+	int 0
+	itxn_field Fee
+
+	// src_map:arc12.rb:202
+	itxn_submit
+
+	// src_map:arc12.rb:204
+	// Send vault MBR to creator
+	// src_map:arc12.rb:205
+	itxn_begin
+
+	// src_map:arc12.rb:206
+	int pay
+	itxn_field TypeEnum
+
+	// src_map:arc12.rb:207
+	load 8 // vault_creator
+	itxn_field Receiver
+
+	// src_map:arc12.rb:208
+	global CurrentApplicationAddress
+	acct_params_get AcctMinBalance
+	pop
+	load 9 // pre_delete_mbr
+	-
+	itxn_field Amount
+
+	// src_map:arc12.rb:209
+	int 0
+	itxn_field Fee
+
+	// src_map:arc12.rb:210
+	itxn_submit
+
+	// src_map:arc12.rb:211
 	retsub
 
 main:
@@ -265,5 +374,20 @@ if2_end:
 
 if3_else0:
 
-// src_map:arc12.rb:172
 if3_end:
+	txna ApplicationArgs 0
+	byte "9e810f4b"
+	==
+	bz if4_else0
+
+	callsub delete_vault
+
+	int 1
+	return
+
+	b if4_end
+
+if4_else0:
+
+// src_map:arc12.rb:213
+if4_end:

@@ -71,6 +71,32 @@
           "type": "address"
         }
       }
+    },
+    {
+      "name": "delete_vault",
+      "desc": "",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "vault",
+          "type": "application",
+          "desc": ""
+        },
+        {
+          "name": "creator",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
     }
   ]
 }
