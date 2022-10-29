@@ -126,9 +126,15 @@ class Master < TEALrb::Contract
   # @abi
   # Create Vault
   # @param receiver [Account]
+  # @param mbr_payment [Pay]
   # @return [Uint64] Application ID of the vault for receiver
-  def create_vault(receiver)
+  def create_vault(receiver, mbr_payment)
     assert !box_exists?(receiver)
+    assert mbr_payment.receiver == Global.current_application_address
+    assert mbr_payment.sender == Txn.sender
+    assert mbr_payment.close_remainder_to == Global.zero_address
+
+    $pre_create_mbr = Global.current_application_address.min_balance
 
     # // Create vault
     InnerTxn.begin
@@ -152,6 +158,8 @@ class Master < TEALrb::Contract
 
     box_create receiver, 32
     Box[receiver] = itob Txn.created_application_id
+
+    assert mbr_payment.amount == (Global.current_application_address.min_balance - $pre_create_mbr) + Global.min_balance
 
     return itob Txn.created_application_id
   end

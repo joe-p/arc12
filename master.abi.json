@@ -11,6 +11,11 @@
           "name": "receiver",
           "type": "account",
           "desc": ""
+        },
+        {
+          "name": "mbr_payment",
+          "type": "pay",
+          "desc": ""
         }
       ],
       "returns": {
