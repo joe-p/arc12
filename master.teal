@@ -1,9 +1,9 @@
 #pragma version 8
 
-// src_map:arc12.rb:221
+// src_map:arc12.rb:220
 b main
 
-// src_map:arc12.rb:131
+// src_map:arc12.rb:130
 create_vault: // create_vault(receiver, mbr_payment)
 	txn OnCompletion
 	int NoOp
@@ -18,7 +18,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	-
 	store 1 // create_vault: mbr_payment [pay]
 
-	// src_map:arc12.rb:132
+	// src_map:arc12.rb:131
 	load 0 // create_vault: receiver [account]
 	box_get
 	swap
@@ -26,108 +26,108 @@ create_vault: // create_vault(receiver, mbr_payment)
 	!
 	assert
 
-	// src_map:arc12.rb:133
+	// src_map:arc12.rb:132
 	load 1 // create_vault: mbr_payment [pay]
 	gtxns Receiver
 	global CurrentApplicationAddress
 	==
 	assert
 
-	// src_map:arc12.rb:134
+	// src_map:arc12.rb:133
 	load 1 // create_vault: mbr_payment [pay]
 	gtxns Sender
 	txn Sender
 	==
 	assert
 
-	// src_map:arc12.rb:135
+	// src_map:arc12.rb:134
 	load 1 // create_vault: mbr_payment [pay]
 	gtxns CloseRemainderTo
 	global ZeroAddress
 	==
 	assert
 
-	// src_map:arc12.rb:137
+	// src_map:arc12.rb:136
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	store 2 // pre_create_mbr
 
-	// src_map:arc12.rb:139
+	// src_map:arc12.rb:138
 	// Create vault
-	// src_map:arc12.rb:140
+	// src_map:arc12.rb:139
 	itxn_begin
 
-	// src_map:arc12.rb:141
+	// src_map:arc12.rb:140
 	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:142
+	// src_map:arc12.rb:141
 	int 0
 	itxn_field ApplicationID
 
-	// src_map:arc12.rb:143
-	byte b64 CCAEAAEEBSYEBmFzc2V0cwZtYXN0ZXIHY3JlYXRvcghyZWNlaXZlckIBYDEZIhJEMRgiEkQ2HAE1ADYcAjUBKCJnKjQBZys0AGcpMg1niTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSISRDIKcwBIIhJEMg0pZBJEiTEZIhIxGSUSEUQ2MAA1BzYcATUINhwCNQk2HAM1CjQHFjUFNAW+TEhENAo0Bb5IEkQ0CCtkEkQ0CSpkEkQxADQIEkQyCnMBSDULNAW8sSSyEDQIshQisgExADQHcABMSLISNAeyETQIshWzsSOyEDQKsgcyCnMBSDQLCbIIIrIBsygoZCMJZyhkIhJBAC+xI7IQNAmyBzIKcwFIsggisgE0CLIJszEWIwg1DDQMOBgpZBJENAw4GSUSREIAAIk2GgCACDA1MThmZDEyEkEACIj+jCNDQgAANhoAgAgyY2NlNjNlNRJBAAiI/pcjQ0IAADYaAIAINmU4NjA4NWMSQQAIiP7oI0NCAAA2GgCACGMyOTAyY2EwEkEACIj+4yNDQgAA
+	// src_map:arc12.rb:142
+	byte b64 CCAEAAEEBSYEBmFzc2V0cwZtYXN0ZXIHY3JlYXRvcghyZWNlaXZlckIBWzEZIhJEMRgiEkQ2HAE1ADYcAjUBKCJnKjQBZys0AGcpMg1niTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSUSRDIKcwBIIhJEMg0pZBJEiTEZIhJENjAANQc2HAE1CDYcAjUJNhwDNQo0BxY1BTQFvkxIRDQKNAW+SBJENAgrZBJENAkqZBJEMQA0CBJEMgpzAUg1CzQFvLEkshA0CLIUIrIBMQA0B3AATEiyEjQHshE0CLIVs7EjshA0CrIHMgpzAUg0CwmyCCKyAbMoKGQjCWcoZCISQQAvsSOyEDQJsgcyCnMBSLIIIrIBNAiyCbMxFiMINQw0DDgYKWQSRDQMOBklEkRCAACJNhoAgAgwNTE4ZmQxMhJBAAiI/pEjQ0IAADYaAIAIMmNjZTYzZTUSQQAIiP6cI0NCAAA2GgCACDZlODYwODVjEkEACIj+7SNDQgAANhoAgAhjMjkwMmNhMBJBAAiI/ugjQ0IAAA==
 	itxn_field ApprovalProgram
 
-	// src_map:arc12.rb:144
+	// src_map:arc12.rb:143
 	int NoOp
 	itxn_field OnCompletion
 
-	// src_map:arc12.rb:145
+	// src_map:arc12.rb:144
 	load 0 // create_vault: receiver [account]
 	itxn_field Accounts
 
-	// src_map:arc12.rb:146
+	// src_map:arc12.rb:145
 	txn Sender
 	itxn_field Accounts
 
-	// src_map:arc12.rb:147
+	// src_map:arc12.rb:146
 	int 0
 	itxn_field Fee
 
+	// src_map:arc12.rb:147
 	// src_map:arc12.rb:148
-	// src_map:arc12.rb:149
 	itxn_submit
 
-	// src_map:arc12.rb:151
+	// src_map:arc12.rb:150
 	// Fund vault with account MBR
-	// src_map:arc12.rb:152
+	// src_map:arc12.rb:151
 	itxn_begin
 
-	// src_map:arc12.rb:153
+	// src_map:arc12.rb:152
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:154
+	// src_map:arc12.rb:153
 	txn CreatedApplicationID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// src_map:arc12.rb:155
+	// src_map:arc12.rb:154
 	global MinBalance
 	itxn_field Amount
 
-	// src_map:arc12.rb:156
+	// src_map:arc12.rb:155
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:157
+	// src_map:arc12.rb:156
 	itxn_submit
 
-	// src_map:arc12.rb:159
+	// src_map:arc12.rb:158
 	load 0 // create_vault: receiver [account]
 	int 32
 	box_create
 
-	// src_map:arc12.rb:160
+	// src_map:arc12.rb:159
 	load 0 // create_vault: receiver [account]
 	txn CreatedApplicationID
 	itob
 	box_put
 
-	// src_map:arc12.rb:162
+	// src_map:arc12.rb:161
 	load 1 // create_vault: mbr_payment [pay]
 	gtxns Amount
 	global CurrentApplicationAddress
@@ -140,17 +140,17 @@ create_vault: // create_vault(receiver, mbr_payment)
 	==
 	assert
 
-	// src_map:arc12.rb:164
+	// src_map:arc12.rb:163
 	txn CreatedApplicationID
 	itob
 	byte "151f7c75"
 	concat
 	log
 
-	// src_map:arc12.rb:165
+	// src_map:arc12.rb:164
 	retsub
 
-// src_map:arc12.rb:170
+// src_map:arc12.rb:169
 verify_axfer: // verify_axfer(receiver, vault_axfer)
 	txn OnCompletion
 	int NoOp
@@ -165,14 +165,14 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	-
 	store 4 // verify_axfer: vault_axfer [axfer]
 
-	// src_map:arc12.rb:171
+	// src_map:arc12.rb:170
 	load 3 // verify_axfer: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:172
+	// src_map:arc12.rb:171
 	load 4 // verify_axfer: vault_axfer [axfer]
 	gtxns Receiver
 	load 3 // verify_axfer: receiver [account]
@@ -181,17 +181,17 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	==
 	assert
 
-	// src_map:arc12.rb:173
+	// src_map:arc12.rb:172
 	load 4 // verify_axfer: vault_axfer [axfer]
 	gtxns CloseRemainderTo
 	global ZeroAddress
 	==
 	assert
 
-	// src_map:arc12.rb:174
+	// src_map:arc12.rb:173
 	retsub
 
-// src_map:arc12.rb:179
+// src_map:arc12.rb:178
 get_vault_id: // get_vault_id(receiver)
 	txn OnCompletion
 	int NoOp
@@ -201,14 +201,14 @@ get_vault_id: // get_vault_id(receiver)
 	txna Accounts 1
 	store 5 // get_vault_id: receiver [account]
 
-	// src_map:arc12.rb:180
+	// src_map:arc12.rb:179
 	load 5 // get_vault_id: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:181
+	// src_map:arc12.rb:180
 	load 5 // get_vault_id: receiver [account]
 	box_get
 	pop
@@ -216,10 +216,10 @@ get_vault_id: // get_vault_id(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:182
+	// src_map:arc12.rb:181
 	retsub
 
-// src_map:arc12.rb:187
+// src_map:arc12.rb:186
 get_vault_addr: // get_vault_addr(receiver)
 	txn OnCompletion
 	int NoOp
@@ -229,14 +229,14 @@ get_vault_addr: // get_vault_addr(receiver)
 	txna Accounts 1
 	store 6 // get_vault_addr: receiver [account]
 
-	// src_map:arc12.rb:188
+	// src_map:arc12.rb:187
 	load 6 // get_vault_addr: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:189
+	// src_map:arc12.rb:188
 	load 6 // get_vault_addr: receiver [account]
 	box_get
 	pop
@@ -247,10 +247,10 @@ get_vault_addr: // get_vault_addr(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:190
+	// src_map:arc12.rb:189
 	retsub
 
-// src_map:arc12.rb:196
+// src_map:arc12.rb:195
 delete_vault: // delete_vault(receiver, vault, creator)
 	txn OnCompletion
 	int NoOp
@@ -266,14 +266,14 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	txna Accounts 2
 	store 9 // delete_vault: creator [account]
 
-	// src_map:arc12.rb:197
+	// src_map:arc12.rb:196
 	load 7 // delete_vault: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:198
+	// src_map:arc12.rb:197
 	load 8 // delete_vault: vault [application]
 	load 7 // delete_vault: receiver [account]
 	box_get
@@ -282,66 +282,66 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	==
 	assert
 
-	// src_map:arc12.rb:199
+	// src_map:arc12.rb:198
 	load 8 // delete_vault: vault [application]
 	byte "creator"
 	app_global_get_ex
 	pop
 	store 10 // vault_creator
 
-	// src_map:arc12.rb:200
+	// src_map:arc12.rb:199
 	load 10 // vault_creator
 	load 9 // delete_vault: creator [account]
 	==
 	assert
 
-	// src_map:arc12.rb:202
+	// src_map:arc12.rb:201
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	store 11 // pre_delete_mbr
 
-	// src_map:arc12.rb:204
+	// src_map:arc12.rb:203
 	// Delete vault
-	// src_map:arc12.rb:205
+	// src_map:arc12.rb:204
 	itxn_begin
 
-	// src_map:arc12.rb:206
+	// src_map:arc12.rb:205
 	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:207
+	// src_map:arc12.rb:206
 	load 7 // delete_vault: receiver [account]
 	box_get
 	pop
 	btoi
 	itxn_field ApplicationID
 
-	// src_map:arc12.rb:208
+	// src_map:arc12.rb:207
 	int DeleteApplication
 	itxn_field OnCompletion
 
-	// src_map:arc12.rb:209
+	// src_map:arc12.rb:208
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:210
+	// src_map:arc12.rb:209
 	itxn_submit
 
-	// src_map:arc12.rb:212
+	// src_map:arc12.rb:211
 	// Send vault MBR to creator
-	// src_map:arc12.rb:213
+	// src_map:arc12.rb:212
 	itxn_begin
 
-	// src_map:arc12.rb:214
+	// src_map:arc12.rb:213
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:215
+	// src_map:arc12.rb:214
 	load 10 // vault_creator
 	itxn_field Receiver
 
-	// src_map:arc12.rb:216
+	// src_map:arc12.rb:215
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
@@ -349,14 +349,14 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	-
 	itxn_field Amount
 
-	// src_map:arc12.rb:217
+	// src_map:arc12.rb:216
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:218
+	// src_map:arc12.rb:217
 	itxn_submit
 
-	// src_map:arc12.rb:219
+	// src_map:arc12.rb:218
 	retsub
 
 main:
@@ -434,5 +434,5 @@ if3_end:
 
 if4_else0:
 
-// src_map:arc12.rb:221
+// src_map:arc12.rb:220
 if4_end:

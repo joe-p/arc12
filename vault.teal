@@ -1,6 +1,6 @@
 #pragma version 8
 
-// src_map:arc12.rb:113
+// src_map:arc12.rb:112
 b main
 
 // src_map:arc12.rb:14
@@ -158,7 +158,7 @@ opt_in: // opt_in(sender, asa, mbr_payment)
 // src_map:arc12.rb:53
 delete: // delete()
 	txn OnCompletion
-	int NoOp
+	int DeleteApplication
 	==
 	assert
 
@@ -180,15 +180,11 @@ delete: // delete()
 	// src_map:arc12.rb:56
 	retsub
 
-// src_map:arc12.rb:65
+// src_map:arc12.rb:64
 claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	txn OnCompletion
 	int NoOp
 	==
-	txn OnCompletion
-	int DeleteApplication
-	==
-	||
 	assert
 
 	txna Assets 0
@@ -203,19 +199,19 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	txna Accounts 3
 	store 10 // claim: asa_mbr_funder [account] The account that funded the MBR for the ASA
 
-	// src_map:arc12.rb:66
+	// src_map:arc12.rb:65
 	load 7 // claim: asa [asset] The ASA to send
 	itob
 	store 5 // asa_bytes
 
-	// src_map:arc12.rb:68
+	// src_map:arc12.rb:67
 	load 5 // asa_bytes
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:69
+	// src_map:arc12.rb:68
 	load 10 // claim: asa_mbr_funder [account] The account that funded the MBR for the ASA
 	load 5 // asa_bytes
 	box_get
@@ -223,54 +219,54 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	==
 	assert
 
-	// src_map:arc12.rb:70
+	// src_map:arc12.rb:69
 	load 8 // claim: receiver [account] The account that funded the MBR for the application
 	byte "receiver"
 	app_global_get
 	==
 	assert
 
-	// src_map:arc12.rb:71
+	// src_map:arc12.rb:70
 	load 9 // claim: creator [account] The account that can claim from this vault
 	byte "creator"
 	app_global_get
 	==
 	assert
 
-	// src_map:arc12.rb:72
+	// src_map:arc12.rb:71
 	txn Sender
 	load 8 // claim: receiver [account] The account that funded the MBR for the application
 	==
 	assert
 
-	// src_map:arc12.rb:74
+	// src_map:arc12.rb:73
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	store 11 // initial_mbr
 
-	// src_map:arc12.rb:76
+	// src_map:arc12.rb:75
 	load 5 // asa_bytes
 	box_del
 
-	// src_map:arc12.rb:78
+	// src_map:arc12.rb:77
 	// Close ASA to receiver
-	// src_map:arc12.rb:79
+	// src_map:arc12.rb:78
 	itxn_begin
 
-	// src_map:arc12.rb:80
+	// src_map:arc12.rb:79
 	int axfer
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:81
+	// src_map:arc12.rb:80
 	load 8 // claim: receiver [account] The account that funded the MBR for the application
 	itxn_field AssetReceiver
 
-	// src_map:arc12.rb:82
+	// src_map:arc12.rb:81
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:83
+	// src_map:arc12.rb:82
 	txn Sender
 	load 7 // claim: asa [asset] The ASA to send
 	asset_holding_get AssetBalance
@@ -278,31 +274,31 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	pop
 	itxn_field AssetAmount
 
-	// src_map:arc12.rb:84
+	// src_map:arc12.rb:83
 	load 7 // claim: asa [asset] The ASA to send
 	itxn_field XferAsset
 
-	// src_map:arc12.rb:85
+	// src_map:arc12.rb:84
 	load 8 // claim: receiver [account] The account that funded the MBR for the application
 	itxn_field AssetCloseTo
 
-	// src_map:arc12.rb:86
+	// src_map:arc12.rb:85
 	itxn_submit
 
-	// src_map:arc12.rb:88
+	// src_map:arc12.rb:87
 	// Send ASA MBR to funder
-	// src_map:arc12.rb:89
+	// src_map:arc12.rb:88
 	itxn_begin
 
-	// src_map:arc12.rb:90
+	// src_map:arc12.rb:89
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:91
+	// src_map:arc12.rb:90
 	load 10 // claim: asa_mbr_funder [account] The account that funded the MBR for the ASA
 	itxn_field Receiver
 
-	// src_map:arc12.rb:92
+	// src_map:arc12.rb:91
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
@@ -310,14 +306,14 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	-
 	itxn_field Amount
 
-	// src_map:arc12.rb:93
+	// src_map:arc12.rb:92
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:94
+	// src_map:arc12.rb:93
 	itxn_submit
 
-	// src_map:arc12.rb:96
+	// src_map:arc12.rb:95
 	byte "assets"
 	byte "assets"
 	app_global_get
@@ -325,48 +321,48 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	-
 	app_global_put
 
-	// src_map:arc12.rb:98
+	// src_map:arc12.rb:97
 	byte "assets"
 	app_global_get
 	int 0
 	==
 	bz if0_else0
 
-	// src_map:arc12.rb:99
+	// src_map:arc12.rb:98
 	itxn_begin
 
-	// src_map:arc12.rb:100
+	// src_map:arc12.rb:99
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:101
+	// src_map:arc12.rb:100
 	load 9 // claim: creator [account] The account that can claim from this vault
 	itxn_field Receiver
 
-	// src_map:arc12.rb:102
+	// src_map:arc12.rb:101
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	itxn_field Amount
 
-	// src_map:arc12.rb:103
+	// src_map:arc12.rb:102
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:104
+	// src_map:arc12.rb:103
 	load 8 // claim: receiver [account] The account that funded the MBR for the application
 	itxn_field CloseRemainderTo
 
-	// src_map:arc12.rb:105
+	// src_map:arc12.rb:104
 	itxn_submit
 
-	// src_map:arc12.rb:107
+	// src_map:arc12.rb:106
 	txn GroupIndex
 	int 1
 	+
 	store 12 // delete_vault_txn
 
-	// src_map:arc12.rb:108
+	// src_map:arc12.rb:107
 	load 12 // delete_vault_txn
 	gtxns ApplicationID
 	byte "master"
@@ -374,21 +370,21 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	==
 	assert
 
-	// src_map:arc12.rb:109
+	// src_map:arc12.rb:108
 	load 12 // delete_vault_txn
 	gtxns OnCompletion
 	int DeleteApplication
 	==
 	assert
 
-	// src_map:arc12.rb:110
+	// src_map:arc12.rb:109
 	b if0_end
 
 if0_else0:
 
 if0_end:
 
-	// src_map:arc12.rb:111
+	// src_map:arc12.rb:110
 	retsub
 
 main:
@@ -451,5 +447,5 @@ if3_end:
 
 if4_else0:
 
-// src_map:arc12.rb:113
+// src_map:arc12.rb:112
 if4_end:

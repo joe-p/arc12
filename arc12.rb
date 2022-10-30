@@ -49,14 +49,13 @@ class Vault < TEALrb::Contract
   end
 
   # @abi
-  # @delete
+  # @on_completion [DeleteApplication]
   def delete
     assert Global.current_application_address.balance == 0
     assert Global.caller_application_id == Global['master']
   end
 
   # @abi
-  # @on_completion [NoOp, DeleteApplication]
   # Sends the ASA to the intended receiver
   # @param asa [Asset] The ASA to send
   # @param creator [Account] The account that funded the MBR for the application
