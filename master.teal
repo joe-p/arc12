@@ -1,16 +1,15 @@
 #pragma version 8
 
-// src_map:arc12.rb:220
 b main
 
-// src_map:arc12.rb:130
 create_vault: // create_vault(receiver, mbr_payment)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 0 // create_vault: receiver [account]
 
 	txn GroupIndex
@@ -67,7 +66,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	itxn_field ApplicationID
 
 	// src_map:arc12.rb:142
-	byte b64 CCAEAAEEBSYEBmFzc2V0cwZtYXN0ZXIHY3JlYXRvcghyZWNlaXZlckIBWzEZIhJEMRgiEkQ2HAE1ADYcAjUBKCJnKjQBZys0AGcpMg1niTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSUSRDIKcwBIIhJEMg0pZBJEiTEZIhJENjAANQc2HAE1CDYcAjUJNhwDNQo0BxY1BTQFvkxIRDQKNAW+SBJENAgrZBJENAkqZBJEMQA0CBJEMgpzAUg1CzQFvLEkshA0CLIUIrIBMQA0B3AATEiyEjQHshE0CLIVs7EjshA0CrIHMgpzAUg0CwmyCCKyAbMoKGQjCWcoZCISQQAvsSOyEDQJsgcyCnMBSLIIIrIBNAiyCbMxFiMINQw0DDgYKWQSRDQMOBklEkRCAACJNhoAgAgwNTE4ZmQxMhJBAAiI/pEjQ0IAADYaAIAIMmNjZTYzZTUSQQAIiP6cI0NCAAA2GgCACDZlODYwODVjEkEACIj+7SNDQgAANhoAgAhjMjkwMmNhMBJBAAiI/ugjQ0IAAA==
+	byte b64 CCAFAAECBAUmBAZhc3NldHMGbWFzdGVyB2NyZWF0b3IIcmVjZWl2ZXJCAVsxGSISRDEYIhJEI8AcNQAkwBw1ASgiZyo0AWcrNABnKTINZ4kxGSISRCPAHDUCIsAwNQMxFiMJNQQ0AxY1BTQFvkxIFEQ0BDgANAISRDQEOAcyChJEMgpzAUg1BigoZCMIZzQFgSC5NAU0Ar+xJbIQMgqyFCKyEiKyATQDshGzNAQ4CDIKcwFINAYJEkSJMRkhBBJEMgpzAEgiEkQyDSlkEkSJMRkiEkQiwDA1ByPAHDUIJMAcNQmBA8AcNQo0BxY1BTQFvkxIRDQKNAW+SBJENAgrZBJENAkqZBJEMQA0CBJEMgpzAUg1CzQFvLElshA0CLIUIrIBMQA0B3AATEiyEjQHshE0CLIVs7EjshA0CrIHMgpzAUg0CwmyCCKyAbMoKGQjCWcoZCISQQAtsSOyEDQJsgcyCnMBSLIIIrIBNAiyCbMxFiMINQw0DDgYKWQSRDQMOBkhBBJEiSLAGoAIMDUxOGZkMTISQQAFiP6RI0MiwBqACDJjY2U2M2U1EkEABYj+nyNDIsAagAg2ZTg2MDg1YxJBAAWI/vMjQyLAGoAIYzI5MDJjYTASQQAFiP7yI0M=
 	itxn_field ApprovalProgram
 
 	// src_map:arc12.rb:143
@@ -86,7 +85,6 @@ create_vault: // create_vault(receiver, mbr_payment)
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:147
 	// src_map:arc12.rb:148
 	itxn_submit
 
@@ -150,14 +148,14 @@ create_vault: // create_vault(receiver, mbr_payment)
 	// src_map:arc12.rb:164
 	retsub
 
-// src_map:arc12.rb:169
 verify_axfer: // verify_axfer(receiver, vault_axfer)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 3 // verify_axfer: receiver [account]
 
 	txn GroupIndex
@@ -191,14 +189,14 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	// src_map:arc12.rb:173
 	retsub
 
-// src_map:arc12.rb:178
 get_vault_id: // get_vault_id(receiver)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 5 // get_vault_id: receiver [account]
 
 	// src_map:arc12.rb:179
@@ -219,14 +217,14 @@ get_vault_id: // get_vault_id(receiver)
 	// src_map:arc12.rb:181
 	retsub
 
-// src_map:arc12.rb:186
 get_vault_addr: // get_vault_addr(receiver)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 6 // get_vault_addr: receiver [account]
 
 	// src_map:arc12.rb:187
@@ -250,20 +248,22 @@ get_vault_addr: // get_vault_addr(receiver)
 	// src_map:arc12.rb:189
 	retsub
 
-// src_map:arc12.rb:195
 delete_vault: // delete_vault(receiver, vault, creator)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 7 // delete_vault: receiver [account]
 
-	txna Applications 0
+	int 0
+	txnas Applications
 	store 8 // delete_vault: vault [application]
 
-	txna Accounts 2
+	int 2
+	txnas Accounts
 	store 9 // delete_vault: creator [account]
 
 	// src_map:arc12.rb:196
@@ -360,79 +360,63 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	retsub
 
 main:
-	txna ApplicationArgs 0
+	int 0
+	txnas ApplicationArgs
 	byte "dc4a2cde"
 	==
-	bz if0_else0
+	bz abi_routing0
 
 	callsub create_vault
 
 	int 1
 	return
 
-	b if0_end
-
-if0_else0:
-
-if0_end:
-	txna ApplicationArgs 0
+abi_routing0:
+	int 0
+	txnas ApplicationArgs
 	byte "e99f0c84"
 	==
-	bz if1_else0
+	bz abi_routing1
 
 	callsub verify_axfer
 
 	int 1
 	return
 
-	b if1_end
-
-if1_else0:
-
-if1_end:
-	txna ApplicationArgs 0
+abi_routing1:
+	int 0
+	txnas ApplicationArgs
 	byte "ef7d7c77"
 	==
-	bz if2_else0
+	bz abi_routing2
 
 	callsub get_vault_id
 
 	int 1
 	return
 
-	b if2_end
-
-if2_else0:
-
-if2_end:
-	txna ApplicationArgs 0
+abi_routing2:
+	int 0
+	txnas ApplicationArgs
 	byte "546d3c21"
 	==
-	bz if3_else0
+	bz abi_routing3
 
 	callsub get_vault_addr
 
 	int 1
 	return
 
-	b if3_end
-
-if3_else0:
-
-if3_end:
-	txna ApplicationArgs 0
+abi_routing3:
+	int 0
+	txnas ApplicationArgs
 	byte "9e810f4b"
 	==
-	bz if4_else0
+	bz abi_routing4
 
 	callsub delete_vault
 
 	int 1
 	return
 
-	b if4_end
-
-if4_else0:
-
-// src_map:arc12.rb:220
-if4_end:
+abi_routing4:

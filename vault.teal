@@ -1,9 +1,7 @@
 #pragma version 8
 
-// src_map:arc12.rb:112
 b main
 
-// src_map:arc12.rb:14
 create: // create(receiver, sender)
 	txn OnCompletion
 	int NoOp
@@ -15,10 +13,12 @@ create: // create(receiver, sender)
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 0 // create: receiver [account] The account that can claim ASAs from this vault
 
-	txna Accounts 2
+	int 2
+	txnas Accounts
 	store 1 // create: sender [account]
 
 	// src_map:arc12.rb:15
@@ -44,17 +44,18 @@ create: // create(receiver, sender)
 	// src_map:arc12.rb:19
 	retsub
 
-// src_map:arc12.rb:26
 opt_in: // opt_in(sender, asa, mbr_payment)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 2 // opt_in: sender [account] The account that is sending the ASA
 
-	txna Assets 0
+	int 0
+	txnas Assets
 	store 3 // opt_in: asa [asset] The asset to opt-in to
 
 	txn GroupIndex
@@ -155,7 +156,6 @@ opt_in: // opt_in(sender, asa, mbr_payment)
 	// src_map:arc12.rb:49
 	retsub
 
-// src_map:arc12.rb:53
 delete: // delete()
 	txn OnCompletion
 	int DeleteApplication
@@ -180,23 +180,26 @@ delete: // delete()
 	// src_map:arc12.rb:56
 	retsub
 
-// src_map:arc12.rb:64
 claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Assets 0
+	int 0
+	txnas Assets
 	store 7 // claim: asa [asset] The ASA to send
 
-	txna Accounts 1
+	int 1
+	txnas Accounts
 	store 8 // claim: receiver [account] The account that funded the MBR for the application
 
-	txna Accounts 2
+	int 2
+	txnas Accounts
 	store 9 // claim: creator [account] The account that can claim from this vault
 
-	txna Accounts 3
+	int 3
+	txnas Accounts
 	store 10 // claim: asa_mbr_funder [account] The account that funded the MBR for the ASA
 
 	// src_map:arc12.rb:65
@@ -326,7 +329,7 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	app_global_get
 	int 0
 	==
-	bz if0_else0
+	bz if0_end
 
 	// src_map:arc12.rb:98
 	itxn_begin
@@ -377,75 +380,58 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	==
 	assert
 
-	// src_map:arc12.rb:109
-	b if0_end
-
-if0_else0:
-
+// src_map:arc12.rb:109
 if0_end:
 
 	// src_map:arc12.rb:110
 	retsub
 
 main:
-	txna ApplicationArgs 0
+	int 0
+	txnas ApplicationArgs
 	byte "0518fd12"
 	==
-	bz if1_else0
+	bz abi_routing0
 
 	callsub create
 
 	int 1
 	return
 
-	b if1_end
-
-if1_else0:
-
-if1_end:
-	txna ApplicationArgs 0
+abi_routing0:
+	int 0
+	txnas ApplicationArgs
 	byte "2cce63e5"
 	==
-	bz if2_else0
+	bz abi_routing1
 
 	callsub opt_in
 
 	int 1
 	return
 
-	b if2_end
-
-if2_else0:
-
-if2_end:
-	txna ApplicationArgs 0
+abi_routing1:
+	int 0
+	txnas ApplicationArgs
 	byte "6e86085c"
 	==
-	bz if3_else0
+	bz abi_routing2
 
 	callsub delete
 
 	int 1
 	return
 
-	b if3_end
-
-if3_else0:
-
-if3_end:
-	txna ApplicationArgs 0
+abi_routing2:
+	int 0
+	txnas ApplicationArgs
 	byte "c2902ca0"
 	==
-	bz if4_else0
+	bz abi_routing3
 
 	callsub claim
 
 	int 1
 	return
 
-	b if4_end
-
-if4_else0:
-
-// src_map:arc12.rb:112
-if4_end:
+abi_routing3:
