@@ -8,8 +8,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 0 // create_vault: receiver [account]
 
 	txn GroupIndex
@@ -66,7 +65,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	itxn_field ApplicationID
 
 	// src_map:arc12.rb:132
-	byte b64 CCAFAAECBAUmCAZhc3NldHMGbWFzdGVyB2NyZWF0b3IIcmVjZWl2ZXIIMDUxOGZkMTIIMmNjZTYzZTUINmU4NjA4NWMIYzI5MDJjYTBCAVsxGSISRDEYIhJEI8AcNQAkwBw1ASgiZyo0AWcrNABnKTINZ4kxGSISRCPAHDUCIsAwNQMxFiMJNQQ0AxY1BTQFvkxIFEQ0BDgANAISRDQEOAcyChJEMgpzAUg1BigoZCMIZzQFgSC5NAU0Ar+xJbIQMgqyFCKyEiKyATQDshGzNAQ4CDIKcwFINAYJEkSJMRkhBBJEMgpzAEgiEkQyDSlkEkSJMRkiEkQiwDA1ByPAHDUIJMAcNQmBA8AcNQo0BxY1BTQFvkxIRDQKNAW+SBJENAgrZBJENAkqZBJEMQA0CBJEMgpzAUg1CzQFvLElshA0CLIUIrIBMQA0B3AATEiyEjQHshE0CLIVs7EjshA0CrIHMgpzAUg0CwmyCCKyAbMoKGQjCWcoZCISQQAtsSOyEDQJsgcyCnMBSLIIIrIBNAiyCbMxFiMINQw0DDgYKWQSRDQMOBkhBBJEiSLAGicEEkEABYj+mSNDIsAaJwUSQQAFiP6vI0MiwBonBhJBAAWI/wsjQyLAGicHEkEABYj/EiNDIsAaJwQSQQAFiP5hI0MiwBonBRJBAAWI/ncjQyLAGicGEkEABYj+0yNDIsAaJwcSQQAFiP7aI0M=
+	byte b64 CCAEAAEEBSYIBmFzc2V0cwZtYXN0ZXIHY3JlYXRvcghyZWNlaXZlcggwNTE4ZmQxMggyY2NlNjNlNQg2ZTg2MDg1YwhjMjkwMmNhMEIBWDEZIhJEMRgiEkQ2HAE1ADYcAjUBKCJnKjQBZys0AGcpMg1niTEZIhJENhwBNQI2MAA1AzEWIwk1BDQDFjUFNAW+TEgURDQEOAA0AhJENAQ4BzIKEkQyCnMBSDUGKChkIwhnNAWBILk0BTQCv7EkshAyCrIUIrISIrIBNAOyEbM0BDgIMgpzAUg0BgkSRIkxGSUSRDIKcwBIIhJEMg0pZBJEiTEZIhJENjAANQc2HAE1CDYcAjUJNhwDNQo0BxY1BTQFvkxIRDQKNAW+SBJENAgrZBJENAkqZBJEMQA0CBJEMgpzAUg1CzQFvLEkshA0CLIUIrIBMQA0B3AATEiyEjQHshE0CLIVs7EjshA0CrIHMgpzAUg0CwmyCCKyAbMoKGQjCWcoZCISQQAssSOyEDQJsgcyCnMBSLIIIrIBNAiyCbMxFiMINQw0DDgYKWQSRDQMOBklEkSJIsAaJwQSQQAFiP6cI0MiwBonBRJBAAWI/rIjQyLAGicGEkEABYj/DiNDIsAaJwcSQQAFiP8UI0MiwBonBBJBAAWI/mQjQyLAGicFEkEABYj+eiNDIsAaJwYSQQAFiP7WI0MiwBonBxJBAAWI/twjQw==
 	itxn_field ApprovalProgram
 
 	// src_map:arc12.rb:133
@@ -154,8 +153,7 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 3 // verify_axfer: receiver [account]
 
 	txn GroupIndex
@@ -195,8 +193,7 @@ get_vault_id: // get_vault_id(receiver)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 5 // get_vault_id: receiver [account]
 
 	// src_map:arc12.rb:169
@@ -223,8 +220,7 @@ get_vault_addr: // get_vault_addr(receiver)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 6 // get_vault_addr: receiver [account]
 
 	// src_map:arc12.rb:177
@@ -254,16 +250,13 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 7 // delete_vault: receiver [account]
 
-	int 0
-	txnas Applications
+	txna Applications 0
 	store 8 // delete_vault: vault [application]
 
-	int 2
-	txnas Accounts
+	txna Accounts 2
 	store 9 // delete_vault: creator [account]
 
 	// src_map:arc12.rb:186

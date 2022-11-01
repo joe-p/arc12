@@ -13,12 +13,10 @@ create: // create(receiver, sender)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 0 // create: receiver [account] The account that can claim ASAs from this vault
 
-	int 2
-	txnas Accounts
+	txna Accounts 2
 	store 1 // create: sender [account]
 
 	// src_map:arc12.rb:15
@@ -50,12 +48,10 @@ opt_in: // opt_in(sender, asa, mbr_payment)
 	==
 	assert
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 2 // opt_in: sender [account] The account that is sending the ASA
 
-	int 0
-	txnas Assets
+	txna Assets 0
 	store 3 // opt_in: asa [asset] The asset to opt-in to
 
 	txn GroupIndex
@@ -186,20 +182,16 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	==
 	assert
 
-	int 0
-	txnas Assets
+	txna Assets 0
 	store 7 // claim: asa [asset] The ASA to send
 
-	int 1
-	txnas Accounts
+	txna Accounts 1
 	store 8 // claim: receiver [account] The account that funded the MBR for the application
 
-	int 2
-	txnas Accounts
+	txna Accounts 2
 	store 9 // claim: creator [account] The account that can claim from this vault
 
-	int 3
-	txnas Accounts
+	txna Accounts 3
 	store 10 // claim: asa_mbr_funder [account] The account that funded the MBR for the ASA
 
 	// src_map:arc12.rb:65
