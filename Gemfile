@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 # lots of gems ...
 
 gem 'pry'
-gem 'tealrb', path: '../TEALrb/'
+gem 'tealrb', '0.12.0'

@@ -6,16 +6,64 @@ require 'pry'
 class Vault < TEALrb::Contract
   @version = 8
 
+  # @subroutine
+  # vault_creator [Account]
+  def close_acct(vault_creator)
+    assert vault_creator == global['creator']
+
+    inner_txn.begin
+    inner_txn.type_enum = txn_type.pay
+    inner_txn.receiver = vault_creator
+    inner_txn.amount = global.current_application_address.min_balance
+    inner_txn.fee = 0
+    inner_txn.close_remainder_to = this_txn.sender
+    inner_txn.submit
+
+    $delete_vault_txn = group_txns[this_txn.group_index + 1]
+    assert $delete_vault_txn.application_id == global.current_application_id
+    assert $delete_vault_txn.on_completion == int('DeleteApplication')
+  end
+
   # @abi
   # @create
   # Method called for creation of the vault
   # @param receiver [Account] The account that can claim ASAs from this vault
   # @param sender [Account]
   def create(receiver, sender)
-    global['assets'] = 0
     global['creator'] = sender
     global['receiver'] = receiver
-    global['master'] = global.caller_application_id
+  end
+
+  # @abi
+  # @param asa_creator [Account]
+  # @param fee_sink [Account]
+  # @param asa [Asset]
+  # @param vault_creator [Account]
+  def reject(asa_creator, fee_sink, asa, vault_creator)
+    assert this_txn.sender == global['receiver']
+    assert fee_sink == addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
+    $pre_mbr = global.current_application_address.min_balance
+    $pre_fee = global.current_application_address.balance
+
+    # send ASA to creator
+    inner_txn.begin
+    inner_txn.type_enum = txn_type.asset_transfer
+    inner_txn.asset_receiver = asa_creator
+    inner_txn.xfer_asset = asa
+    inner_txn.asset_close_to = asa_creator
+    inner_txn.submit
+
+    $fee_amt = $pre_fee - global.current_application_address.balance
+    $mbr_amt = $pre_mbr - global.current_application_address.min_balance
+
+    # send MBR to fee sink
+    inner_txn.begin
+    inner_txn.type_enum = txn_type.pay
+    inner_txn.receiver = fee_sink
+    inner_txn.amount = $mbr_amt - (2 * $fee_amt)
+    inner_txn.submit
+
+    close_acct(vault_creator) if global.current_application_address.assets == 1
   end
 
   # @abi
@@ -30,8 +78,6 @@ class Vault < TEALrb::Contract
     assert mbr_payment.receiver == global.current_application_address
 
     $pre_mbr = global.current_application_address.min_balance
-
-    global['assets'] = global['assets'] + 1
 
     box_create($asa_bytes, 32)
     box[$asa_bytes] = sender
@@ -52,7 +98,7 @@ class Vault < TEALrb::Contract
   # @on_completion [DeleteApplication]
   def delete
     assert global.current_application_address.balance == 0
-    assert global.caller_application_id == global['master']
+    assert this_txn.sender == global.creator_address
   end
 
   # @abi
@@ -92,21 +138,7 @@ class Vault < TEALrb::Contract
     inner_txn.fee = 0
     inner_txn.submit
 
-    global['assets'] = global['assets'] - 1
-
-    if global['assets'] == 0
-      inner_txn.begin
-      inner_txn.type_enum = txn_type.pay
-      inner_txn.receiver = creator
-      inner_txn.amount = global.current_application_address.min_balance
-      inner_txn.fee = 0
-      inner_txn.close_remainder_to = receiver
-      inner_txn.submit
-
-      $delete_vault_txn = group_txns[this_txn.group_index + 1]
-      assert $delete_vault_txn.application_id == global['master']
-      assert $delete_vault_txn.on_completion == int('DeleteApplication')
-    end
+    close_acct(creator) if global.current_application_address.assets == 1
   end
 end
 

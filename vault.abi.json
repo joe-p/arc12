@@ -25,6 +25,37 @@
       }
     },
     {
+      "name": "reject",
+      "desc": "",
+      "args": [
+        {
+          "name": "asa_creator",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "fee_sink",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": ""
+        },
+        {
+          "name": "vault_creator",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": {
+          "type": "void"
+        }
+      }
+    },
+    {
       "name": "opt_in",
       "desc": "Opts into the given asa",
       "args": [
