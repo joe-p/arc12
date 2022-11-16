@@ -65,7 +65,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	itxn_field ApplicationID
 
 	// src_map:arc12.rb:164
-	byte b64 CCAEAAEEBSYHB2NyZWF0b3IIcmVjZWl2ZXIIMDUxOGZkMTIIM2M5NTdmZWIIMmNjZTYzZTUINmU4NjA4NWMIYzI5MDJjYTBCAfkxGSISRDUANAAoZBJEsSOyEDQAsgcyCnMBSLIIIrIBMQCyCbMxFiMINQE0ATgYcghIMgkSRDQBOBklEkSJMRkiEkQxGCISRDYcATUCNhwCNQMoNANnKTQCZ4kxGSISRDYcATUENhwCNQU2MAA1BjYcAzUHMQApZBJENAWAIMf8zbJY8NQYnCv4ttaO5pdQhkKwrQAfMfy5GMNUuoWaEkQyCnMBSDUIMgpzAEg1CbEkshA0BLIUNAayETQEshWzNAkyCnMASAk1CjQIMgpzAUgJNQuxI7IQNAWyBzQLgQI0CgsJsgizMgpzCUgjEkEABTQHiP8MiTEZIhJENhwBNQw2MAA1DTEWIwk1DjQNFjUPNA++TEgURDQOOAA0DBJENA44BzIKEkQyCnMBSDUINA+BILk0DzQMv7EkshAyCrIUIrISIrIBNA2yEbM0DjgIMgpzAUg0CAkSRIkxGSUSRDIKcwBIIhJEMQAyCRJEiTEZIhJENjAANRA2HAE1ETYcAjUSNhwDNRM0EBY1DzQPvkxIRDQTNA++SBJENBEpZBJENBIoZBJEMQA0ERJEMgpzAUg1FDQPvLEkshA0EbIUIrIBMQA0EHAATEiyEjQQshE0EbIVs7EjshA0E7IHMgpzAUg0FAmyCCKyAbMyCnMJSCMSQQAFNBKI/giJIsAaKhJBAAWI/jkjQyLAGisSQQAFiP5JI0MiwBonBBJBAAWI/tYjQyLAGicFEkEABYj/LCNDIsAaJwYSQQAFiP8yI0MiwBoqEkEABYj99SNDIsAaKxJBAAWI/gUjQyLAGicEEkEABYj+kiNDIsAaJwUSQQAFiP7oI0MiwBonBhJBAAWI/u4jQw==
+	byte b64 CCAEAAEEBSYHB2NyZWF0b3IIcmVjZWl2ZXIEwTFcWQSPTFY9BMV7wq4EJDeNPASTyPQZQgIAMRkiEkQ1ADQAKGQSRLEjshA0ALIHMgpzAUiyCCKyATEAsgmzMRYjCDUBNAE4GDIIEkQ0ATgZJRJEiTEZIhJEMRgiEkQ2HAE1AjYcAjUDKDQDZyk0AmdCAdExGSISRDYcATUENhwCNQU2MAA1BjYcAzUHMQApZBJENAWAIMf8zbJY8NQYnCv4ttaO5pdQhkKwrQAfMfy5GMNUuoWaEkQyCnMBSDUIMgpzAEg1CbEkshA0BLIUNAayETQEshWzNAkyCnMASAk1CjQIMgpzAUgJNQuxI7IQNAWyBzQLgQI0CgsJsgizMgpzCUgjEkEABTQHiP8NQgE0MRkiEkQ2HAE1DDYwADUNMRYjCTUONA0WNQ80D75MSBRENA44ADQMEkQ0DjgHMgoSRDIKcwFINQg0D4EguTQPNAy/sSSyEDIKshQishIisgE0DbIRszQOOAgyCnMBSDQICRJEQgDOMRklEkQyCnMASCISRDEAMgkSREIAuDEZIhJENjAANRA2HAE1ETYcAjUSNhwDNRM0EBY1DzQPvkxIRDQTNA++SBJENBEpZBJENBIoZBJEMQA0ERJEMgpzAUg1FDQPvLEkshA0EbIUIrIBMQA0EHAATEiyEjQQshE0EbIVs7EjshA0E7IHMgpzAUg0FAmyCCKyAbMyCnMJSCMSQQAFNBKI/gNCACoqKycEJwUnBiorJwQnBScGNhoAjgr+Ef4w/s3/M/9J/hH+MP7N/zP/SQAjQw==
 	itxn_field ApprovalProgram
 
 	// src_map:arc12.rb:165
@@ -145,7 +145,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	log
 
 	// src_map:arc12.rb:186
-	retsub
+	b post_routing
 
 verify_axfer: // verify_axfer(receiver, vault_axfer)
 	txn OnCompletion
@@ -185,7 +185,7 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	assert
 
 	// src_map:arc12.rb:195
-	retsub
+	b post_routing
 
 get_vault_id: // get_vault_id(receiver)
 	txn OnCompletion
@@ -212,7 +212,7 @@ get_vault_id: // get_vault_id(receiver)
 	log
 
 	// src_map:arc12.rb:203
-	retsub
+	b post_routing
 
 get_vault_addr: // get_vault_addr(receiver)
 	txn OnCompletion
@@ -242,7 +242,7 @@ get_vault_addr: // get_vault_addr(receiver)
 	log
 
 	// src_map:arc12.rb:211
-	retsub
+	b post_routing
 
 delete_vault: // delete_vault(receiver, vault, creator)
 	txn OnCompletion
@@ -350,66 +350,20 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	itxn_submit
 
 	// src_map:arc12.rb:240
-	retsub
+	b post_routing
 
 main:
-	int 0
-	txnas ApplicationArgs
-	byte "dc4a2cde"
-	==
-	bz abi_routing0
+	method "create_vault(account,pay)uint64"
+	method "verify_axfer(account,axfer)void"
+	method "get_vault_id(account)uint64"
+	method "get_vault_addr(account)address"
+	method "delete_vault(account,application,account)void"
+	txna ApplicationArgs 0
+	match create_vault verify_axfer get_vault_id get_vault_addr delete_vault
+	err
 
-	callsub create_vault
+post_routing:
 
+	// src_map:contract.rb:401
 	int 1
 	return
-
-abi_routing0:
-	int 0
-	txnas ApplicationArgs
-	byte "e99f0c84"
-	==
-	bz abi_routing1
-
-	callsub verify_axfer
-
-	int 1
-	return
-
-abi_routing1:
-	int 0
-	txnas ApplicationArgs
-	byte "ef7d7c77"
-	==
-	bz abi_routing2
-
-	callsub get_vault_id
-
-	int 1
-	return
-
-abi_routing2:
-	int 0
-	txnas ApplicationArgs
-	byte "546d3c21"
-	==
-	bz abi_routing3
-
-	callsub get_vault_addr
-
-	int 1
-	return
-
-abi_routing3:
-	int 0
-	txnas ApplicationArgs
-	byte "9e810f4b"
-	==
-	bz abi_routing4
-
-	callsub delete_vault
-
-	int 1
-	return
-
-abi_routing4:

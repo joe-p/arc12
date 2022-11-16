@@ -1,3 +1,15 @@
+GIT
+  remote: https://github.com/joe-p/TEALrb.git
+  revision: 0b31e5794253df135e3237eeb43f7fbe3de895ea
+  branch: dev
+  specs:
+    tealrb (0.12.0)
+      faraday (~> 2.6.0)
+      method_source (~> 1.0)
+      rubocop (~> 1.36)
+      source_map (~> 3.0.1)
+      yard (~> 0.9.27)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -18,7 +30,7 @@ GEM
     rainbow (3.1.1)
     regexp_parser (2.6.0)
     rexml (3.2.5)
-    rubocop (1.38.0)
+    rubocop (1.39.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.2.1)
@@ -34,12 +46,6 @@ GEM
     ruby2_keywords (0.0.5)
     source_map (3.0.1)
       json
-    tealrb (0.12.0)
-      faraday (~> 2.6.0)
-      method_source (~> 1.0)
-      rubocop (~> 1.36)
-      source_map (~> 3.0.1)
-      yard (~> 0.9.27)
     unicode-display_width (2.3.0)
     webrick (1.7.0)
     yard (0.9.28)
@@ -50,7 +56,7 @@ PLATFORMS
 
 DEPENDENCIES
   pry
-  tealrb (= 0.12.0)
+  tealrb!
 
 BUNDLED WITH
    2.3.12

@@ -19,9 +19,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "uint64"
-        }
+        "type": "uint64"
       }
     },
     {
@@ -40,9 +38,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     },
     {
@@ -56,9 +52,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "uint64"
-        }
+        "type": "uint64"
       }
     },
     {
@@ -72,9 +66,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "address"
-        }
+        "type": "address"
       }
     },
     {
@@ -98,9 +90,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     }
   ]

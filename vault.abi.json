@@ -19,9 +19,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     },
     {
@@ -50,9 +48,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     },
     {
@@ -76,9 +72,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     },
     {
@@ -88,9 +82,7 @@
 
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     },
     {
@@ -119,9 +111,7 @@
         }
       ],
       "returns": {
-        "type": {
-          "type": "void"
-        }
+        "type": "void"
       }
     }
   ]

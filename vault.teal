@@ -54,9 +54,7 @@ close_acct: // close_acct(vault_creator)
 	// src_map:arc12.rb:23
 	load 1 // delete_vault_txn
 	gtxns ApplicationID
-	app_params_get AppAddress
-	pop
-	global CreatorAddress
+	global CurrentApplicationID
 	==
 	assert
 
@@ -98,7 +96,7 @@ create: // create(receiver, sender)
 	app_global_put
 
 	// src_map:arc12.rb:35
-	retsub
+	b post_routing
 
 reject: // reject(asa_creator, fee_sink, asa, vault_creator)
 	txn OnCompletion
@@ -219,7 +217,7 @@ reject: // reject(asa_creator, fee_sink, asa, vault_creator)
 	if1_end:
 
 	// src_map:arc12.rb:67
-	retsub
+	b post_routing
 
 opt_in: // opt_in(sender, asa, mbr_payment)
 	txn OnCompletion
@@ -321,7 +319,7 @@ opt_in: // opt_in(sender, asa, mbr_payment)
 	assert
 
 	// src_map:arc12.rb:95
-	retsub
+	b post_routing
 
 delete: // delete()
 	txn OnCompletion
@@ -344,7 +342,7 @@ delete: // delete()
 	assert
 
 	// src_map:arc12.rb:102
-	retsub
+	b post_routing
 
 claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	txn OnCompletion
@@ -494,66 +492,20 @@ claim: // claim(asa, receiver, creator, asa_mbr_funder)
 	if2_end:
 
 	// src_map:arc12.rb:142
-	retsub
+	b post_routing
 
 main:
-	int 0
-	txnas ApplicationArgs
-	byte "0518fd12"
-	==
-	bz abi_routing0
+	method "create(account,account)void"
+	method "reject(account,account,asset,account)void"
+	method "opt_in(account,asset,pay)void"
+	method "delete()void"
+	method "claim(asset,account,account,account)void"
+	txna ApplicationArgs 0
+	match create reject opt_in delete claim
+	err
 
-	callsub create
+post_routing:
 
+	// src_map:contract.rb:401
 	int 1
 	return
-
-abi_routing0:
-	int 0
-	txnas ApplicationArgs
-	byte "3c957feb"
-	==
-	bz abi_routing1
-
-	callsub reject
-
-	int 1
-	return
-
-abi_routing1:
-	int 0
-	txnas ApplicationArgs
-	byte "2cce63e5"
-	==
-	bz abi_routing2
-
-	callsub opt_in
-
-	int 1
-	return
-
-abi_routing2:
-	int 0
-	txnas ApplicationArgs
-	byte "6e86085c"
-	==
-	bz abi_routing3
-
-	callsub delete
-
-	int 1
-	return
-
-abi_routing3:
-	int 0
-	txnas ApplicationArgs
-	byte "c2902ca0"
-	==
-	bz abi_routing4
-
-	callsub claim
-
-	int 1
-	return
-
-abi_routing4:
