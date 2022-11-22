@@ -199,9 +199,12 @@ class Master < TEALrb::Contract
   # @abi
   # @param receiver [Account]
   # @param vault_axfer [Axfer]
-  def verify_axfer(receiver, vault_axfer)
+  # @param vault [Application]
+  def verify_axfer(receiver, vault_axfer, vault)
     assert box_exists?(receiver)
-    assert vault_axfer.receiver == box[receiver]
+
+    assert btoi(box[receiver]) == vault
+    assert vault_axfer.asset_receiver == vault.address
     assert vault_axfer.close_remainder_to == global.zero_address
   end
 

@@ -45,6 +45,11 @@
           "name": "vault_axfer",
           "type": "axfer",
           "desc": ""
+        },
+        {
+          "name": "vault",
+          "type": "application",
+          "desc": ""
         }
       ],
       "returns": {

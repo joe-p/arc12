@@ -30,21 +30,24 @@ class Master(Application):
 
     @external
     def verify_axfer(
-        self, reciever: abi.Account, vault_axfer: abi.AssetTransferTransaction
+        self,
+        receiver: abi.Account,
+        vault_axfer: abi.AssetTransferTransaction,
+        vault: abi.Application,
     ):
         return Reject()
 
     @external
-    def get_vault_id(self, reciever: abi.Account, *, output: abi.Uint64):
+    def get_vault_id(self, receiver: abi.Account, *, output: abi.Uint64):
         return Reject()
 
     @external
-    def get_vault_addr(self, reciever: abi.Account, *, output: abi.Address):
+    def get_vault_addr(self, receiver: abi.Account, *, output: abi.Address):
         return Reject()
 
     @external
     def delete_vault(
-        self, reciever: abi.Account, vault: abi.Application, creator: abi.Account
+        self, receiver: abi.Account, vault: abi.Application, creator: abi.Account
     ):
         return Reject()
 
@@ -100,6 +103,7 @@ def create_master():
     global creator
     global receiver
     global master_client
+    global algod
 
     accounts = sorted(
         sandbox.get_accounts(),
@@ -118,6 +122,8 @@ def create_master():
         app=master_app,
         signer=creator.signer,
     )
+
+    algod = master_client.client
 
     master_client.create(args=[get_method_spec(Master.create).get_selector()])
 
@@ -175,8 +181,8 @@ def opt_in():
     )
 
     stxn = txn.sign(creator.private_key)
-    txid = master_client.client.send_transaction(stxn)
-    confirmed_txn = transaction.wait_for_confirmation(master_client.client, txid, 4)
+    txid = algod.send_transaction(stxn)
+    confirmed_txn = transaction.wait_for_confirmation(algod, txid, 4)
     asa_id = confirmed_txn["asset-index"]
 
     sp = vault_client.get_suggested_params()
@@ -199,6 +205,30 @@ def opt_in():
         asa=asa_id,
         mbr_payment=pay_txn,
         boxes=[[vault_client.app_id, asa_id.to_bytes(8, "big")]],
+    )
+
+
+@pytest.fixture(scope="module")
+def verify_axfer():
+    axfer = TransactionWithSigner(
+        txn=transaction.AssetTransferTxn(
+            sender=creator.address,
+            receiver=vault_client.app_addr,
+            amt=1,
+            sp=vault_client.get_suggested_params(),
+            index=asa_id,
+        ),
+        signer=creator.signer,
+    )
+
+    res = call(
+        master_client,
+        "master",
+        method=Master.verify_axfer,
+        receiver=receiver.address,
+        vault_axfer=axfer,
+        vault=vault_client.app_id,
+        boxes=[[master_client.app_id, decode_address(receiver.address)]],
     )
 
 
@@ -242,6 +272,12 @@ def test_create_vault_receiver(create_master, create_vault):
     )
 
 
+@pytest.mark.create_vault
+def test_create_vault_mbr(create_master, create_vault, opt_in):
+    info = algod.account_info(master_client.app_addr)
+    assert info["amount"] == info["min-balance"]
+
+
 @pytest.mark.opt_in
 def test_opt_in_box_name(create_master, create_vault, opt_in):
     box_names = vault_client.get_box_names()
@@ -253,3 +289,15 @@ def test_opt_in_box_name(create_master, create_vault, opt_in):
 def test_opt_in_box_value(create_master, create_vault, opt_in):
     box_value = vault_client.get_box_contents(asa_id.to_bytes(8, "big"))
     assert box_value == decode_address(creator.address)
+
+
+@pytest.mark.opt_in
+def test_opt_in_mbr(create_master, create_vault, opt_in):
+    info = algod.account_info(vault_client.app_addr)
+    assert info["amount"] == info["min-balance"]
+
+
+@pytest.mark.verify_axfer
+def test_verify_axfer(create_master, create_vault, opt_in, verify_axfer):
+    asa_info = algod.account_asset_info(vault_client.app_addr, asa_id)
+    assert asa_info["asset-holding"]["amount"] == 1

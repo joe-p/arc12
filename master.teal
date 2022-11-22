@@ -190,7 +190,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	// src_map:arc12.rb:197
 	b post_routing
 
-verify_axfer: // verify_axfer(receiver, vault_axfer)
+verify_axfer: // verify_axfer(receiver, vault_axfer, vault)
 	txn OnCompletion
 	int NoOp
 	==
@@ -204,30 +204,42 @@ verify_axfer: // verify_axfer(receiver, vault_axfer)
 	-
 	store 5 // verify_axfer: vault_axfer [axfer]
 
-	// src_map:arc12.rb:203
+	txna Applications 1
+	store 6 // verify_axfer: vault [application]
+
+	// src_map:arc12.rb:204
 	load 4 // verify_axfer: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:204
-	load 5 // verify_axfer: vault_axfer [axfer]
-	gtxns Receiver
+	// src_map:arc12.rb:206
 	load 4 // verify_axfer: receiver [account]
 	box_get
+	pop
+	btoi
+	load 6 // verify_axfer: vault [application]
+	==
+	assert
+
+	// src_map:arc12.rb:207
+	load 5 // verify_axfer: vault_axfer [axfer]
+	gtxns AssetReceiver
+	load 6 // verify_axfer: vault [application]
+	app_params_get AppAddress
 	pop
 	==
 	assert
 
-	// src_map:arc12.rb:205
+	// src_map:arc12.rb:208
 	load 5 // verify_axfer: vault_axfer [axfer]
 	gtxns CloseRemainderTo
 	global ZeroAddress
 	==
 	assert
 
-	// src_map:arc12.rb:206
+	// src_map:arc12.rb:209
 	b post_routing
 
 get_vault_id: // get_vault_id(receiver)
@@ -237,17 +249,17 @@ get_vault_id: // get_vault_id(receiver)
 	assert
 
 	txna Accounts 1
-	store 6 // get_vault_id: receiver [account]
+	store 7 // get_vault_id: receiver [account]
 
-	// src_map:arc12.rb:212
-	load 6 // get_vault_id: receiver [account]
+	// src_map:arc12.rb:215
+	load 7 // get_vault_id: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:213
-	load 6 // get_vault_id: receiver [account]
+	// src_map:arc12.rb:216
+	load 7 // get_vault_id: receiver [account]
 	box_get
 	pop
 	byte 0x151f7c75
@@ -255,7 +267,7 @@ get_vault_id: // get_vault_id(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:214
+	// src_map:arc12.rb:217
 	b post_routing
 
 get_vault_addr: // get_vault_addr(receiver)
@@ -265,17 +277,17 @@ get_vault_addr: // get_vault_addr(receiver)
 	assert
 
 	txna Accounts 1
-	store 7 // get_vault_addr: receiver [account]
+	store 8 // get_vault_addr: receiver [account]
 
-	// src_map:arc12.rb:220
-	load 7 // get_vault_addr: receiver [account]
+	// src_map:arc12.rb:223
+	load 8 // get_vault_addr: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:221
-	load 7 // get_vault_addr: receiver [account]
+	// src_map:arc12.rb:224
+	load 8 // get_vault_addr: receiver [account]
 	box_get
 	pop
 	btoi
@@ -286,7 +298,7 @@ get_vault_addr: // get_vault_addr(receiver)
 	concat
 	log
 
-	// src_map:arc12.rb:222
+	// src_map:arc12.rb:225
 	b post_routing
 
 delete_vault: // delete_vault(receiver, vault, creator)
@@ -296,111 +308,111 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	assert
 
 	txna Accounts 1
-	store 8 // delete_vault: receiver [account]
+	store 9 // delete_vault: receiver [account]
 
-	txna Applications 0
-	store 9 // delete_vault: vault [application]
+	txna Applications 1
+	store 10 // delete_vault: vault [application]
 
 	txna Accounts 2
-	store 10 // delete_vault: creator [account]
+	store 11 // delete_vault: creator [account]
 
-	// src_map:arc12.rb:229
-	load 8 // delete_vault: receiver [account]
+	// src_map:arc12.rb:232
+	load 9 // delete_vault: receiver [account]
 	box_get
 	swap
 	pop
 	assert
 
-	// src_map:arc12.rb:230
-	load 9 // delete_vault: vault [application]
-	load 8 // delete_vault: receiver [account]
+	// src_map:arc12.rb:233
+	load 10 // delete_vault: vault [application]
+	load 9 // delete_vault: receiver [account]
 	box_get
 	pop
 	btoi
 	==
 	assert
 
-	// src_map:arc12.rb:231
-	load 9 // delete_vault: vault [application]
+	// src_map:arc12.rb:234
+	load 10 // delete_vault: vault [application]
 	byte "creator"
 	app_global_get_ex
 	pop
-	store 11 // vault_creator
+	store 12 // vault_creator
 
-	// src_map:arc12.rb:232
-	load 11 // vault_creator
-	load 10 // delete_vault: creator [account]
+	// src_map:arc12.rb:235
+	load 12 // vault_creator
+	load 11 // delete_vault: creator [account]
 	==
 	assert
 
-	// src_map:arc12.rb:234
+	// src_map:arc12.rb:237
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
-	store 12 // pre_delete_mbr
+	store 13 // pre_delete_mbr
 
-	// src_map:arc12.rb:236
+	// src_map:arc12.rb:239
 	// Delete vault
-	// src_map:arc12.rb:237
+	// src_map:arc12.rb:240
 	itxn_begin
 
-	// src_map:arc12.rb:238
+	// src_map:arc12.rb:241
 	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:239
-	load 8 // delete_vault: receiver [account]
+	// src_map:arc12.rb:242
+	load 9 // delete_vault: receiver [account]
 	box_get
 	pop
 	btoi
 	itxn_field ApplicationID
 
-	// src_map:arc12.rb:240
+	// src_map:arc12.rb:243
 	int DeleteApplication
 	itxn_field OnCompletion
 
-	// src_map:arc12.rb:241
+	// src_map:arc12.rb:244
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:242
+	// src_map:arc12.rb:245
 	itxn_submit
 
-	// src_map:arc12.rb:244
+	// src_map:arc12.rb:247
 	// Send vault MBR to creator
-	// src_map:arc12.rb:245
+	// src_map:arc12.rb:248
 	itxn_begin
 
-	// src_map:arc12.rb:246
+	// src_map:arc12.rb:249
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:247
-	load 11 // vault_creator
+	// src_map:arc12.rb:250
+	load 12 // vault_creator
 	itxn_field Receiver
 
-	// src_map:arc12.rb:248
+	// src_map:arc12.rb:251
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
-	load 12 // pre_delete_mbr
+	load 13 // pre_delete_mbr
 	-
 	itxn_field Amount
 
-	// src_map:arc12.rb:249
+	// src_map:arc12.rb:252
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:250
+	// src_map:arc12.rb:253
 	itxn_submit
 
-	// src_map:arc12.rb:251
+	// src_map:arc12.rb:254
 	b post_routing
 
 main:
 	method "create()void"
 	method "create_vault(account,pay)uint64"
-	method "verify_axfer(account,axfer)void"
+	method "verify_axfer(account,axfer,application)void"
 	method "get_vault_id(account)uint64"
 	method "get_vault_addr(account)address"
 	method "delete_vault(account,application,account)void"
