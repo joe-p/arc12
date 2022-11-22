@@ -10,6 +10,7 @@ from algosdk.atomic_transaction_composer import (
 from algosdk.error import AlgodHTTPError
 import re
 import json
+import base64
 
 
 class Master(Application):
@@ -52,7 +53,7 @@ def call(app_client, *args, **kwargs):
     try:
         return app_client.call(*args, **kwargs)
     except LogicException as e:
-        pc = int(re.findall("(?<=pc=).*?\d+", str(e))[0])
+        pc = int(re.findall("(?<=at PC).*?\d+", str(e))[0])
         src_map = json.load(Path("master.src_map.json").open())
 
         teal_line = "Unknown"
@@ -107,17 +108,19 @@ pay_txn = TransactionWithSigner(
     txn=transaction.PaymentTxn(
         sender=creator.address,
         receiver=master_client.app_addr,
-        amt=100_000,
+        amt=418_500,
         sp=sp,
     ),
     signer=creator.signer,
 )
 
-call(
+vault_id = call(
     master_client,
     method=Master.create_vault,
     receiver=receiver.address,
     mbr_payment=pay_txn,
     boxes=[[master_client.app_id, decode_address(receiver.address)]],
     foreign_apps=[0],
-)
+).return_value
+
+print(vault_id)

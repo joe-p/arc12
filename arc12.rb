@@ -191,9 +191,10 @@ class Master < TEALrb::Contract
     box_create receiver, 8
     box[receiver] = itob $vault_id
 
-    assert mbr_payment.amount == (global.current_application_address.min_balance - $pre_create_mbr) + global.min_balance
+    assert mbr_payment.amount ==
+           (global.current_application_address.min_balance - $pre_create_mbr) + (2 * global.min_balance)
 
-    return itob this_txn.created_application_id
+    return itob $vault_id
   end
 
   # @abi
