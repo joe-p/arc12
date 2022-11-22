@@ -1,12 +1,15 @@
 from beaker import *
+from beaker.client.logic_error import LogicException
 from pyteal import *
 from pathlib import Path
 from algosdk.future import transaction
 from algosdk.encoding import decode_address
 from algosdk.atomic_transaction_composer import (
     TransactionWithSigner,
-    AtomicTransactionComposer,
 )
+from algosdk.error import AlgodHTTPError
+import re
+import json
 
 
 class Master(Application):
@@ -45,6 +48,41 @@ class Master(Application):
         return Reject()
 
 
+def call(app_client, *args, **kwargs):
+    try:
+        return app_client.call(*args, **kwargs)
+    except LogicException as e:
+        pc = int(re.findall("(?<=pc=).*?\d+", str(e))[0])
+        src_map = json.load(Path("master.src_map.json").open())
+
+        teal_line = "Unknown"
+        rb_line = "Unknown"
+        for teal_ln, data in src_map.items():
+            print(data)
+            if "pcs" in data.keys() and pc in data["pcs"]:
+                teal_line = (
+                    Path("master.teal")
+                    .read_text()
+                    .splitlines()[int(teal_ln) - 1]
+                    .strip()
+                )
+
+                teal_line = f"./master.teal:{teal_ln} => {teal_line}"
+
+                print(data["location"])
+                rb_line = (
+                    Path("arc12.rb")
+                    .read_text()
+                    .splitlines()[int(data["location"].split(":")[1]) - 1]
+                    .strip()
+                )
+
+                rb_line = f"./{data['location']} => {rb_line}"
+                break
+
+        raise AlgodHTTPError(f"{str(e).splitlines()[0]}\n{teal_line}\n{rb_line}")
+
+
 accounts = sorted(
     sandbox.get_accounts(),
     key=lambda a: sandbox.clients.get_algod_client().account_info(a.address)["amount"],
@@ -75,10 +113,11 @@ pay_txn = TransactionWithSigner(
     signer=creator.signer,
 )
 
-# master_client.call(
-#    Master.create_vault,
-#    receiver=receiver.address,
-#    mbr_payment=pay_txn,
-#    boxes=[[0, decode_address(receiver.address)]], # <- TODO: Get this working
-#    foreign_apps=[0],
-# )
+call(
+    master_client,
+    method=Master.create_vault,
+    receiver=receiver.address,
+    mbr_payment=pay_txn,
+    boxes=[[master_client.app_id, decode_address(receiver.address)]],
+    foreign_apps=[0],
+)

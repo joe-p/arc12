@@ -178,16 +178,18 @@ class Master < TEALrb::Contract
     inner_txn.global_num_byte_slice = 2
     inner_txn.submit
 
+    $vault_id = inner_txn.created_application_id
+
     # // Fund vault with account MBR
     inner_txn.begin
     inner_txn.type_enum = txn_type.pay
-    inner_txn.receiver = this_txn.created_application_id.address
+    inner_txn.receiver = $vault_id.address
     inner_txn.amount = global.min_balance
     inner_txn.fee = 0
     inner_txn.submit
 
-    box_create receiver, 32
-    box[receiver] = itob this_txn.created_application_id
+    box_create receiver, 8
+    box[receiver] = itob $vault_id
 
     assert mbr_payment.amount == (global.current_application_address.min_balance - $pre_create_mbr) + global.min_balance
 

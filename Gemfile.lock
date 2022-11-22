@@ -1,7 +1,5 @@
-GIT
-  remote: https://github.com/joe-p/TEALrb.git
-  revision: fe9804fc82a40bee9d32f90ab08097854cb4ae84
-  branch: dev
+PATH
+  remote: ../TEALrb
   specs:
     tealrb (0.12.0)
       faraday (~> 2.6.0)
@@ -28,7 +26,7 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     rainbow (3.1.1)
-    regexp_parser (2.6.0)
+    regexp_parser (2.6.1)
     rexml (3.2.5)
     rubocop (1.39.0)
       json (~> 2.3)
