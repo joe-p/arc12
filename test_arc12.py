@@ -10,7 +10,7 @@ from algosdk.atomic_transaction_composer import (
 from algosdk.error import AlgodHTTPError
 import re
 import json
-import base64
+import pytest
 
 
 class Master(Application):
@@ -53,7 +53,7 @@ def call(app_client, *args, **kwargs):
     try:
         return app_client.call(*args, **kwargs)
     except LogicException as e:
-        pc = int(re.findall("(?<=at PC).*?\d+", str(e))[0])
+        pc = int(re.findall(r"(?<=at PC).*?\d+", str(e))[0])
         src_map = json.load(Path("master.src_map.json").open())
 
         teal_line = "Unknown"
@@ -84,43 +84,83 @@ def call(app_client, *args, **kwargs):
         raise AlgodHTTPError(f"{str(e).splitlines()[0]}\n{teal_line}\n{rb_line}")
 
 
-accounts = sorted(
-    sandbox.get_accounts(),
-    key=lambda a: sandbox.clients.get_algod_client().account_info(a.address)["amount"],
-)
+@pytest.fixture(scope="module")
+def create_master():
+    global creator
+    global receiver
+    global master_client
 
-creator = accounts.pop()
-receiver = accounts.pop()
+    accounts = sorted(
+        sandbox.get_accounts(),
+        key=lambda a: sandbox.clients.get_algod_client().account_info(a.address)[
+            "amount"
+        ],
+    )
 
-master_app = Master(version=8)
-master_app.approval_program = Path("master.teal").read_text()
-master_client = client.ApplicationClient(
-    client=sandbox.get_algod_client(),
-    app=master_app,
-    signer=creator.signer,
-)
+    creator = accounts.pop()
+    receiver = accounts.pop()
 
-master_client.create(args=[get_method_spec(Master.create).get_selector()])
-sp = master_client.get_suggested_params()
-sp.fee = sp.min_fee * 2
+    master_app = Master(version=8)
+    master_app.approval_program = Path("master.teal").read_text()
+    master_client = client.ApplicationClient(
+        client=sandbox.get_algod_client(),
+        app=master_app,
+        signer=creator.signer,
+    )
 
-pay_txn = TransactionWithSigner(
-    txn=transaction.PaymentTxn(
-        sender=creator.address,
-        receiver=master_client.app_addr,
-        amt=418_500,
-        sp=sp,
-    ),
-    signer=creator.signer,
-)
+    master_client.create(args=[get_method_spec(Master.create).get_selector()])
 
-vault_id = call(
-    master_client,
-    method=Master.create_vault,
-    receiver=receiver.address,
-    mbr_payment=pay_txn,
-    boxes=[[master_client.app_id, decode_address(receiver.address)]],
-    foreign_apps=[0],
-).return_value
 
-print(vault_id)
+@pytest.fixture(scope="module")
+def create_vault():
+    global vault_id
+
+    sp = master_client.get_suggested_params()
+    sp.fee = sp.min_fee * 2
+
+    pay_txn = TransactionWithSigner(
+        txn=transaction.PaymentTxn(
+            sender=creator.address,
+            receiver=master_client.app_addr,
+            amt=418_500,
+            sp=sp,
+        ),
+        signer=creator.signer,
+    )
+
+    res = call(
+        master_client,
+        method=Master.create_vault,
+        receiver=receiver.address,
+        mbr_payment=pay_txn,
+        boxes=[[master_client.app_id, decode_address(receiver.address)]],
+        foreign_apps=[0],
+    )
+
+    vault_id = res.return_value
+
+
+@pytest.mark.create_master
+def test_create_master(create_master):
+    pass
+
+
+@pytest.mark.create_vault(create_master, create_vault)
+def test_create_vault_id(create_master, create_vault):
+    assert vault_id > 0
+
+
+@pytest.mark.create_vault(create_master, create_vault)
+def test_create_vault_box_name(create_master, create_vault):
+    box_names = master_client.get_box_names()
+    assert len(box_names) == 1
+    assert box_names[0] == decode_address(receiver.address)
+
+
+@pytest.mark.create_vault(create_master, create_vault)
+def test_create_vault_box_value(create_master, create_vault):
+    box_value = int.from_bytes(
+        master_client.get_box_contents(decode_address(receiver.address)),
+        byteorder="big",
+    )
+    assert box_value == vault_id
