@@ -56,11 +56,6 @@
       "desc": "Opts into the given asa",
       "args": [
         {
-          "name": "sender",
-          "type": "account",
-          "desc": "The account that is sending the ASA"
-        },
-        {
           "name": "asa",
           "type": "asset",
           "desc": "The asset to opt-in to"

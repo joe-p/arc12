@@ -68,19 +68,18 @@ class Vault < TEALrb::Contract
 
   # @abi
   # Opts into the given asa
-  # @param sender [Account] The account that is sending the ASA
   # @param asa [Asset] The asset to opt-in to
   # @param mbr_payment [Pay] The payment to cover this contracts MBR
-  def opt_in(sender, asa, mbr_payment)
+  def opt_in(asa, mbr_payment)
     $asa_bytes = itob(asa)
     assert !box_exists?($asa_bytes)
-    assert mbr_payment.sender == sender
+    assert mbr_payment.sender == this_txn.sender
     assert mbr_payment.receiver == global.current_application_address
 
     $pre_mbr = global.current_application_address.min_balance
 
     box_create($asa_bytes, 32)
-    box[$asa_bytes] = sender
+    box[$asa_bytes] = this_txn.sender
 
     # // Opt into ASA
     inner_txn.begin
@@ -91,7 +90,7 @@ class Vault < TEALrb::Contract
     inner_txn.xfer_asset = asa
     inner_txn.submit
 
-    assert mbr_payment.amount == global.current_application_address.min_balance - $pre_mbr
+    # assert mbr_payment.amount == global.current_application_address.min_balance - $pre_mbr
   end
 
   # @abi
