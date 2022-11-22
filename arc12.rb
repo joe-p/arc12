@@ -144,6 +144,13 @@ end
 
 class Master < TEALrb::Contract
   @version = 8
+
+  # @abi
+  # @create
+  def create
+    approve
+  end
+
   # @abi
   # Create Vault
   # @param receiver [Account]
@@ -162,11 +169,13 @@ class Master < TEALrb::Contract
     inner_txn.type_enum = txn_type.application_call
     inner_txn.application_id = 0
     inner_txn.approval_program = byte_b64 Vault.new.compiled_program
+    inner_txn.clear_state_program = apps[0].clear_state_program
     inner_txn.on_completion = int('NoOp')
     inner_txn.accounts = receiver
     inner_txn.accounts = this_txn.sender
     inner_txn.fee = 0
-    # TODO: inner_txn.application_args = Vault.create
+    inner_txn.application_args = method_signature('create(account,account)void')
+    inner_txn.global_num_byte_slice = 2
     inner_txn.submit
 
     # // Fund vault with account MBR

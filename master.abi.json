@@ -4,6 +4,16 @@
   },
   "methods": [
     {
+      "name": "create",
+      "desc": "",
+      "args": [
+
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "create_vault",
       "desc": "Create Vault",
       "args": [

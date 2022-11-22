@@ -3,11 +3,6 @@
 b main
 
 close_acct: // close_acct(vault_creator)
-	txn OnCompletion
-	int NoOp
-	==
-	assert
-
 	store 0 // close_acct: vault_creator [any]
 
 	// src_map:arc12.rb:12
