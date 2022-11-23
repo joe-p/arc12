@@ -260,5 +260,6 @@ class Master < TEALrb::Contract
   end
 end
 
-Vault.new.dump
-Master.new.dump
+artifacts_dir = File.join(__dir__, 'artifacts')
+Vault.new.dump(artifacts_dir)
+Master.new.dump(artifacts_dir)

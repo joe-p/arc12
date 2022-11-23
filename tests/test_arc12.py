@@ -15,6 +15,7 @@ import pytest
 import time
 
 ZERO_ADDR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
+ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, "artifacts")
 
 
 class Master(Application):
@@ -80,6 +81,7 @@ class Vault(Application):
 
 
 def call(app_client, file_name, *args, **kwargs):
+    file_name = Path.joinpath(ARTIFACTS, file_name)
     try:
         return app_client.call(*args, **kwargs)
 
@@ -137,7 +139,7 @@ def create_master():
     receiver = accounts.pop()
 
     master_app = Master(version=8)
-    master_app.approval_program = Path("master.teal").read_text()
+    master_app.approval_program = Path.joinpath(ARTIFACTS, "master.teal").read_text()
     master_client = client.ApplicationClient(
         client=sandbox.get_algod_client(),
         app=master_app,
@@ -183,7 +185,7 @@ def create_vault():
     ).return_value
 
     vault_app = Vault(version=8)
-    vault_app.approval_program = Path("vault.teal").read_text()
+    vault_app.approval_program = Path.joinpath(ARTIFACTS, "vault.teal").read_text()
     vault_client = client.ApplicationClient(
         client=sandbox.get_algod_client(),
         app=vault_app,
