@@ -68,6 +68,16 @@ class Vault(Application):
     ):
         return Reject()
 
+    @external
+    def reject(
+        self,
+        asa_creator: abi.Account,
+        fee_sink: abi.Account,
+        asa: abi.Asset,
+        vault_creator: abi.Account,
+    ):
+        return Reject()
+
 
 def call(app_client, file_name, *args, **kwargs):
     try:
@@ -140,7 +150,6 @@ def create_master():
     master_client.fund(100_000)
 
 
-@pytest.fixture(scope="module")
 def create_vault():
     global vault_client
     global creator_pre_vault_balance
@@ -183,14 +192,13 @@ def create_vault():
     )
 
 
-@pytest.fixture(scope="module")
 def opt_in():
     global asa_id
 
     txn = transaction.AssetConfigTxn(
         sender=creator.address,
         sp=master_client.get_suggested_params(),
-        total=1000,
+        total=1,
         default_frozen=False,
         unit_name="LATINUM",
         asset_name="latinum",
@@ -227,7 +235,6 @@ def opt_in():
     )
 
 
-@pytest.fixture(scope="module")
 def verify_axfer():
     axfer = TransactionWithSigner(
         txn=transaction.AssetTransferTxn(
@@ -294,25 +301,104 @@ def claim():
     atc.execute(algod, 3)
 
 
+@pytest.fixture(scope="module")
+def reject():
+    atc = AtomicTransactionComposer()
+    reject_sp = algod.suggested_params()
+    reject_sp.fee = reject_sp.min_fee * 2
+    reject_sp.flat_fee = True
+
+    del_sp = algod.suggested_params()
+    del_sp.fee = del_sp.min_fee * 3
+    del_sp.flat_fee = True
+
+    atc.add_method_call(
+        app_id=vault_client.app_id,
+        sender=receiver.address,
+        signer=receiver.signer,
+        sp=reject_sp,
+        method=application.get_method_spec(Vault.reject),
+        method_args=[
+            creator.address,
+            "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
+            asa_id,
+            ZERO_ADDR,
+        ],
+        boxes=[[vault_client.app_id, asa_id.to_bytes(8, "big")]],
+    )
+
+    atc.add_method_call(
+        app_id=master_client.app_id,
+        sender=receiver.address,
+        signer=receiver.signer,
+        sp=del_sp,
+        method=application.get_method_spec(Master.delete_vault),
+        method_args=[vault_client.app_id, creator.address],
+        boxes=[[master_client.app_id, decode_address(receiver.address)]],
+    )
+
+    atc.execute(algod, 3)
+
+
+@pytest.fixture(scope="module")
+def create_vault_claim():
+    create_vault()
+
+
+@pytest.fixture(scope="module")
+def opt_in_claim():
+    opt_in()
+
+
+@pytest.fixture(scope="module")
+def opt_in_claim():
+    opt_in()
+
+
+@pytest.fixture(scope="module")
+def verify_axfer_claim():
+    verify_axfer()
+
+
+@pytest.fixture(scope="module")
+def create_vault_reject():
+    create_vault()
+
+
+@pytest.fixture(scope="module")
+def opt_in_reject():
+    opt_in()
+
+
+@pytest.fixture(scope="module")
+def opt_in_reject():
+    opt_in()
+
+
+@pytest.fixture(scope="module")
+def verify_axfer_reject():
+    verify_axfer()
+
+
 @pytest.mark.create_master
 def test_create_master(create_master):
     pass
 
 
 @pytest.mark.create_vault
-def test_create_vault_id(create_master, create_vault):
+def test_create_vault_id(create_master, create_vault_claim):
     assert vault_client.app_id > 0
 
 
 @pytest.mark.create_vault
-def test_create_vault_box_name(create_master, create_vault):
+def test_create_vault_box_name(create_master, create_vault_claim):
     box_names = master_client.get_box_names()
     assert len(box_names) == 1
     assert box_names[0] == decode_address(receiver.address)
 
 
 @pytest.mark.create_vault
-def test_create_vault_box_value(create_master, create_vault):
+def test_create_vault_box_value(create_master, create_vault_claim):
     box_value = int.from_bytes(
         master_client.get_box_contents(decode_address(receiver.address)),
         byteorder="big",
@@ -321,78 +407,88 @@ def test_create_vault_box_value(create_master, create_vault):
 
 
 @pytest.mark.create_vault
-def test_create_vault_creator(create_master, create_vault):
+def test_create_vault_creator(create_master, create_vault_claim):
     assert decode_address(creator.address) == bytes.fromhex(
         vault_client.get_application_state()["creator"]
     )
 
 
 @pytest.mark.create_vault
-def test_create_vault_receiver(create_master, create_vault):
+def test_create_vault_receiver(create_master, create_vault_claim):
     assert decode_address(receiver.address) == bytes.fromhex(
         vault_client.get_application_state()["receiver"]
     )
 
 
 @pytest.mark.create_vault
-def test_create_vault_mbr(create_master, create_vault, opt_in):
+def test_create_vault_mbr(create_master, create_vault_claim, opt_in_claim):
     info = algod.account_info(master_client.app_addr)
     assert info["amount"] == info["min-balance"]
 
 
 @pytest.mark.opt_in
-def test_opt_in_box_name(create_master, create_vault, opt_in):
+def test_opt_in_box_name(create_master, create_vault_claim, opt_in_claim):
     box_names = vault_client.get_box_names()
     assert len(box_names) == 1
     assert box_names[0] == asa_id.to_bytes(8, "big")
 
 
 @pytest.mark.opt_in
-def test_opt_in_box_value(create_master, create_vault, opt_in):
+def test_opt_in_box_value(create_master, create_vault_claim, opt_in_claim):
     box_value = vault_client.get_box_contents(asa_id.to_bytes(8, "big"))
     assert box_value == decode_address(creator.address)
 
 
 @pytest.mark.opt_in
-def test_opt_in_mbr(create_master, create_vault, opt_in):
+def test_opt_in_mbr(create_master, create_vault_claim, opt_in_claim):
     info = algod.account_info(vault_client.app_addr)
     assert info["amount"] == info["min-balance"]
 
 
 @pytest.mark.verify_axfer
-def test_verify_axfer(create_master, create_vault, opt_in, verify_axfer):
+def test_verify_axfer(
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim
+):
     asa_info = algod.account_asset_info(vault_client.app_addr, asa_id)
     assert asa_info["asset-holding"]["amount"] == 1
 
 
 @pytest.mark.claim
-def test_claim_axfer(create_master, create_vault, opt_in, verify_axfer, claim):
+def test_claim_axfer(
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
+):
     asa_info = algod.account_asset_info(receiver.address, asa_id)
     assert asa_info["asset-holding"]["amount"] == 1
 
 
 @pytest.mark.claim
-def test_claim_delete_vault(create_master, create_vault, opt_in, verify_axfer, claim):
+def test_claim_delete_vault(
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
+):
     with pytest.raises(AlgodHTTPError) as e:
         algod.application_info(vault_client.app_id)
     assert e.match("application does not exist")
 
 
 @pytest.mark.claim
-def test_claim_vault_balance(create_master, create_vault, opt_in, verify_axfer, claim):
+def test_claim_vault_balance(
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
+):
     info = algod.account_info(vault_client.app_addr)
     assert info["amount"] == 0
 
 
 @pytest.mark.claim
-def test_claim_master_balance(create_master, create_vault, opt_in, verify_axfer, claim):
+def test_claim_master_balance(
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
+):
     info = algod.account_info(master_client.app_addr)
     assert info["amount"] == info["min-balance"]
 
 
 @pytest.mark.claim
 def test_claim_creator_balance(
-    create_master, create_vault, opt_in, verify_axfer, claim
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
 ):
     amt = algod.account_info(creator.address)["amount"]
     expected_amt = creator_pre_vault_balance - 1_000 * 10
@@ -401,7 +497,62 @@ def test_claim_creator_balance(
 
 @pytest.mark.claim
 def test_claim_receiver_balance(
-    create_master, create_vault, opt_in, verify_axfer, claim
+    create_master, create_vault_claim, opt_in_claim, verify_axfer_claim, claim
+):
+    amt = algod.account_info(receiver.address)["amount"]
+    expected_amt = receiver_pre_vault_balance - 1_000 * 8
+    assert amt == expected_amt
+
+
+@pytest.mark.reject
+def test_reject_axfer(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, reject
+):
+    asa_info = algod.account_asset_info(creator.address, asa_id)
+    assert asa_info["asset-holding"]["amount"] == 1
+
+
+@pytest.mark.reject
+def test_reject_delete_vault(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, claim
+):
+    with pytest.raises(AlgodHTTPError) as e:
+        algod.application_info(vault_client.app_id)
+    assert e.match("application does not exist")
+
+
+@pytest.mark.reject
+def test_reject_vault_balance(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, claim
+):
+    info = algod.account_info(vault_client.app_addr)
+    assert info["amount"] == 0
+
+
+@pytest.mark.reject
+def test_reject_master_balance(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, claim
+):
+    info = algod.account_info(master_client.app_addr)
+    assert info["amount"] == info["min-balance"]
+
+
+# TODO: Fix below balance assertions
+# TODO: Reduce fee cost for receiver as much as possible
+
+
+@pytest.mark.reject
+def test_reject_creator_balance(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, claim
+):
+    amt = algod.account_info(creator.address)["amount"]
+    expected_amt = creator_pre_vault_balance - 1_000 * 10
+    assert amt == expected_amt
+
+
+@pytest.mark.reject
+def test_reject_receiver_balance(
+    create_master, create_vault_reject, opt_in_reject, verify_axfer_reject, claim
 ):
     amt = algod.account_info(receiver.address)["amount"]
     expected_amt = receiver_pre_vault_balance - 1_000 * 8

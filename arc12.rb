@@ -39,6 +39,7 @@ class Vault < TEALrb::Contract
   # @param asa [Asset]
   # @param vault_creator [Account]
   def reject(asa_creator, fee_sink, asa, vault_creator)
+    vault_creator = asa_creator if vault_creator == global.zero_address
     assert this_txn.sender == global['receiver']
     assert fee_sink == addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     $pre_mbr = global.current_application_address.min_balance
@@ -50,7 +51,10 @@ class Vault < TEALrb::Contract
     inner_txn.asset_receiver = asa_creator
     inner_txn.xfer_asset = asa
     inner_txn.asset_close_to = asa_creator
+    inner_txn.fee = global.min_txn_fee
     inner_txn.submit
+
+    box_del itob asa
 
     $fee_amt = $pre_fee - global.current_application_address.balance
     $mbr_amt = $pre_mbr - global.current_application_address.min_balance
@@ -60,6 +64,7 @@ class Vault < TEALrb::Contract
     inner_txn.type_enum = txn_type.pay
     inner_txn.receiver = fee_sink
     inner_txn.amount = $mbr_amt - (2 * $fee_amt)
+    inner_txn.fee = global.min_txn_fee
     inner_txn.submit
 
     close_acct(vault_creator) if global.current_application_address.assets == 0
