@@ -51,20 +51,27 @@ class Vault < TEALrb::Contract
     inner_txn.asset_receiver = asa_creator
     inner_txn.xfer_asset = asa
     inner_txn.asset_close_to = asa_creator
-    inner_txn.fee = global.min_txn_fee
+    inner_txn.fee = 0
     inner_txn.submit
 
     box_del itob asa
 
-    $fee_amt = $pre_fee - global.current_application_address.balance
     $mbr_amt = $pre_mbr - global.current_application_address.min_balance
 
     # send MBR to fee sink
     inner_txn.begin
     inner_txn.type_enum = txn_type.pay
     inner_txn.receiver = fee_sink
-    inner_txn.amount = $mbr_amt - (2 * $fee_amt)
-    inner_txn.fee = global.min_txn_fee
+    inner_txn.amount = $mbr_amt - this_txn.fee
+    inner_txn.fee = 0
+    inner_txn.submit
+
+    # Refund fee
+    inner_txn.begin
+    inner_txn.type_enum = txn_type.pay
+    inner_txn.receiver = this_txn.sender
+    inner_txn.amount = this_txn.fee
+    inner_txn.fee = 0
     inner_txn.submit
 
     close_acct(vault_creator) if global.current_application_address.assets == 0
@@ -232,7 +239,9 @@ class Master < TEALrb::Contract
   # @param vault [Application]
   # @param creator [Account]
   def delete_vault(vault, creator)
+    assert this_txn.fee == 0 # The fee will be covered by the reject/claim call
     assert vault == btoi(box[this_txn.sender])
+
     $vault_creator = vault.global_value('creator')
     assert $vault_creator == creator
 

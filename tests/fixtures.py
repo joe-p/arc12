@@ -1,5 +1,5 @@
 from beaker import *
-from beaker.client.logic_error import LogicException
+import beaker as bkr
 from pyteal import *
 from pathlib import Path
 from algosdk.future import transaction
@@ -8,9 +8,6 @@ from algosdk.atomic_transaction_composer import (
     TransactionWithSigner,
     AtomicTransactionComposer,
 )
-from algosdk.error import AlgodHTTPError
-import re
-import json
 import pytest
 from contracts import Vault, Master
 
@@ -19,60 +16,15 @@ ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, "artifacts")
 
 
 class TestVars:
-    creator = None
-    receiver = None
-    master_client = None
-    algod = None
-    vault_client = None
-    asa_id = None
-
-
-def tealrb_exception_handler(e, file_name):
-    file_name = Path.joinpath(ARTIFACTS, file_name)
-
-    if e.__class__.__name__ == "LogicException":
-        pc = int(re.findall(r"(?<=at PC).*?\d+", str(e))[0])
-    elif "pc" in str(e):
-        pc = int(re.findall(r"(?<=pc=).*?\d+", str(e))[0])
-    else:
-        raise e
-
-    src_map = json.load(Path(f"{file_name}.src_map.json").open())
-
-    teal_line = "Unknown"
-    rb_line = "Unknown"
-    for teal_ln, data in src_map.items():
-        if "pcs" in data.keys() and pc in data["pcs"]:
-            teal_line = (
-                Path(f"{file_name}.teal")
-                .read_text()
-                .splitlines()[int(teal_ln) - 1]
-                .strip()
-            )
-
-            teal_line = f"{file_name}.teal:{teal_ln} => {teal_line}"
-
-            rb_line = (
-                Path("arc12.rb")
-                .read_text()
-                .splitlines()[int(data["location"].split(":")[1]) - 1]
-                .strip()
-            )
-
-            rb_line = f"{data['location']} => {rb_line}"
-            break
-
-    raise AlgodHTTPError(f"{str(e)}\n{teal_line}\n{rb_line}")
-
-
-def tealrb_src_mapper(fn):
-    def wrapper():
-        try:
-            fn()
-        except (LogicException, AlgodHTTPError) as e:
-            tealrb_exception_handler(e, fn.__name__)
-
-    return wrapper
+    creator: sandbox.SandboxAccount
+    receiver: sandbox.SandboxAccount
+    master_client: client.ApplicationClient
+    vault_client: client.ApplicationClient
+    asa_id: int
+    creator_pre_reject_balance: int
+    receiver_pre_reject_balance: int
+    creator_pre_vault_balance: int
+    receiver_pre_vault_balance: int
 
 
 @pytest.fixture(scope="module")
@@ -212,11 +164,11 @@ def verify_axfer():
 def claim():
     atc = AtomicTransactionComposer()
     claim_sp = TestVars.algod.suggested_params()
-    claim_sp.fee = claim_sp.min_fee * 4
+    claim_sp.fee = claim_sp.min_fee * 7
     claim_sp.flat_fee = True
 
     del_sp = TestVars.algod.suggested_params()
-    del_sp.fee = del_sp.min_fee * 3
+    del_sp.fee = 0
     del_sp.flat_fee = True
 
     atc.add_transaction(
@@ -257,13 +209,21 @@ def claim():
 
 @pytest.fixture(scope="module")
 def reject():
+    TestVars.creator_pre_reject_balance = TestVars.algod.account_info(
+        TestVars.creator.address
+    )["amount"]
+
+    TestVars.receiver_pre_reject_balance = TestVars.algod.account_info(
+        TestVars.receiver.address
+    )["amount"]
+
     atc = AtomicTransactionComposer()
     reject_sp = TestVars.algod.suggested_params()
-    reject_sp.fee = reject_sp.min_fee * 2
+    reject_sp.fee = reject_sp.min_fee * 8
     reject_sp.flat_fee = True
 
     del_sp = TestVars.algod.suggested_params()
-    del_sp.fee = del_sp.min_fee * 3
+    del_sp.fee = 0
     del_sp.flat_fee = True
 
     atc.add_method_call(

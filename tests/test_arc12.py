@@ -1,5 +1,6 @@
 import pytest
 from fixtures import *
+from algosdk.error import AlgodHTTPError
 
 
 @pytest.mark.create_master

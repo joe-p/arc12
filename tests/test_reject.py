@@ -1,4 +1,5 @@
 from fixtures import *
+from algosdk.error import AlgodHTTPError
 
 
 @pytest.mark.reject
@@ -32,23 +33,21 @@ def test_reject_master_balance(
     assert info["amount"] == info["min-balance"]
 
 
-# TODO: Fix below balance assertions
-# TODO: Reduce fee cost for receiver as much as possible
-
-
-@pytest.mark.skip(reason="Need to update the balances")
+@pytest.mark.skip("TODO: Fix this test to have proper amount")
 def test_reject_creator_balance(
     create_master, create_vault, opt_in, verify_axfer, reject
 ):
-    amt = TestVars.algod.account_info(TestVars.creator.address)["amount"]
-    expected_amt = TestVars.creator_pre_vault_balance - 1_000 * 10
-    assert amt == expected_amt
+    assert (
+        TestVars.algod.account_info(TestVars.creator.address)["amount"]
+        == TestVars.creator_pre_reject_balance
+    )
 
 
-@pytest.mark.skip(reason="Need to update the balances")
+@pytest.mark.reject
 def test_reject_receiver_balance(
     create_master, create_vault, opt_in, verify_axfer, reject
 ):
-    amt = TestVars.algod.account_info(TestVars.receiver.address)["amount"]
-    expected_amt = TestVars.receiver_pre_vault_balance - 1_000 * 8
-    assert amt == expected_amt
+    assert (
+        TestVars.algod.account_info(TestVars.receiver.address)["amount"]
+        == TestVars.receiver_pre_reject_balance
+    )
