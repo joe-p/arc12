@@ -137,13 +137,17 @@ def create_master():
     algod = master_client.client
 
     master_client.create(args=[get_method_spec(Master.create).get_selector()])
+    master_client.fund(100_000)
 
 
 @pytest.fixture(scope="module")
 def create_vault():
     global vault_client
     global creator_pre_vault_balance
+    global receiver_pre_vault_balance
+
     creator_pre_vault_balance = algod.account_info(creator.address)["amount"]
+    receiver_pre_vault_balance = algod.account_info(receiver.address)["amount"]
 
     sp = master_client.get_suggested_params()
     sp.fee = sp.min_fee * 3
@@ -153,7 +157,7 @@ def create_vault():
         txn=transaction.PaymentTxn(
             sender=creator.address,
             receiver=master_client.app_addr,
-            amt=447_000,
+            amt=347_000,
             sp=sp,
         ),
         signer=creator.signer,
@@ -391,13 +395,14 @@ def test_claim_creator_balance(
     create_master, create_vault, opt_in, verify_axfer, claim
 ):
     amt = algod.account_info(creator.address)["amount"]
-    expected_amt = creator_pre_vault_balance - 1_000 * 9
+    expected_amt = creator_pre_vault_balance - 1_000 * 10
+    assert amt == expected_amt
 
-    print(f"\nDifference: {expected_amt - amt}")
-    print(f"Receiver: {receiver.address}")
-    print(f"Creator: {creator.address}")
-    print(f"Vault: {vault_client.app_addr}")
-    print(f"Master: {master_client.app_addr}")
 
-    # TODO: Figure out why this is failing
+@pytest.mark.claim
+def test_claim_receiver_balance(
+    create_master, create_vault, opt_in, verify_axfer, claim
+):
+    amt = algod.account_info(receiver.address)["amount"]
+    expected_amt = receiver_pre_vault_balance - 1_000 * 8
     assert amt == expected_amt

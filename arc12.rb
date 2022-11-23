@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'tealrb'
-require 'pry'
 
 class Vault < TEALrb::Contract
   @version = 8
@@ -191,7 +190,7 @@ class Master < TEALrb::Contract
     box_create receiver, 8
     box[receiver] = itob $vault_id
 
-    assert mbr_payment.amount == (global.current_application_address.min_balance - $pre_create_mbr) + (2 * global.min_balance)
+    assert mbr_payment.amount == (global.current_application_address.min_balance - $pre_create_mbr) + global.min_balance
 
     return itob $vault_id
   end
@@ -243,6 +242,8 @@ class Master < TEALrb::Contract
     inner_txn.accounts = creator
     inner_txn.fee = 0
     inner_txn.submit
+
+    box_del this_txn.sender
 
     # // Send vault MBR to creator
     inner_txn.begin

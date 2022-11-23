@@ -1,5 +1,7 @@
-PATH
-  remote: ../TEALrb
+GIT
+  remote: https://github.com/joe-p/TEALrb.git
+  revision: 00758cdf502cc1b4be454820e7c19bb704adcc09
+  branch: dev
   specs:
     tealrb (0.12.0)
       faraday (~> 2.6.0)
