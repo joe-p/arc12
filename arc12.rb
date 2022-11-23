@@ -89,7 +89,6 @@ class Vault < TEALrb::Contract
 
     $pre_mbr = global.current_application_address.min_balance
 
-    box_create($asa_bytes, 32)
     box[$asa_bytes] = this_txn.sender
 
     # // Opt into ASA
@@ -199,7 +198,6 @@ class Master < TEALrb::Contract
     inner_txn.fee = 0
     inner_txn.submit
 
-    box_create receiver, 8
     box[receiver] = itob $vault_id
 
     assert mbr_payment.amount == (global.current_application_address.min_balance - $pre_create_mbr) + global.min_balance
