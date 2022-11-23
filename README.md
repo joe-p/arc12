@@ -2,8 +2,8 @@
 
 1. `python -v venv .venv`
 2. `source .venv/bin/activate`
-3. `pip install -r requirements.txt`
-4. `pytest`
+3. `pip install -r tests/requirements.txt`
+4. `pytest tests/`
 
 # Generating TEALrb Output
 
