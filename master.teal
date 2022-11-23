@@ -83,7 +83,7 @@ create_vault: // create_vault(receiver, mbr_payment)
 	itxn_field ApplicationID
 
 	// src_map:arc12.rb:170
-	byte b64 CCAEAAEEBSYHB2NyZWF0b3IIcmVjZWl2ZXIEwTFcWQSPTFY9BNFsgBgEJDeNPASTyPQZQgHoNQA0AChkEkSxI7IQNACyBzIKcwFIsggisgExALIJszEWIwg1ATQBOBgyCBJENAE4GSUSRIkxGSISRDEYIhJENhwBNQI2HAI1Ayg0A2cpNAJnQgG+MRkiEkQ2HAE1BDYcAjUFNjAANQY2HAM1BzEAKWQSRDQFgCDH/M2yWPDUGJwr+LbWjuaXUIZCsK0AHzH8uRjDVLqFmhJEMgpzAUg1CDIKcwBINQmxJLIQNASyFDQGshE0BLIVszQJMgpzAEgJNQo0CDIKcwFICTULsSOyEDQFsgc0C4ECNAoLCbIIszIKcwlIIxJBAAU0B4j/EkIBITEZIhJENjAANQwxFiMJNQ00DBY1DjQOvkxIFEQ0DTgAMQASRDQNOAcyChJEMgpzAUg1CDQOgSC5NA4xAL+xJLIQMgqyFCKyEiKyATQMshGzQgDOMRklEkQyCnMASCISRDEAMgkSREIAuDEZIhJENjAANQ82HAE1EDYcAjURNhwDNRI0DxY1DjQOvkxIRDQSNA6+SBJENBApZBJENBEoZBJEMQA0EBJEMgpzAUg1EzQOvLEkshA0ELIUIrIBMQA0D3AATEiyEjQPshE0ELIVs7EjshA0ErIHMgpzAUg0EwmyCCKyAbMyCnMJSCMSQQAFNBGI/htCACoqKycEJwUnBiorJwQnBScGNhoAjgr+JP5D/uD/M/9J/iT+Q/7g/zP/SQAjQw==
+	byte b64 CCADAAEEJggHY3JlYXRvcghyZWNlaXZlcgZtYXN0ZXIEwTFcWQSPTFY9BNFsgBgEJDeNPAQpHFFiQgHxNQA0AChkEkSxI7IQNACyBzIKcwFIsggisgExALIJszEWIwg1ATQBOBgqZBJEiTEZIhJEMRgiEkQ2HAE1AjYcAjUDKDQDZyk0AmcqMg1nQgHMMRkiEkQ2HAE1BDYcAjUFNjAANQY2HAM1BzEAKWQSRDQFgCDH/M2yWPDUGJwr+LbWjuaXUIZCsK0AHzH8uRjDVLqFmhJEMgpzAUg1CDIKcwBINQmxJLIQNASyFDQGshE0BLIVszQJMgpzAEgJNQo0CDIKcwFICTULsSOyEDQFsgc0C4ECNAoLCbIIszIKcwlIIhJBAAU0B4j/FUIBLzEZIhJENjAANQwxFiMJNQ00DBY1DjQOvkxIFEQ0DTgAMQASRDQNOAcyChJEMgpzAUg1CDQOgSC5NA4xAL+xJLIQMgqyFCKyEiKyATQMshGzNA04CDIKcwFINAgJEkRCAM4xGYEFEkQyCnMASCISRDEAMgkSREIAtzEZIhJENjAANQ82HAE1EDYcAjURNA8WNQ40ETIDEkEAADQOvkxIRDQQNA6+SBJEMQApZBJENBAoZBJEMgpzAUg1EjQOvLEkshAxALIUIrIBMgo0D3AATEiyEjQPshExALIVs7EjshA0ELIHNBIyCnMBSAmyCCKyAbMyCnMJSCISQQAFNBCI/hJCACwrJwQnBScGJwcrJwQnBScGJwc2GgCOCv4S/jX+0v8z/0r+Ev41/tL/M/9KACND
 	itxn_field ApprovalProgram
 
 	// src_map:arc12.rb:171
@@ -117,54 +117,56 @@ create_vault: // create_vault(receiver, mbr_payment)
 	itxn_field GlobalNumByteSlice
 
 	// src_map:arc12.rb:178
+	int 1
+	itxn_field GlobalNumUint
+
+	// src_map:arc12.rb:179
 	itxn_submit
 
-	// src_map:arc12.rb:180
+	// src_map:arc12.rb:181
 	itxn CreatedApplicationID
 	store 3 // vault_id
 
-	// src_map:arc12.rb:182
-	// Fund vault with account MBR
 	// src_map:arc12.rb:183
+	// Fund vault with account MBR
+	// src_map:arc12.rb:184
 	itxn_begin
 
-	// src_map:arc12.rb:184
+	// src_map:arc12.rb:185
 	int pay
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:185
+	// src_map:arc12.rb:186
 	load 3 // vault_id
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// src_map:arc12.rb:186
+	// src_map:arc12.rb:187
 	global MinBalance
 	itxn_field Amount
 
-	// src_map:arc12.rb:187
+	// src_map:arc12.rb:188
 	int 0
 	itxn_field Fee
 
-	// src_map:arc12.rb:188
+	// src_map:arc12.rb:189
 	itxn_submit
 
-	// src_map:arc12.rb:190
+	// src_map:arc12.rb:191
 	load 0 // create_vault: receiver [account]
 	int 8
 	box_create
 
-	// src_map:arc12.rb:191
+	// src_map:arc12.rb:192
 	load 0 // create_vault: receiver [account]
 	load 3 // vault_id
 	itob
 	box_put
 
-	// src_map:arc12.rb:193
+	// src_map:arc12.rb:194
 	load 1 // create_vault: mbr_payment [pay]
 	gtxns Amount
-
-	// src_map:arc12.rb:194
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
@@ -174,8 +176,6 @@ create_vault: // create_vault(receiver, mbr_payment)
 	global MinBalance
 	*
 	+
-
-	// src_map:arc12.rb:193
 	==
 	assert
 
@@ -301,75 +301,73 @@ get_vault_addr: // get_vault_addr(receiver)
 	// src_map:arc12.rb:225
 	b post_routing
 
-delete_vault: // delete_vault(receiver, vault, creator)
+delete_vault: // delete_vault(vault, creator)
 	txn OnCompletion
 	int NoOp
 	==
 	assert
 
-	txna Accounts 1
-	store 9 // delete_vault: receiver [account]
-
 	txna Applications 1
-	store 10 // delete_vault: vault [application]
+	store 9 // delete_vault: vault [application]
 
-	txna Accounts 2
-	store 11 // delete_vault: creator [account]
+	txna Accounts 1
+	store 10 // delete_vault: creator [account]
 
-	// src_map:arc12.rb:232
-	load 9 // delete_vault: receiver [account]
-	box_get
-	swap
-	pop
-	assert
-
-	// src_map:arc12.rb:233
-	load 10 // delete_vault: vault [application]
-	load 9 // delete_vault: receiver [account]
+	// src_map:arc12.rb:231
+	load 9 // delete_vault: vault [application]
+	txn Sender
 	box_get
 	pop
 	btoi
 	==
 	assert
 
-	// src_map:arc12.rb:234
-	load 10 // delete_vault: vault [application]
+	// src_map:arc12.rb:232
+	load 9 // delete_vault: vault [application]
 	byte "creator"
 	app_global_get_ex
 	pop
-	store 12 // vault_creator
+	store 11 // vault_creator
 
-	// src_map:arc12.rb:235
-	load 12 // vault_creator
-	load 11 // delete_vault: creator [account]
+	// src_map:arc12.rb:233
+	load 11 // vault_creator
+	load 10 // delete_vault: creator [account]
 	==
 	assert
 
-	// src_map:arc12.rb:237
+	// src_map:arc12.rb:235
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
-	store 13 // pre_delete_mbr
+	store 12 // pre_delete_mbr
 
-	// src_map:arc12.rb:239
+	// src_map:arc12.rb:237
 	// Delete vault
-	// src_map:arc12.rb:240
+	// src_map:arc12.rb:238
 	itxn_begin
 
-	// src_map:arc12.rb:241
+	// src_map:arc12.rb:239
 	int appl
 	itxn_field TypeEnum
 
-	// src_map:arc12.rb:242
-	load 9 // delete_vault: receiver [account]
+	// src_map:arc12.rb:240
+	txn Sender
 	box_get
 	pop
 	btoi
 	itxn_field ApplicationID
 
-	// src_map:arc12.rb:243
+	// src_map:arc12.rb:241
 	int DeleteApplication
 	itxn_field OnCompletion
+
+	// src_map:arc12.rb:242
+	method "delete()void"
+	itxn_field ApplicationArgs
+
+	// src_map:arc12.rb:243
+	load 10 // delete_vault: creator [account]
+	itxn_field Accounts
 
 	// src_map:arc12.rb:244
 	int 0
@@ -388,14 +386,14 @@ delete_vault: // delete_vault(receiver, vault, creator)
 	itxn_field TypeEnum
 
 	// src_map:arc12.rb:250
-	load 12 // vault_creator
+	load 11 // vault_creator
 	itxn_field Receiver
 
 	// src_map:arc12.rb:251
+	load 12 // pre_delete_mbr
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
-	load 13 // pre_delete_mbr
 	-
 	itxn_field Amount
 
@@ -415,7 +413,7 @@ main:
 	method "verify_axfer(account,axfer,application)void"
 	method "get_vault_id(account)uint64"
 	method "get_vault_addr(account)address"
-	method "delete_vault(account,application,account)void"
+	method "delete_vault(application,account)void"
 	txna ApplicationArgs 0
 	match create create_vault verify_axfer get_vault_id get_vault_addr delete_vault
 	err

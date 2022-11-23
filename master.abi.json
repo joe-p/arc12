@@ -89,11 +89,6 @@
       "desc": "",
       "args": [
         {
-          "name": "receiver",
-          "type": "account",
-          "desc": ""
-        },
-        {
           "name": "vault",
           "type": "application",
           "desc": ""
