@@ -1,3 +1,4 @@
+from algosdk.v2client.algod import AlgodClient
 from beaker import *
 import beaker as bkr
 from pyteal import *
@@ -15,383 +16,426 @@ ZERO_ADDR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, "artifacts")
 
 
-class TestVars:
+class ARC12TestClass:
     creator: sandbox.SandboxAccount
     receiver: sandbox.SandboxAccount
     random_acct: sandbox.SandboxAccount
+    algod: AlgodClient
     master_client: client.ApplicationClient
+    creator_pre_vault_balance: int
+    receiver_pre_vault_balance: int
     vault_client: client.ApplicationClient
     asa_id: int
     creator_pre_reject_balance: int
     receiver_pre_reject_balance: int
-    creator_pre_vault_balance: int
-    receiver_pre_vault_balance: int
     second_asa_id: int
 
+    @pytest.fixture(scope="class")
+    def setup(self, request):
+        accounts = sorted(
+            sandbox.get_accounts(),
+            key=lambda a: sandbox.clients.get_algod_client().account_info(a.address)[
+                "amount"
+            ],
+        )
 
-@pytest.fixture(scope="module")
-def create_master():
-    accounts = sorted(
-        sandbox.get_accounts(),
-        key=lambda a: sandbox.clients.get_algod_client().account_info(a.address)[
-            "amount"
-        ],
-    )
+        request.cls.creator = accounts.pop()
+        request.cls.receiver = accounts.pop()
+        request.cls.random_acct = accounts.pop()
+        request.cls.algod = sandbox.get_algod_client()
 
-    TestVars.creator = accounts.pop()
-    TestVars.receiver = accounts.pop()
-    TestVars.random_acct = accounts.pop()
+    @pytest.fixture(scope="class")
+    def create_master(self, request, setup):
+        master_app = Master(version=8)
+        master_app.approval_program = Path.joinpath(
+            ARTIFACTS, "master.teal"
+        ).read_text()
 
-    master_app = Master(version=8)
-    master_app.approval_program = Path.joinpath(ARTIFACTS, "master.teal").read_text()
-    TestVars.master_client = client.ApplicationClient(
-        client=sandbox.get_algod_client(),
-        app=master_app,
-        signer=TestVars.creator.signer,
-    )
+        master_client = client.ApplicationClient(
+            client=sandbox.get_algod_client(),
+            app=master_app,
+            signer=request.cls.creator.signer,
+        )
 
-    TestVars.algod = TestVars.master_client.client
+        master_client.create(args=[get_method_spec(Master.create).get_selector()])
+        master_client.fund(100_000)
 
-    TestVars.master_client.create(args=[get_method_spec(Master.create).get_selector()])
-    TestVars.master_client.fund(100_000)
+        request.cls.master_client = master_client
 
+    @pytest.fixture(scope="class")
+    def create_vault(self, request, create_master):
+        request.cls.creator_pre_vault_balance = request.cls.algod.account_info(
+            request.cls.creator.address
+        )["amount"]
+        request.cls.receiver_pre_vault_balance = request.cls.algod.account_info(
+            request.cls.receiver.address
+        )["amount"]
 
-@pytest.fixture(scope="module")
-def create_vault():
-    TestVars.creator_pre_vault_balance = TestVars.algod.account_info(
-        TestVars.creator.address
-    )["amount"]
-    TestVars.receiver_pre_vault_balance = TestVars.algod.account_info(
-        TestVars.receiver.address
-    )["amount"]
+        sp = request.cls.algod.suggested_params()
+        sp.fee = sp.min_fee * 3
+        sp.flat_fee = True
 
-    sp = TestVars.master_client.get_suggested_params()
-    sp.fee = sp.min_fee * 3
-    sp.flat_fee = True
-
-    pay_txn = TransactionWithSigner(
-        txn=transaction.PaymentTxn(
-            sender=TestVars.creator.address,
-            receiver=TestVars.master_client.app_addr,
-            amt=347_000,
-            sp=sp,
-        ),
-        signer=TestVars.creator.signer,
-    )
-
-    vault_id = TestVars.master_client.call(
-        method=Master.create_vault,
-        receiver=TestVars.receiver.address,
-        mbr_payment=pay_txn,
-        boxes=[
-            [TestVars.master_client.app_id, decode_address(TestVars.receiver.address)]
-        ],
-        foreign_apps=[0],
-    ).return_value
-
-    vault_app = Vault(version=8)
-    vault_app.approval_program = Path.joinpath(ARTIFACTS, "vault.teal").read_text()
-    TestVars.vault_client = client.ApplicationClient(
-        client=sandbox.get_algod_client(),
-        app=vault_app,
-        signer=TestVars.creator.signer,
-        app_id=vault_id,
-    )
-
-
-@pytest.fixture(scope="module")
-def opt_in():
-    txn = transaction.AssetConfigTxn(
-        sender=TestVars.creator.address,
-        sp=TestVars.master_client.get_suggested_params(),
-        total=1,
-        default_frozen=False,
-        unit_name="LATINUM",
-        asset_name="latinum",
-        decimals=0,
-        strict_empty_address_check=False,
-    )
-
-    stxn = txn.sign(TestVars.creator.private_key)
-    txid = TestVars.algod.send_transaction(stxn)
-    confirmed_txn = transaction.wait_for_confirmation(TestVars.algod, txid, 4)
-    TestVars.asa_id = confirmed_txn["asset-index"]
-
-    sp = TestVars.vault_client.get_suggested_params()
-    sp.fee = sp.min_fee * 2
-    sp.flat_fee = True
-
-    pay_txn = TransactionWithSigner(
-        txn=transaction.PaymentTxn(
-            sender=TestVars.creator.address,
-            receiver=TestVars.vault_client.app_addr,
-            amt=118_500,
-            sp=sp,
-        ),
-        signer=TestVars.creator.signer,
-    )
-
-    TestVars.vault_client.call(
-        method=Vault.opt_in,
-        asa=TestVars.asa_id,
-        mbr_payment=pay_txn,
-        boxes=[[TestVars.vault_client.app_id, TestVars.asa_id.to_bytes(8, "big")]],
-    )
-
-
-@pytest.fixture(scope="module")
-def verify_axfer():
-    axfer = TransactionWithSigner(
-        txn=transaction.AssetTransferTxn(
-            sender=TestVars.creator.address,
-            receiver=TestVars.vault_client.app_addr,
-            amt=1,
-            sp=TestVars.vault_client.get_suggested_params(),
-            index=TestVars.asa_id,
-        ),
-        signer=TestVars.creator.signer,
-    )
-
-    TestVars.master_client.call(
-        method=Master.verify_axfer,
-        receiver=TestVars.receiver.address,
-        vault_axfer=axfer,
-        vault=TestVars.vault_client.app_id,
-        boxes=[
-            [TestVars.master_client.app_id, decode_address(TestVars.receiver.address)]
-        ],
-    )
-
-
-@pytest.fixture(scope="module")
-def claim():
-    claim_from(TestVars.receiver)
-
-
-def claim_from(claimer):
-    atc = AtomicTransactionComposer()
-    claim_sp = TestVars.algod.suggested_params()
-    claim_sp.fee = claim_sp.min_fee * 7
-    claim_sp.flat_fee = True
-
-    del_sp = TestVars.algod.suggested_params()
-    del_sp.fee = 0
-    del_sp.flat_fee = True
-
-    atc.add_transaction(
-        TransactionWithSigner(
-            txn=transaction.AssetOptInTxn(
-                sender=claimer.address,
-                sp=TestVars.algod.suggested_params(),
-                index=TestVars.asa_id,
+        pay_txn = TransactionWithSigner(
+            txn=transaction.PaymentTxn(
+                sender=request.cls.creator.address,
+                receiver=request.cls.master_client.app_addr,
+                amt=347_000,
+                sp=sp,
             ),
+            signer=request.cls.creator.signer,
+        )
+
+        vault_id = request.cls.master_client.call(
+            method=Master.create_vault,
+            receiver=request.cls.receiver.address,
+            mbr_payment=pay_txn,
+            boxes=[
+                (
+                    request.cls.master_client.app_id,
+                    decode_address(request.cls.receiver.address),
+                )
+            ],
+            foreign_apps=[0],
+        ).return_value
+
+        vault_app = Vault(version=8)
+        vault_app.approval_program = Path.joinpath(ARTIFACTS, "vault.teal").read_text()
+
+        request.cls.vault_client = client.ApplicationClient(
+            client=sandbox.get_algod_client(),
+            app=vault_app,
+            signer=request.cls.creator.signer,
+            app_id=vault_id,
+        )
+
+    @pytest.fixture(scope="class")
+    def opt_in(self, request, create_vault):
+        txn = transaction.AssetConfigTxn(
+            sender=request.cls.creator.address,
+            sp=request.cls.master_client.get_suggested_params(),
+            total=1,
+            default_frozen=False,
+            unit_name="LATINUM",
+            asset_name="latinum",
+            decimals=0,
+            strict_empty_address_check=False,
+        )
+
+        stxn = txn.sign(request.cls.creator.private_key)
+        txid = request.cls.algod.send_transaction(stxn)
+        confirmed_txn = transaction.wait_for_confirmation(request.cls.algod, txid, 4)
+
+        request.cls.asa_id = confirmed_txn["asset-index"]
+
+        sp = request.cls.vault_client.get_suggested_params()
+        sp.fee = sp.min_fee * 2
+        sp.flat_fee = True
+
+        pay_txn = TransactionWithSigner(
+            txn=transaction.PaymentTxn(
+                sender=request.cls.creator.address,
+                receiver=request.cls.vault_client.app_addr,
+                amt=118_500,
+                sp=sp,
+            ),
+            signer=request.cls.creator.signer,
+        )
+
+        request.cls.vault_client.call(
+            method=Vault.opt_in,
+            asa=request.cls.asa_id,
+            mbr_payment=pay_txn,
+            boxes=[
+                (request.cls.vault_client.app_id, request.cls.asa_id.to_bytes(8, "big"))
+            ],
+        )
+
+    @pytest.fixture(scope="class")
+    def verify_axfer(self, request, opt_in):
+        axfer = TransactionWithSigner(
+            txn=transaction.AssetTransferTxn(
+                sender=request.cls.creator.address,
+                receiver=request.cls.vault_client.app_addr,
+                amt=1,
+                sp=request.cls.vault_client.get_suggested_params(),
+                index=request.cls.asa_id,
+            ),
+            signer=request.cls.creator.signer,
+        )
+
+        request.cls.master_client.call(
+            method=Master.verify_axfer,
+            receiver=request.cls.receiver.address,
+            vault_axfer=axfer,
+            vault=request.cls.vault_client.app_id,
+            boxes=[
+                (
+                    request.cls.master_client.app_id,
+                    decode_address(request.cls.receiver.address),
+                )
+            ],
+        )
+
+    def _claim(self, claimer):
+        atc = AtomicTransactionComposer()
+        claim_sp = self.algod.suggested_params()
+        claim_sp.fee = claim_sp.min_fee * 7
+        claim_sp.flat_fee = True
+
+        del_sp = self.algod.suggested_params()
+        del_sp.fee = 0
+        del_sp.flat_fee = True
+
+        atc.add_transaction(
+            TransactionWithSigner(
+                txn=transaction.AssetOptInTxn(
+                    sender=claimer.address,
+                    sp=self.algod.suggested_params(),
+                    index=self.asa_id,
+                ),
+                signer=claimer.signer,
+            )
+        )
+
+        atc.add_method_call(
+            app_id=self.vault_client.app_id,
+            sender=claimer.address,
             signer=claimer.signer,
+            sp=claim_sp,
+            method=application.get_method_spec(Vault.claim),
+            method_args=[self.asa_id, self.creator.address, ZERO_ADDR],
+            boxes=[(self.vault_client.app_id, self.asa_id.to_bytes(8, "big"))],
         )
-    )
 
-    atc.add_method_call(
-        app_id=TestVars.vault_client.app_id,
-        sender=claimer.address,
-        signer=claimer.signer,
-        sp=claim_sp,
-        method=application.get_method_spec(Vault.claim),
-        method_args=[TestVars.asa_id, TestVars.creator.address, ZERO_ADDR],
-        boxes=[[TestVars.vault_client.app_id, TestVars.asa_id.to_bytes(8, "big")]],
-    )
+        atc.add_method_call(
+            app_id=self.master_client.app_id,
+            sender=claimer.address,
+            signer=claimer.signer,
+            sp=del_sp,
+            method=application.get_method_spec(Master.delete_vault),
+            method_args=[self.vault_client.app_id, self.creator.address],
+            boxes=[
+                (
+                    self.master_client.app_id,
+                    decode_address(claimer.address),
+                )
+            ],
+        )
 
-    atc.add_method_call(
-        app_id=TestVars.master_client.app_id,
-        sender=claimer.address,
-        signer=claimer.signer,
-        sp=del_sp,
-        method=application.get_method_spec(Master.delete_vault),
-        method_args=[TestVars.vault_client.app_id, TestVars.creator.address],
-        boxes=[
-            [TestVars.master_client.app_id, decode_address(TestVars.receiver.address)]
-        ],
-    )
+        atc.execute(self.algod, 3)
 
-    atc.execute(TestVars.algod, 3)
+    @pytest.fixture(scope="class")
+    def claim(self, request, verify_axfer):
+        self._claim(request.cls.receiver)
 
+    @pytest.fixture(scope="class")
+    def reject(self, request, verify_axfer):
+        request.cls.creator_pre_reject_balance = request.cls.algod.account_info(
+            request.cls.creator.address
+        )["amount"]
 
-@pytest.fixture(scope="module")
-def reject():
-    TestVars.creator_pre_reject_balance = TestVars.algod.account_info(
-        TestVars.creator.address
-    )["amount"]
+        request.cls.receiver_pre_reject_balance = request.cls.algod.account_info(
+            request.cls.receiver.address
+        )["amount"]
 
-    TestVars.receiver_pre_reject_balance = TestVars.algod.account_info(
-        TestVars.receiver.address
-    )["amount"]
+        atc = AtomicTransactionComposer()
+        reject_sp = request.cls.algod.suggested_params()
+        reject_sp.fee = reject_sp.min_fee * 8
+        reject_sp.flat_fee = True
 
-    atc = AtomicTransactionComposer()
-    reject_sp = TestVars.algod.suggested_params()
-    reject_sp.fee = reject_sp.min_fee * 8
-    reject_sp.flat_fee = True
+        del_sp = request.cls.algod.suggested_params()
+        del_sp.fee = 0
+        del_sp.flat_fee = True
 
-    del_sp = TestVars.algod.suggested_params()
-    del_sp.fee = 0
-    del_sp.flat_fee = True
+        atc.add_method_call(
+            app_id=request.cls.vault_client.app_id,
+            sender=request.cls.receiver.address,
+            signer=request.cls.receiver.signer,
+            sp=reject_sp,
+            method=application.get_method_spec(Vault.reject),
+            method_args=[
+                request.cls.creator.address,
+                "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
+                request.cls.asa_id,
+                ZERO_ADDR,
+            ],
+            boxes=[
+                (request.cls.vault_client.app_id, request.cls.asa_id.to_bytes(8, "big"))
+            ],
+        )
 
-    atc.add_method_call(
-        app_id=TestVars.vault_client.app_id,
-        sender=TestVars.receiver.address,
-        signer=TestVars.receiver.signer,
-        sp=reject_sp,
-        method=application.get_method_spec(Vault.reject),
-        method_args=[
-            TestVars.creator.address,
-            "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
-            TestVars.asa_id,
-            ZERO_ADDR,
-        ],
-        boxes=[[TestVars.vault_client.app_id, TestVars.asa_id.to_bytes(8, "big")]],
-    )
+        atc.add_method_call(
+            app_id=request.cls.master_client.app_id,
+            sender=request.cls.receiver.address,
+            signer=request.cls.receiver.signer,
+            sp=del_sp,
+            method=application.get_method_spec(Master.delete_vault),
+            method_args=[request.cls.vault_client.app_id, request.cls.creator.address],
+            boxes=[
+                (
+                    request.cls.master_client.app_id,
+                    decode_address(request.cls.receiver.address),
+                )
+            ],
+        )
 
-    atc.add_method_call(
-        app_id=TestVars.master_client.app_id,
-        sender=TestVars.receiver.address,
-        signer=TestVars.receiver.signer,
-        sp=del_sp,
-        method=application.get_method_spec(Master.delete_vault),
-        method_args=[TestVars.vault_client.app_id, TestVars.creator.address],
-        boxes=[
-            [TestVars.master_client.app_id, decode_address(TestVars.receiver.address)]
-        ],
-    )
+        atc.execute(request.cls.algod, 3)
 
-    atc.execute(TestVars.algod, 3)
+    @pytest.fixture(scope="class")
+    def second_opt_in(self, request, verify_axfer):
+        txn = transaction.AssetConfigTxn(
+            sender=request.cls.creator.address,
+            sp=request.cls.master_client.get_suggested_params(),
+            total=1,
+            default_frozen=False,
+            unit_name="LATINUM",
+            asset_name="latinum",
+            decimals=0,
+            strict_empty_address_check=False,
+        )
 
+        stxn = txn.sign(request.cls.creator.private_key)
+        txid = request.cls.algod.send_transaction(stxn)
+        confirmed_txn = transaction.wait_for_confirmation(request.cls.algod, txid, 4)
 
-@pytest.fixture(scope="module")
-def second_opt_in():
-    txn = transaction.AssetConfigTxn(
-        sender=TestVars.creator.address,
-        sp=TestVars.master_client.get_suggested_params(),
-        total=1,
-        default_frozen=False,
-        unit_name="LATINUM",
-        asset_name="latinum",
-        decimals=0,
-        strict_empty_address_check=False,
-    )
+        request.cls.second_asa_id = confirmed_txn["asset-index"]
 
-    stxn = txn.sign(TestVars.creator.private_key)
-    txid = TestVars.algod.send_transaction(stxn)
-    confirmed_txn = transaction.wait_for_confirmation(TestVars.algod, txid, 4)
-    TestVars.second_asa_id = confirmed_txn["asset-index"]
+        sp = request.cls.vault_client.get_suggested_params()
+        sp.fee = sp.min_fee * 2
+        sp.flat_fee = True
 
-    sp = TestVars.vault_client.get_suggested_params()
-    sp.fee = sp.min_fee * 2
-    sp.flat_fee = True
-
-    pay_txn = TransactionWithSigner(
-        txn=transaction.PaymentTxn(
-            sender=TestVars.creator.address,
-            receiver=TestVars.vault_client.app_addr,
-            amt=118_500,
-            sp=sp,
-        ),
-        signer=TestVars.creator.signer,
-    )
-
-    TestVars.vault_client.call(
-        method=Vault.opt_in,
-        asa=TestVars.second_asa_id,
-        mbr_payment=pay_txn,
-        boxes=[
-            [TestVars.vault_client.app_id, TestVars.second_asa_id.to_bytes(8, "big")]
-        ],
-    )
-
-
-@pytest.fixture(scope="module")
-def second_verify_axfer():
-    axfer = TransactionWithSigner(
-        txn=transaction.AssetTransferTxn(
-            sender=TestVars.creator.address,
-            receiver=TestVars.vault_client.app_addr,
-            amt=1,
-            sp=TestVars.vault_client.get_suggested_params(),
-            index=TestVars.second_asa_id,
-        ),
-        signer=TestVars.creator.signer,
-    )
-
-    TestVars.master_client.call(
-        method=Master.verify_axfer,
-        receiver=TestVars.receiver.address,
-        vault_axfer=axfer,
-        vault=TestVars.vault_client.app_id,
-        boxes=[
-            [TestVars.master_client.app_id, decode_address(TestVars.receiver.address)]
-        ],
-    )
-
-
-@pytest.fixture(scope="module")
-def second_claim():
-    atc = AtomicTransactionComposer()
-    claim_sp = TestVars.algod.suggested_params()
-    claim_sp.fee = claim_sp.min_fee * 7
-    claim_sp.flat_fee = True
-
-    atc.add_transaction(
-        TransactionWithSigner(
-            txn=transaction.AssetOptInTxn(
-                sender=TestVars.receiver.address,
-                sp=TestVars.algod.suggested_params(),
-                index=TestVars.second_asa_id,
+        pay_txn = TransactionWithSigner(
+            txn=transaction.PaymentTxn(
+                sender=request.cls.creator.address,
+                receiver=request.cls.vault_client.app_addr,
+                amt=118_500,
+                sp=sp,
             ),
-            signer=TestVars.receiver.signer,
+            signer=request.cls.creator.signer,
         )
-    )
 
-    atc.add_method_call(
-        app_id=TestVars.vault_client.app_id,
-        sender=TestVars.receiver.address,
-        signer=TestVars.receiver.signer,
-        sp=claim_sp,
-        method=application.get_method_spec(Vault.claim),
-        method_args=[TestVars.second_asa_id, TestVars.creator.address, ZERO_ADDR],
-        boxes=[
-            [TestVars.vault_client.app_id, TestVars.second_asa_id.to_bytes(8, "big")]
-        ],
-    )
+        request.cls.vault_client.call(
+            method=Vault.opt_in,
+            asa=request.cls.second_asa_id,
+            mbr_payment=pay_txn,
+            boxes=[
+                (
+                    request.cls.vault_client.app_id,
+                    request.cls.second_asa_id.to_bytes(8, "big"),
+                )
+            ],
+        )
 
-    atc.execute(TestVars.algod, 3)
+    @pytest.fixture(scope="class")
+    def second_verify_axfer(
+        self,
+        request,
+        second_opt_in,
+    ):
+        axfer = TransactionWithSigner(
+            txn=transaction.AssetTransferTxn(
+                sender=request.cls.creator.address,
+                receiver=request.cls.vault_client.app_addr,
+                amt=1,
+                sp=request.cls.vault_client.get_suggested_params(),
+                index=request.cls.second_asa_id,
+            ),
+            signer=request.cls.creator.signer,
+        )
 
+        request.cls.master_client.call(
+            method=Master.verify_axfer,
+            receiver=request.cls.receiver.address,
+            vault_axfer=axfer,
+            vault=request.cls.vault_client.app_id,
+            boxes=[
+                (
+                    request.cls.master_client.app_id,
+                    decode_address(request.cls.receiver.address),
+                )
+            ],
+        )
 
-@pytest.fixture(scope="module")
-def second_reject():
-    TestVars.creator_pre_reject_balance = TestVars.algod.account_info(
-        TestVars.creator.address
-    )["amount"]
+    @pytest.fixture(scope="class")
+    def second_claim(
+        self,
+        request,
+        second_opt_in,
+    ):
+        atc = AtomicTransactionComposer()
+        claim_sp = request.cls.algod.suggested_params()
+        claim_sp.fee = claim_sp.min_fee * 7
+        claim_sp.flat_fee = True
 
-    TestVars.receiver_pre_reject_balance = TestVars.algod.account_info(
-        TestVars.receiver.address
-    )["amount"]
+        atc.add_transaction(
+            TransactionWithSigner(
+                txn=transaction.AssetOptInTxn(
+                    sender=request.cls.receiver.address,
+                    sp=request.cls.algod.suggested_params(),
+                    index=request.cls.second_asa_id,
+                ),
+                signer=request.cls.receiver.signer,
+            )
+        )
 
-    atc = AtomicTransactionComposer()
-    reject_sp = TestVars.algod.suggested_params()
-    reject_sp.fee = reject_sp.min_fee * 8
-    reject_sp.flat_fee = True
+        atc.add_method_call(
+            app_id=request.cls.vault_client.app_id,
+            sender=request.cls.receiver.address,
+            signer=request.cls.receiver.signer,
+            sp=claim_sp,
+            method=application.get_method_spec(Vault.claim),
+            method_args=[
+                request.cls.second_asa_id,
+                request.cls.creator.address,
+                ZERO_ADDR,
+            ],
+            boxes=[
+                (
+                    request.cls.vault_client.app_id,
+                    request.cls.second_asa_id.to_bytes(8, "big"),
+                )
+            ],
+        )
 
-    atc.add_method_call(
-        app_id=TestVars.vault_client.app_id,
-        sender=TestVars.receiver.address,
-        signer=TestVars.receiver.signer,
-        sp=reject_sp,
-        method=application.get_method_spec(Vault.reject),
-        method_args=[
-            TestVars.creator.address,
-            "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
-            TestVars.second_asa_id,
-            ZERO_ADDR,
-        ],
-        boxes=[
-            [TestVars.vault_client.app_id, TestVars.second_asa_id.to_bytes(8, "big")]
-        ],
-    )
+        atc.execute(request.cls.algod, 3)
 
-    atc.execute(TestVars.algod, 3)
+    @pytest.fixture(scope="class")
+    def second_reject(
+        self,
+        request,
+        second_opt_in,
+    ):
+        request.cls.creator_pre_reject_balance = request.cls.algod.account_info(
+            request.cls.creator.address
+        )["amount"]
+
+        request.cls.receiver_pre_reject_balance = request.cls.algod.account_info(
+            request.cls.receiver.address
+        )["amount"]
+
+        atc = AtomicTransactionComposer()
+        reject_sp = request.cls.algod.suggested_params()
+        reject_sp.fee = reject_sp.min_fee * 8
+        reject_sp.flat_fee = True
+
+        atc.add_method_call(
+            app_id=request.cls.vault_client.app_id,
+            sender=request.cls.receiver.address,
+            signer=request.cls.receiver.signer,
+            sp=reject_sp,
+            method=application.get_method_spec(Vault.reject),
+            method_args=[
+                request.cls.creator.address,
+                "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
+                request.cls.second_asa_id,
+                ZERO_ADDR,
+            ],
+            boxes=[
+                (
+                    request.cls.vault_client.app_id,
+                    request.cls.second_asa_id.to_bytes(8, "big"),
+                )
+            ],
+        )
+
+        atc.execute(request.cls.algod, 3)

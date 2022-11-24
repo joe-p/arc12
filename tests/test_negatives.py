@@ -1,31 +1,21 @@
-import pytest
 from fixtures import *
 from algosdk.error import AlgodHTTPError
+import pytest
 
 
-@pytest.mark.reject
-def test_premature_claim_delete(
-    create_master,
-    create_vault,
-    opt_in,
-    verify_axfer,
-    second_opt_in,
-    second_verify_axfer,
-):
-    with pytest.raises(AlgodHTTPError) as e:
-        claim_from(TestVars.receiver)
-    assert e.match("assert failed pc=424")
+class TestNegatives(ARC12TestClass):
+    def test_premature_claim_delete(
+        self,
+        second_verify_axfer,
+    ):
+        with pytest.raises(AlgodHTTPError) as e:
+            self._claim(self.receiver)
+        assert e.match("assert failed pc=424")
 
-
-@pytest.mark.reject
-def test_wrong_claimer(
-    create_master,
-    create_vault,
-    opt_in,
-    verify_axfer,
-    second_opt_in,
-    second_verify_axfer,
-):
-    with pytest.raises(AlgodHTTPError) as e:
-        claim_from(TestVars.random_acct)
-    assert e.match("assert failed pc=486")
+    def test_wrong_claimer(
+        self,
+        second_verify_axfer,
+    ):
+        with pytest.raises(AlgodHTTPError) as e:
+            self._claim(self.random_acct)
+        assert e.match("assert failed pc=486")
