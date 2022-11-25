@@ -1,0 +1,108 @@
+{
+  "name": "Vault",
+  "networks": {
+  },
+  "methods": [
+    {
+      "name": "create",
+      "desc": "Method called for creation of the vault",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "account",
+          "desc": "The account that can claim ASAs from this vault"
+        },
+        {
+          "name": "sender",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "reject",
+      "desc": "",
+      "args": [
+        {
+          "name": "asa_creator",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "fee_sink",
+          "type": "account",
+          "desc": ""
+        },
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": ""
+        },
+        {
+          "name": "vault_creator",
+          "type": "account",
+          "desc": ""
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "opt_in",
+      "desc": "Opts into the given asa",
+      "args": [
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": "The asset to opt-in to"
+        },
+        {
+          "name": "mbr_payment",
+          "type": "pay",
+          "desc": "The payment to cover this contracts MBR"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "delete",
+      "desc": "",
+      "args": [
+
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "claim",
+      "desc": "Sends the ASA to the intended receiver",
+      "args": [
+        {
+          "name": "asa",
+          "type": "asset",
+          "desc": "The ASA to send"
+        },
+        {
+          "name": "creator",
+          "type": "account",
+          "desc": "The account that funded the MBR for the application"
+        },
+        {
+          "name": "asa_mbr_funder",
+          "type": "account",
+          "desc": "The account that funded the MBR for the ASA"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}
