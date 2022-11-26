@@ -85,7 +85,7 @@ export default class ARC12 {
 
     let asaFunder = algosdk.encodeAddress(boxResponse.value);
 
-    if (asaFunder == vaultCreator) {
+    if (asaFunder === vaultCreator) {
       asaFunder = ZERO_ADDRESS;
     }
 

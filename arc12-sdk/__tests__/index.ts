@@ -1,6 +1,8 @@
+/* eslint-disable no-param-reassign */
 import algosdk from 'algosdk';
 import fs from 'fs';
 import path from 'path';
+// eslint-disable-next-line import/extensions,import/no-unresolved
 import ARC12 from '../src/index';
 import masterABI from '../../artifacts/master.abi.json';
 
@@ -24,13 +26,13 @@ interface TestState {
 
 // Based on https://github.com/algorand-devrel/demo-abi/blob/master/js/sandbox.ts
 async function getAccounts(): Promise<algosdk.Account[]> {
-  const wallets = await kmdClient.listWallets();
+  const { wallets } = await kmdClient.listWallets();
 
   // find kmdWallet
   let walletId;
-  for (const wallet of wallets.wallets) {
+  wallets.forEach((wallet: any) => {
     if (wallet.name === kmdWallet) walletId = wallet.id;
-  }
+  });
   if (walletId === undefined) throw Error(`No wallet named: ${kmdWallet}`);
 
   // get handle
@@ -38,15 +40,15 @@ async function getAccounts(): Promise<algosdk.Account[]> {
   const handle = handleResp.wallet_handle_token;
 
   // get account keys
-  const addresses = await kmdClient.listKeys(handle);
-  const acctPromises = [];
-  for (const addr of addresses.addresses) {
+  const { addresses } = await kmdClient.listKeys(handle);
+  const acctPromises: Promise<{private_key: Buffer}>[] = [];
+  addresses.forEach((addr: string) => {
     acctPromises.push(kmdClient.exportKey(handle, kmdPassword, addr));
-  }
+  });
   const keys = await Promise.all(acctPromises);
 
   // release handle
-  kmdClient.releaseWalletHandle(handle);
+  await kmdClient.releaseWalletHandle(handle);
 
   // return all algosdk.Account objects derived from kmdWallet
   return keys.map((k) => {
@@ -120,6 +122,7 @@ describe('ARC12 SDK', () => {
     const res = await atc.execute(algodClient, 3);
 
     // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
     await new Promise((r) => setTimeout(r, 10));
 
     state.vault = Number(res.methodResults[0].returnValue as algosdk.ABIValue);
