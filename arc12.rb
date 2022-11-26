@@ -176,7 +176,6 @@ class Master < TEALrb::Contract
     # // Create vault
     inner_txn.begin
     inner_txn.type_enum = txn_type.application_call
-    inner_txn.application_id = 0
     inner_txn.approval_program = byte_b64 Vault.new.compiled_program
     inner_txn.clear_state_program = apps[0].clear_state_program
     inner_txn.on_completion = int('NoOp')

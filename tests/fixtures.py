@@ -95,7 +95,6 @@ class ARC12TestClass:
                     decode_address(request.cls.receiver.address),
                 )
             ],
-            foreign_apps=[0],
         ).return_value
 
         vault_app = Vault(version=8)
