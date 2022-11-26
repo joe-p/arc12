@@ -1,6 +1,6 @@
 import algosdk from 'algosdk';
-import vaultABI from './vault.abi.json';
-import masterABI from './master.abi.json';
+import vaultABI from '../../artifacts/vault.abi.json';
+import masterABI from '../../artifacts/master.abi.json';
 
 const ZERO_ADDRESS = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
 
@@ -10,7 +10,7 @@ interface Holding {
   vaultOptedIn?: boolean,
 }
 
-class ARC12 {
+export default class ARC12 {
   indexer: algosdk.Indexer;
 
   masterApp: number;
@@ -45,6 +45,31 @@ class ARC12 {
     }
   }
 
+  async delete(
+    atc: algosdk.AtomicTransactionComposer,
+    sender: string,
+    signer: algosdk.TransactionSigner,
+    vault: number,
+  ): Promise<algosdk.AtomicTransactionComposer> {
+    const vaultCreator: string = (await this.indexer.searchForApplications().index(vault).do())
+      .params.creator;
+
+    const appSp = await this.algodClient.getTransactionParams().do();
+    appSp.fee = 0;
+    appSp.flatFee = true;
+
+    atc.addMethodCall({
+      appID: vault,
+      method: algosdk.getMethodByName(this.masterContract.methods, 'delete_vault'),
+      methodArgs: [vault, vaultCreator],
+      sender,
+      suggestedParams: appSp,
+      signer,
+    });
+
+    return atc;
+  }
+
   async claim(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
@@ -70,7 +95,7 @@ class ARC12 {
 
     atc.addMethodCall({
       appID: vault,
-      method: algosdk.getMethodByName(this.vaultContract.methods, 'create_vault'),
+      method: algosdk.getMethodByName(this.vaultContract.methods, 'claim'),
       methodArgs: [asa, vaultCreator, asaFunder],
       sender,
       suggestedParams: appSp,
@@ -105,11 +130,12 @@ class ARC12 {
 
     atc.addMethodCall({
       appID: master,
-      method: algosdk.getMethodByName(this.vaultContract.methods, 'create_vault'),
+      method: algosdk.getMethodByName(this.masterContract.methods, 'create_vault'),
       methodArgs: [receiver, { txn: payTxn, signer }],
       sender,
       suggestedParams: appSp,
       signer,
+      boxes: [{ appIndex: master, name: algosdk.decodeAddress(receiver).publicKey }],
     });
 
     return atc;
@@ -173,14 +199,3 @@ class ARC12 {
     return holding;
   }
 }
-
-(async () => {
-  const vaultAsa = 1812;
-  const indexerClient = new algosdk.Indexer('', 'http://localhost', 8980);
-  const algodClient = new algosdk.Algodv2('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'http://localhost', 4001);
-
-  const arc12 = new ARC12(indexerClient, algodClient, vaultAsa);
-  console.log(await arc12.getHolding('BKD6AHZUQ5OJEBFZMTANYHGIOR4JNC5MNPCAEWRTZCYCNGG453I6ZKBRNU', 1818));
-  console.log(await arc12.getHolding('BKD6AHZUQ5OJEBFZMTANYHGIOR4JNC5MNPCAEWRTZCYCNGG453I6ZKBRNU', 1));
-  console.log(await arc12.getHolding(algosdk.generateAccount().addr, 1818));
-})();
