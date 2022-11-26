@@ -29,6 +29,22 @@ class ARC12 {
     this.masterContract = new algosdk.ABIContract(masterABI);
   }
 
+  async getVault(address: string) {
+    const pubKey = algosdk.decodeAddress(address).publicKey;
+    try {
+      const boxResponse = await this.indexer
+        .lookupApplicationBoxByIDandName(this.masterApp, pubKey).do();
+
+      return algosdk.decodeUint64(boxResponse.value, 'safe');
+    } catch (e: any) {
+      if (e.response.body.message.includes('no application boxes found')) {
+        return undefined;
+      }
+
+      throw e;
+    }
+  }
+
   async claim(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
@@ -144,14 +160,10 @@ class ARC12 {
 
     const holding: Holding = { optedIn: false };
 
-    const pubKey = algosdk.decodeAddress(address).publicKey;
-    const boxResponse = await this.indexer
-      .lookupApplicationBoxByIDandName(this.masterApp, pubKey).do();
+    holding.vault = await this.getVault(address);
 
-    if (boxResponse.value) {
-      holding.vault = algosdk.decodeUint64(boxResponse.value, 'safe');
+    if (holding.vault) {
       const appAddr = algosdk.getApplicationAddress(holding.vault);
-
       const vaultAssets: any[] = (await this.indexer.lookupAccountAssets(appAddr)
         .assetId(asa).do()).assets;
 
@@ -168,5 +180,7 @@ class ARC12 {
   const algodClient = new algosdk.Algodv2('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'http://localhost', 4001);
 
   const arc12 = new ARC12(indexerClient, algodClient, vaultAsa);
-  await arc12.getHolding('BKD6AHZUQ5OJEBFZMTANYHGIOR4JNC5MNPCAEWRTZCYCNGG453I6ZKBRNU', 1818);
+  console.log(await arc12.getHolding('BKD6AHZUQ5OJEBFZMTANYHGIOR4JNC5MNPCAEWRTZCYCNGG453I6ZKBRNU', 1818));
+  console.log(await arc12.getHolding('BKD6AHZUQ5OJEBFZMTANYHGIOR4JNC5MNPCAEWRTZCYCNGG453I6ZKBRNU', 1));
+  console.log(await arc12.getHolding(algosdk.generateAccount().addr, 1818));
 })();
