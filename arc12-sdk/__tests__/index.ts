@@ -18,11 +18,10 @@ jest.setTimeout(10_000);
 interface TestState {
   master: number,
   vault: number,
-  asa: number,
+  assets: number[],
   sender: algosdk.Account
   receiver: algosdk.Account
   arc12: ARC12
-  secondAsa: number
 }
 
 // Based on https://github.com/algorand-devrel/demo-abi/blob/master/js/sandbox.ts
@@ -120,9 +119,40 @@ async function createMaster(state: TestState) {
   await algodClient.sendRawTransaction(payTxn).do();
 }
 
+async function newASA(state: TestState) {
+  const atc = new algosdk.AtomicTransactionComposer();
+  const signer = algosdk.makeBasicAccountTransactionSigner(state.sender);
+
+  const asa = await createASA(state);
+
+  await state.arc12.vaultOptIn(
+    atc,
+    state.sender.addr,
+    signer,
+    asa,
+    state.vault,
+  );
+
+  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParams(
+    state.sender.addr,
+    algosdk.getApplicationAddress(state.vault),
+    undefined,
+    undefined,
+    1,
+    undefined,
+    asa,
+    await algodClient.getTransactionParams().do(),
+  );
+  atc.addTransaction({ txn: axfer, signer });
+
+  await atc.execute(algodClient, 3);
+
+  return asa;
+}
+
 describe('ARC12 SDK', () => {
   // @ts-ignore
-  const state: TestState = {};
+  const state: TestState = { assets: [] };
 
   beforeAll(async () => {
     const accounts = await getAccounts();
@@ -153,62 +183,12 @@ describe('ARC12 SDK', () => {
   });
 
   it('optIn and getHolding', async () => {
-    const atc = new algosdk.AtomicTransactionComposer();
-    const signer = algosdk.makeBasicAccountTransactionSigner(state.sender);
-
-    const asa = await createASA(state);
-
-    await state.arc12.vaultOptIn(
-      atc,
-      state.sender.addr,
-      signer,
-      asa,
-      state.vault,
-    );
-
-    const axfer = algosdk.makeAssetTransferTxnWithSuggestedParams(
-      state.sender.addr,
-      algosdk.getApplicationAddress(state.vault),
-      undefined,
-      undefined,
-      1,
-      undefined,
-      asa,
-      await algodClient.getTransactionParams().do(),
-    );
-    atc.addTransaction({ txn: axfer, signer });
-
-    await atc.execute(algodClient, 3);
-
-    const secondAtc = new algosdk.AtomicTransactionComposer();
-    const secondAsa = await createASA(state);
-
-    await state.arc12.vaultOptIn(
-      secondAtc,
-      state.sender.addr,
-      algosdk.makeBasicAccountTransactionSigner(state.sender),
-      secondAsa,
-      state.vault,
-    );
-
-    const secondAxfer = algosdk.makeAssetTransferTxnWithSuggestedParams(
-      state.sender.addr,
-      algosdk.getApplicationAddress(state.vault),
-      undefined,
-      undefined,
-      1,
-      undefined,
-      secondAsa,
-      await algodClient.getTransactionParams().do(),
-    );
-    secondAtc.addTransaction({ txn: secondAxfer, signer });
-
-    await secondAtc.execute(algodClient, 3);
-    const holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    state.assets.push(await newASA(state));
+    state.assets.push(await newASA(state));
+    state.assets.push(await newASA(state));
+    const holding = await state.arc12.getHolding(state.receiver.addr, state.assets[0]);
 
     expect(holding).toStrictEqual({ optedIn: false, vault: state.vault, vaultOptedIn: true });
-    state.asa = asa;
-    state.secondAsa = secondAsa;
   });
 
   it('claim and getAssets', async () => {
@@ -217,7 +197,7 @@ describe('ARC12 SDK', () => {
       atc,
       state.receiver.addr,
       algosdk.makeBasicAccountTransactionSigner(state.receiver),
-      state.asa,
+      state.assets[0],
       state.vault,
     );
 
@@ -229,7 +209,7 @@ describe('ARC12 SDK', () => {
 
     const { accountAssets } = await state.arc12.getAssets(state.receiver.addr);
 
-    const asaBalance = accountAssets.assets.find((a: any) => a['asset-id'] === state.asa).amount;
+    const asaBalance = accountAssets.assets.find((a: any) => a['asset-id'] === state.assets[0]).amount;
 
     expect(asaBalance).toBe(1);
   });
