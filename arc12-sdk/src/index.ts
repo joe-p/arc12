@@ -168,6 +168,7 @@ export default class ARC12 {
       methodArgs: [asa, { txn: payTxn, signer }],
       sender,
       suggestedParams: appSp,
+      boxes: [{ appIndex: vault, name: algosdk.encodeUint64(asa) }],
       signer,
     });
 

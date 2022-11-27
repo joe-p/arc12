@@ -65,6 +65,28 @@ async function compileProgram(programSource: string) {
   return new Uint8Array(Buffer.from(compileResponse.result, 'base64'));
 }
 
+async function createASA(state: TestState): Promise<number> {
+  const asaTxn = algosdk.makeAssetCreateTxnWithSuggestedParams(
+    state.sender.addr,
+    undefined,
+    1,
+    0,
+    false,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    'TEST',
+    `TEST${Math.random().toString()}`,
+    undefined,
+    undefined,
+    await algodClient.getTransactionParams().do(),
+  ).signTxn(state.sender.sk);
+
+  const { txId } = await algodClient.sendRawTransaction(asaTxn).do();
+  return (await algosdk.waitForConfirmation(algodClient, txId, 3))['asset-index'];
+}
+
 async function createMaster(state: TestState) {
   const masterContract = new algosdk.ABIContract(masterABI);
   const creator = state.sender as algosdk.Account;
@@ -109,7 +131,7 @@ describe('ARC12 SDK', () => {
     state.arc12 = new ARC12(indexerClient, algodClient, state.master);
   });
 
-  it('Creates Vault', async () => {
+  it('createVault and getVault', async () => {
     const atc = new algosdk.AtomicTransactionComposer();
     const signer = algosdk.makeBasicAccountTransactionSigner(state.sender);
     await state.arc12.createVault(
@@ -127,5 +149,36 @@ describe('ARC12 SDK', () => {
 
     state.vault = Number(res.methodResults[0].returnValue as algosdk.ABIValue);
     expect(await state.arc12.getVault(state.receiver.addr)).toBe(state.vault);
+  });
+
+  it('optIn and getHolding', async () => {
+    const atc = new algosdk.AtomicTransactionComposer();
+    const asa = await createASA(state);
+
+    await state.arc12.vaultOptIn(
+      atc,
+      state.receiver.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.receiver),
+      asa,
+      state.vault,
+    );
+
+    await atc.execute(algodClient, 3);
+
+    const secondAtc = new algosdk.AtomicTransactionComposer();
+    const secondAsa = await createASA(state);
+
+    await state.arc12.vaultOptIn(
+      secondAtc,
+      state.receiver.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.receiver),
+      secondAsa,
+      state.vault,
+    );
+
+    await secondAtc.execute(algodClient, 3);
+    const holding = await state.arc12.getHolding(state.receiver.addr, asa);
+
+    expect(holding).toStrictEqual({ optedIn: false, vault: state.vault, vaultOptedIn: true });
   });
 });
