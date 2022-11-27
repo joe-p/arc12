@@ -65,26 +65,32 @@ export default class ARC12 {
     }
   }
 
-  async delete(
+  async deleteNeeded(vault: number): Promise<boolean> {
+    return (await this.indexer.lookupAccountAssets(algosdk.getApplicationAddress(vault)).do())
+      .assets.length == 1;
+  }
+
+  async deleteVault(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
     signer: algosdk.TransactionSigner,
     vault: number,
   ): Promise<algosdk.AtomicTransactionComposer> {
-    const vaultCreator: string = (await this.indexer.searchForApplications().index(vault).do())
-      .params.creator;
+    const res = (await this.indexer.lookupApplications(vault).do());
+    const vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
     const appSp = await this.algodClient.getTransactionParams().do();
     appSp.fee = 0;
     appSp.flatFee = true;
 
     atc.addMethodCall({
-      appID: vault,
+      appID: this.masterApp,
       method: algosdk.getMethodByName(this.masterContract.methods, 'delete_vault'),
       methodArgs: [vault, vaultCreator],
       sender,
       suggestedParams: appSp,
       signer,
+      boxes: [{ appIndex: this.masterApp, name: algosdk.decodeAddress(sender).publicKey }],
     });
 
     return atc;
@@ -123,8 +129,6 @@ export default class ARC12 {
     asa: number,
     vault: number,
   ): Promise<algosdk.AtomicTransactionComposer> {
-    //   def reject(asa_creator, fee_sink, asa, vault_creator)
-
     const asaCreator = (await this.indexer.lookupAssetByID(asa).do()).asset.params.creator;
 
     const res = (await this.indexer.lookupApplications(vault).do());
@@ -134,8 +138,10 @@ export default class ARC12 {
       vaultCreator = ZERO_ADDRESS;
     }
 
+    const del = await this.deleteNeeded(vault);
+
     const sp = await this.algodClient.getTransactionParams().do();
-    sp.fee = (sp.fee | 1_000) * 4; // 8 if delete
+    sp.fee = (sp.fee | 1_000) * (del ? 8 : 4); // 8 if delete
     sp.flatFee = true;
 
     atc.addMethodCall({
@@ -147,6 +153,10 @@ export default class ARC12 {
       signer,
       boxes: [{ appIndex: vault, name: algosdk.encodeUint64(asa) }],
     });
+
+    if (del) {
+      await this.deleteVault(atc, sender, signer, vault);
+    }
 
     return atc;
   }
@@ -183,8 +193,9 @@ export default class ARC12 {
 
     atc.addTransaction({ txn: optInTxn, signer });
 
+    const del = await this.deleteNeeded(vault);
     const appSp = await this.algodClient.getTransactionParams().do();
-    appSp.fee = (appSp.fee || 1_000) * 3; // 7 if delete
+    appSp.fee = (appSp.fee || 1_000) * (del ? 7 : 3);
     appSp.flatFee = true;
 
     atc.addMethodCall({
@@ -197,7 +208,9 @@ export default class ARC12 {
       boxes: [{ appIndex: vault, name: algosdk.encodeUint64(asa) }],
     });
 
-    // TODO: Logic for deleting vault
+    if (del) {
+      await this.deleteVault(atc, sender, signer, vault);
+    }
 
     return atc;
   }

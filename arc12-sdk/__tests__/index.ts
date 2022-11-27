@@ -235,4 +235,20 @@ describe('ARC12 SDK', () => {
 
     expect(creatorBalance).toBe(1);
   });
+
+  it('deleteVault', async () => {
+    const atc = new algosdk.AtomicTransactionComposer();
+    await state.arc12.claim(
+      atc,
+      state.receiver.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.receiver),
+      state.assets[2],
+      state.vault,
+    );
+
+    await atc.execute(algodClient, 3);
+
+    // TODO: expect error
+    // await algodClient.getApplicationByID(state.vault).do();
+  });
 });
