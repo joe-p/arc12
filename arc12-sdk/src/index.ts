@@ -116,6 +116,41 @@ export default class ARC12 {
     return r;
   }
 
+  async reject(
+    atc: algosdk.AtomicTransactionComposer,
+    sender: string,
+    signer: algosdk.TransactionSigner,
+    asa: number,
+    vault: number,
+  ): Promise<algosdk.AtomicTransactionComposer> {
+    //   def reject(asa_creator, fee_sink, asa, vault_creator)
+
+    const asaCreator = (await this.indexer.lookupAssetByID(asa).do()).asset.params.creator;
+
+    const res = (await this.indexer.lookupApplications(vault).do());
+    let vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
+
+    if (asaCreator === vaultCreator) {
+      vaultCreator = ZERO_ADDRESS;
+    }
+
+    const sp = await this.algodClient.getTransactionParams().do();
+    sp.fee = (sp.fee | 1_000) * 4; // 8 if delete
+    sp.flatFee = true;
+
+    atc.addMethodCall({
+      appID: vault,
+      method: algosdk.getMethodByName(this.vaultContract.methods, 'reject'),
+      methodArgs: [asaCreator, 'Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA', asa, vaultCreator],
+      sender,
+      suggestedParams: sp,
+      signer,
+      boxes: [{ appIndex: vault, name: algosdk.encodeUint64(asa) }],
+    });
+
+    return atc;
+  }
+
   async claim(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
@@ -149,7 +184,7 @@ export default class ARC12 {
     atc.addTransaction({ txn: optInTxn, signer });
 
     const appSp = await this.algodClient.getTransactionParams().do();
-    appSp.fee = (appSp.fee || 1_000) * 7;
+    appSp.fee = (appSp.fee || 1_000) * 3; // 7 if delete
     appSp.flatFee = true;
 
     atc.addMethodCall({

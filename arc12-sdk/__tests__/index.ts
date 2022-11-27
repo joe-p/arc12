@@ -213,4 +213,26 @@ describe('ARC12 SDK', () => {
 
     expect(asaBalance).toBe(1);
   });
+
+  it('reject', async () => {
+    const atc = new algosdk.AtomicTransactionComposer();
+    await state.arc12.reject(
+      atc,
+      state.receiver.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.receiver),
+      state.assets[1],
+      state.vault,
+    );
+
+    await atc.execute(algodClient, 3);
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 10));
+
+    const creatorBalance = (await indexerClient.lookupAccountAssets(state.sender.addr)
+      .assetId(state.assets[1]).do()).assets[0].amount;
+
+    expect(creatorBalance).toBe(1);
+  });
 });
