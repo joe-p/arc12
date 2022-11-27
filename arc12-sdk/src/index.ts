@@ -10,6 +10,26 @@ interface Holding {
   vaultOptedIn?: boolean,
 }
 
+interface Assets {
+  vaultAssets?: any
+  accountAssets: any
+}
+
+interface GlobalStateDeltaValue {
+    action: number,
+    bytes?: string
+    uint?: number
+}
+
+interface GlobalStateDelta {
+    key: string
+    value: GlobalStateDeltaValue
+}
+
+interface ReadableGlobalStateDelta {
+    [key: string]: string | number | bigint | undefined
+}
+
 export default class ARC12 {
   indexer: algosdk.Indexer;
 
@@ -70,6 +90,32 @@ export default class ARC12 {
     return atc;
   }
 
+  getReadableGlobalState(delta: Array<GlobalStateDelta>) {
+    const r = {} as ReadableGlobalStateDelta;
+
+    delta.forEach((d) => {
+      const key = Buffer.from(d.key, 'base64').toString('utf8');
+      let value = null;
+
+      if (d.value.bytes) {
+      // first see if it's a valid address
+        const b = new Uint8Array(Buffer.from(d.value.bytes as string, 'base64'));
+        value = algosdk.encodeAddress(b);
+
+        // then decode as string
+        if (!algosdk.isValidAddress(value)) {
+          value = Buffer.from(d.value.bytes as string, 'base64').toString();
+        }
+      } else {
+        value = d.value.uint;
+      }
+
+      r[key] = value;
+    });
+
+    return r;
+  }
+
   async claim(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
@@ -77,8 +123,8 @@ export default class ARC12 {
     asa: number,
     vault: number,
   ): Promise<algosdk.AtomicTransactionComposer> {
-    const vaultCreator: string = (await this.indexer.searchForApplications().index(vault).do())
-      .params.creator;
+    const res = (await this.indexer.lookupApplications(vault).do());
+    const vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
     const boxResponse = await this.indexer
       .lookupApplicationBoxByIDandName(vault, algosdk.encodeUint64(asa)).do();
@@ -88,6 +134,19 @@ export default class ARC12 {
     if (asaFunder === vaultCreator) {
       asaFunder = ZERO_ADDRESS;
     }
+
+    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+      sender,
+      sender,
+      undefined,
+      undefined,
+      0,
+      undefined,
+      asa,
+      await this.algodClient.getTransactionParams().do(),
+    );
+
+    atc.addTransaction({ txn: optInTxn, signer });
 
     const appSp = await this.algodClient.getTransactionParams().do();
     appSp.fee = (appSp.fee || 1_000) * 7;
@@ -100,6 +159,7 @@ export default class ARC12 {
       sender,
       suggestedParams: appSp,
       signer,
+      boxes: [{ appIndex: vault, name: algosdk.encodeUint64(asa) }],
     });
 
     // TODO: Logic for deleting vault
@@ -173,6 +233,21 @@ export default class ARC12 {
     });
 
     return atc;
+  }
+
+  async getAssets(address: string): Promise<Assets> {
+    const assets: Assets = {
+      accountAssets: await this.indexer.lookupAccountAssets(address).do(),
+    };
+    const vault = await this.getVault(address);
+
+    if (vault) {
+      assets.vaultAssets = await this.indexer.lookupAccountAssets(
+        algosdk.getApplicationAddress(vault),
+      ).do();
+    }
+
+    return assets;
   }
 
   async getHolding(address: string, asa: number): Promise<Holding> {
