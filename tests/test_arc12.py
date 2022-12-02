@@ -4,6 +4,9 @@ from algosdk.error import AlgodHTTPError
 
 
 class TestARC12(ARC12TestClass):
+    @pytest.mark.create_master
+    def test_create_master(self, create_master):
+        pass
     @pytest.mark.create_vault
     def test_create_vault_id(self, create_vault):
         assert self.vault_client.app_id > 0

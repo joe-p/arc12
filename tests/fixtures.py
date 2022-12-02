@@ -12,7 +12,6 @@ from algosdk.atomic_transaction_composer import (
 import pytest
 from contracts import Vault, Master
 
-ZERO_ADDR = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, "artifacts")
 
 
@@ -202,7 +201,7 @@ class ARC12TestClass:
             signer=claimer.signer,
             sp=claim_sp,
             method=application.get_method_spec(Vault.claim),
-            method_args=[self.asa_id, self.creator.address, ZERO_ADDR],
+            method_args=[self.asa_id, self.creator.address, self.creator.address],
             boxes=[(self.vault_client.app_id, self.asa_id.to_bytes(8, "big"))],
         )
 
@@ -256,7 +255,7 @@ class ARC12TestClass:
                 request.cls.creator.address,
                 "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
                 request.cls.asa_id,
-                ZERO_ADDR,
+                request.cls.creator.address,
             ],
             boxes=[
                 (request.cls.vault_client.app_id, request.cls.asa_id.to_bytes(8, "big"))
@@ -386,7 +385,7 @@ class ARC12TestClass:
             method_args=[
                 request.cls.second_asa_id,
                 request.cls.creator.address,
-                ZERO_ADDR,
+                request.cls.creator.address,
             ],
             boxes=[
                 (
@@ -427,7 +426,7 @@ class ARC12TestClass:
                 request.cls.creator.address,
                 "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA",
                 request.cls.second_asa_id,
-                ZERO_ADDR,
+                request.cls.creator.address,
             ],
             boxes=[
                 (

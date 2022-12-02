@@ -2,8 +2,6 @@ import algosdk from 'algosdk';
 import vaultABI from '../../artifacts/vault.abi.json';
 import masterABI from '../../artifacts/master.abi.json';
 
-const ZERO_ADDRESS = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
-
 interface Holding {
   optedIn: boolean,
   vault?: number,
@@ -134,10 +132,6 @@ export default class ARC12 {
     const res = (await this.indexer.lookupApplications(vault).do());
     let vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
-    if (asaCreator === vaultCreator) {
-      vaultCreator = ZERO_ADDRESS;
-    }
-
     const del = await this.deleteNeeded(vault);
 
     const sp = await this.algodClient.getTransactionParams().do();
@@ -175,10 +169,6 @@ export default class ARC12 {
       .lookupApplicationBoxByIDandName(vault, algosdk.encodeUint64(asa)).do();
 
     let asaFunder = algosdk.encodeAddress(boxResponse.value);
-
-    if (asaFunder === vaultCreator) {
-      asaFunder = ZERO_ADDRESS;
-    }
 
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
       sender,

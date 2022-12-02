@@ -39,7 +39,6 @@ class Vault < TEALrb::Contract
   # @param asa [Asset]
   # @param vault_creator [Account]
   def reject(asa_creator, fee_sink, asa, vault_creator)
-    vault_creator = asa_creator if vault_creator == global.zero_address
     assert this_txn.sender == global['receiver']
     assert fee_sink == addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     $pre_mbr = global.current_application_address.min_balance
@@ -118,8 +117,6 @@ class Vault < TEALrb::Contract
   def claim(asa, creator, asa_mbr_funder)
     $asa_bytes = itob(asa)
 
-    asa_mbr_funder = creator if asa_mbr_funder == global.zero_address
-
     assert box_exists?($asa_bytes)
     assert asa_mbr_funder == box[$asa_bytes]
     assert this_txn.sender == global['receiver']
@@ -183,6 +180,8 @@ class Master < TEALrb::Contract
     inner_txn.accounts = this_txn.sender
     inner_txn.fee = 0
     inner_txn.application_args = method_signature('create(account,account)void')
+    inner_txn.application_args = itob 1
+    inner_txn.application_args = itob(1 + (receiver != this_txn.sender))
     inner_txn.global_num_byte_slice = 2
     inner_txn.global_num_uint = 1
     inner_txn.submit
