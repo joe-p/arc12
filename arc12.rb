@@ -42,7 +42,6 @@ class Vault < TEALrb::Contract
     assert this_txn.sender == global['receiver']
     assert fee_sink == addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     $pre_mbr = global.current_application_address.min_balance
-    $pre_fee = global.current_application_address.balance
 
     # send ASA to creator
     inner_txn.begin
