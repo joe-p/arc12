@@ -28,6 +28,32 @@ interface ReadableGlobalStateDelta {
     [key: string]: string | number | bigint | undefined
 }
 
+function getReadableGlobalState(delta: Array<GlobalStateDelta>) {
+  const r = {} as ReadableGlobalStateDelta;
+
+  delta.forEach((d) => {
+    const key = Buffer.from(d.key, 'base64').toString('utf8');
+    let value = null;
+
+    if (d.value.bytes) {
+    // first see if it's a valid address
+      const b = new Uint8Array(Buffer.from(d.value.bytes as string, 'base64'));
+      value = algosdk.encodeAddress(b);
+
+      // then decode as string
+      if (!algosdk.isValidAddress(value)) {
+        value = Buffer.from(d.value.bytes as string, 'base64').toString();
+      }
+    } else {
+      value = d.value.uint;
+    }
+
+    r[key] = value;
+  });
+
+  return r;
+}
+
 export default class ARC12 {
   indexer: algosdk.Indexer;
 
@@ -63,19 +89,19 @@ export default class ARC12 {
     }
   }
 
-  async deleteNeeded(vault: number): Promise<boolean> {
+  private async deleteNeeded(vault: number): Promise<boolean> {
     return (await this.indexer.lookupAccountAssets(algosdk.getApplicationAddress(vault)).do())
-      .assets.length == 1;
+      .assets.length === 1;
   }
 
-  async deleteVault(
+  private async deleteVault(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
     signer: algosdk.TransactionSigner,
     vault: number,
   ): Promise<algosdk.AtomicTransactionComposer> {
     const res = (await this.indexer.lookupApplications(vault).do());
-    const vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
+    const vaultCreator = (getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
     const appSp = await this.algodClient.getTransactionParams().do();
     appSp.fee = 0;
@@ -94,32 +120,6 @@ export default class ARC12 {
     return atc;
   }
 
-  getReadableGlobalState(delta: Array<GlobalStateDelta>) {
-    const r = {} as ReadableGlobalStateDelta;
-
-    delta.forEach((d) => {
-      const key = Buffer.from(d.key, 'base64').toString('utf8');
-      let value = null;
-
-      if (d.value.bytes) {
-      // first see if it's a valid address
-        const b = new Uint8Array(Buffer.from(d.value.bytes as string, 'base64'));
-        value = algosdk.encodeAddress(b);
-
-        // then decode as string
-        if (!algosdk.isValidAddress(value)) {
-          value = Buffer.from(d.value.bytes as string, 'base64').toString();
-        }
-      } else {
-        value = d.value.uint;
-      }
-
-      r[key] = value;
-    });
-
-    return r;
-  }
-
   async reject(
     atc: algosdk.AtomicTransactionComposer,
     sender: string,
@@ -130,12 +130,12 @@ export default class ARC12 {
     const asaCreator = (await this.indexer.lookupAssetByID(asa).do()).asset.params.creator;
 
     const res = (await this.indexer.lookupApplications(vault).do());
-    let vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
+    const vaultCreator = (getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
     const del = await this.deleteNeeded(vault);
 
     const sp = await this.algodClient.getTransactionParams().do();
-    sp.fee = (sp.fee | 1_000) * (del ? 8 : 4); // 8 if delete
+    sp.fee = (sp.fee || 1_000) * (del ? 8 : 4); // 8 if delete
     sp.flatFee = true;
 
     atc.addMethodCall({
@@ -163,12 +163,12 @@ export default class ARC12 {
     vault: number,
   ): Promise<algosdk.AtomicTransactionComposer> {
     const res = (await this.indexer.lookupApplications(vault).do());
-    const vaultCreator = (this.getReadableGlobalState(res.application.params['global-state']).creator) as string;
+    const vaultCreator = (getReadableGlobalState(res.application.params['global-state']).creator) as string;
 
     const boxResponse = await this.indexer
       .lookupApplicationBoxByIDandName(vault, algosdk.encodeUint64(asa)).do();
 
-    let asaFunder = algosdk.encodeAddress(boxResponse.value);
+    const asaFunder = algosdk.encodeAddress(boxResponse.value);
 
     const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
       sender,
