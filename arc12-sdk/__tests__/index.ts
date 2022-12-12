@@ -65,11 +65,11 @@ async function compileProgram(programSource: string) {
   return new Uint8Array(Buffer.from(compileResponse.result, 'base64'));
 }
 
-async function createASA(state: TestState): Promise<number> {
+async function createASA(state: TestState, amount: number = 1): Promise<number> {
   const asaTxn = algosdk.makeAssetCreateTxnWithSuggestedParams(
     state.sender.addr,
     undefined,
-    1,
+    amount,
     0,
     false,
     undefined,
@@ -176,7 +176,7 @@ describe('ARC12 SDK', () => {
 
     // Wait for indexer to catch up
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 50));
 
     state.vault = Number(res.methodResults[0].returnValue as algosdk.ABIValue);
     expect(await state.arc12.getVault(state.receiver.addr)).toBe(state.vault);
@@ -205,7 +205,7 @@ describe('ARC12 SDK', () => {
 
     // Wait for indexer to catch up
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 50));
 
     const { accountAssets } = await state.arc12.getAssets(state.receiver.addr);
 
@@ -228,7 +228,7 @@ describe('ARC12 SDK', () => {
 
     // Wait for indexer to catch up
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 50));
 
     const creatorBalance = (await indexerClient.lookupAccountAssets(state.sender.addr)
       .assetId(state.assets[1]).do()).assets[0].amount;
@@ -251,5 +251,113 @@ describe('ARC12 SDK', () => {
     expect(async () => {
       await algodClient.getApplicationByID(state.vault).do();
     }).rejects.toThrow('application does not exist');
+  });
+
+  it('send', async () => {
+    const asa = await createASA(state, 3);
+    let holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    expect(holding.optedIn).toBe(false);
+    expect(holding.vault).toBe(undefined);
+
+    await state.arc12.send(
+      new algosdk.AtomicTransactionComposer(),
+      state.sender.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.sender),
+      asa,
+      state.receiver.addr,
+      1,
+    );
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 50));
+
+    const vault = await state.arc12.getVault(state.receiver.addr);
+
+    holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    expect(holding.optedIn).toBe(false);
+    expect(holding.vault).toBe(vault);
+    expect(holding.vaultOptedIn).toBe(true);
+
+    const secondAsa = await createASA(state, 1);
+
+    holding = await state.arc12.getHolding(state.receiver.addr, secondAsa);
+    expect(holding.optedIn).toBe(false);
+    expect(holding.vault).toBe(vault);
+    expect(holding.vaultOptedIn).toBe(false);
+
+    await state.arc12.send(
+      new algosdk.AtomicTransactionComposer(),
+      state.sender.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.sender),
+      secondAsa,
+      state.receiver.addr,
+      1,
+    );
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 50));
+
+    holding = await state.arc12.getHolding(state.receiver.addr, secondAsa);
+    expect(holding.optedIn).toBe(false);
+    expect(holding.vault).toBe(vault);
+    expect(holding.vaultOptedIn).toBe(true);
+
+    await state.arc12.send(
+      new algosdk.AtomicTransactionComposer(),
+      state.sender.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.sender),
+      asa,
+      state.receiver.addr,
+      1,
+    );
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 50));
+
+    holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    expect(holding.optedIn).toBe(false);
+    expect(holding.vault).toBe(vault);
+    expect(holding.vaultOptedIn).toBe(true);
+
+    const claimAtc = new algosdk.AtomicTransactionComposer();
+    await state.arc12.claim(
+      claimAtc,
+      state.receiver.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.receiver),
+      asa,
+      await state.arc12.getVault(state.receiver.addr) as number,
+    );
+
+    claimAtc.execute(algodClient, 3);
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 50));
+
+    holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    expect(holding.optedIn).toBe(true);
+    expect(holding.vault).toBe(undefined);
+    expect(holding.vaultOptedIn).toBe(undefined);
+
+    await state.arc12.send(
+      new algosdk.AtomicTransactionComposer(),
+      state.sender.addr,
+      algosdk.makeBasicAccountTransactionSigner(state.sender),
+      asa,
+      state.receiver.addr,
+      1,
+    );
+
+    // Wait for indexer to catch up
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 50));
+
+    holding = await state.arc12.getHolding(state.receiver.addr, asa);
+    expect(holding.optedIn).toBe(true);
+    expect(holding.vault).toBe(undefined);
+    expect(holding.vaultOptedIn).toBe(undefined);
   });
 });

@@ -312,4 +312,47 @@ export default class ARC12 {
 
     return holding;
   }
+
+  async send(
+    atc: algosdk.AtomicTransactionComposer,
+    sender: string,
+    signer: algosdk.TransactionSigner,
+    asa: number,
+    receiver: string,
+    amount: number,
+  ): Promise<{ confirmedRound: number; txIDs: string[]; methodResults: algosdk.ABIResult[]; }> {
+    const holding = await this.getHolding(receiver, asa);
+    let assetReceiver = receiver;
+
+    if (!holding.optedIn && holding.vault) {
+      if (!holding.vaultOptedIn) {
+        await this.vaultOptIn(atc, sender, signer, asa, holding.vault);
+      }
+      assetReceiver = algosdk.getApplicationAddress(holding.vault);
+    } else if (!holding.optedIn && !holding.vault) {
+      const createAtc = new algosdk.AtomicTransactionComposer();
+      await this.createVault(createAtc, sender, signer, receiver, this.masterApp);
+
+      const res = await createAtc.execute(this.algodClient, 3);
+
+      const createdVault = Number(res.methodResults[0].returnValue as algosdk.ABIValue);
+      assetReceiver = algosdk.getApplicationAddress(createdVault);
+      await this.vaultOptIn(atc, sender, signer, asa, createdVault);
+    }
+
+    const tx = algosdk.makeAssetTransferTxnWithSuggestedParams(
+      sender,
+      assetReceiver,
+      undefined,
+      undefined,
+      amount,
+      undefined,
+      asa,
+      await this.algodClient.getTransactionParams().do(),
+    );
+
+    atc.addTransaction({ txn: tx, signer });
+
+    return atc.execute(this.algodClient, 3);
+  }
 }
