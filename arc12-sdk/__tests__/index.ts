@@ -248,7 +248,8 @@ describe('ARC12 SDK', () => {
 
     await atc.execute(algodClient, 3);
 
-    // TODO: expect error
-    // await algodClient.getApplicationByID(state.vault).do();
+    expect(async () => {
+      await algodClient.getApplicationByID(state.vault).do();
+    }).rejects.toThrow('application does not exist');
   });
 });
