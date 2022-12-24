@@ -349,9 +349,9 @@ delete: // delete()
 	// src_map:arc12.rb:107
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
+	swap
 	pop
-	int 0
-	==
+	!
 	assert
 
 	// src_map:arc12.rb:108

@@ -104,7 +104,7 @@ class Vault < TEALrb::Contract
   # @abi
   # @on_completion [DeleteApplication]
   def delete
-    assert global.current_application_address.balance == 0
+    assert !global.current_application_address.balance?
     assert this_txn.sender == global.creator_address
   end
 
