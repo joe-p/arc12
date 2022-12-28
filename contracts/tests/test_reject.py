@@ -20,11 +20,11 @@ class TestReject(ARC12TestClass):
         info = self.algod.account_info(self.master_client.app_addr)
         assert info["amount"] == info["min-balance"]
 
-    @pytest.mark.skip("TODO: Fix this test to have proper amount")
     def test_reject_creator_balance(self, reject):
         assert (
             self.algod.account_info(self.creator.address)["amount"]
             == self.creator_pre_reject_balance
+            + 347_000  # 347_000 is the amount refunded for the vault
         )
 
     def test_reject_receiver_balance(self, reject):
