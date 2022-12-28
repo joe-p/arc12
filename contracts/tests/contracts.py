@@ -8,7 +8,7 @@ class Master(Application):
         return Reject()
 
     @external
-    def create_vault(
+    def createVault(
         self,
         receiver: abi.Account,
         mbr_payment: abi.PaymentTransaction,
@@ -18,7 +18,7 @@ class Master(Application):
         return Reject()
 
     @external
-    def verify_axfer(
+    def verifyAxfer(
         self,
         receiver: abi.Account,
         vault_axfer: abi.AssetTransferTransaction,
@@ -27,21 +27,21 @@ class Master(Application):
         return Reject()
 
     @external
-    def get_vault_id(self, receiver: abi.Account, *, output: abi.Uint64):
+    def getVaultID(self, receiver: abi.Account, *, output: abi.Uint64):
         return Reject()
 
     @external
-    def get_vault_addr(self, receiver: abi.Account, *, output: abi.Address):
+    def getVaultAddr(self, receiver: abi.Account, *, output: abi.Address):
         return Reject()
 
     @external
-    def delete_vault(self, vault: abi.Application, creator: abi.Account):
+    def deleteVault(self, vault: abi.Application, creator: abi.Account):
         return Reject()
 
 
 class Vault(Application):
     @external
-    def opt_in(self, asa: abi.Asset, mbr_payment: abi.PaymentTransaction):
+    def optIn(self, asa: abi.Asset, mbr_payment: abi.PaymentTransaction):
         return Reject()
 
     @external

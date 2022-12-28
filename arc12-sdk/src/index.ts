@@ -1,6 +1,6 @@
 import algosdk from 'algosdk';
-import vaultABI from '../../artifacts/vault.abi.json';
-import masterABI from '../../artifacts/master.abi.json';
+import vaultABI from '../../contracts/Vault.abi.json';
+import masterABI from '../../contracts/Master.abi.json';
 
 interface Holding {
   optedIn: boolean,
@@ -109,7 +109,7 @@ export default class ARC12 {
 
     atc.addMethodCall({
       appID: this.masterApp,
-      method: algosdk.getMethodByName(this.masterContract.methods, 'delete_vault'),
+      method: algosdk.getMethodByName(this.masterContract.methods, 'deleteVault'),
       methodArgs: [vault, vaultCreator],
       sender,
       suggestedParams: appSp,
@@ -228,7 +228,7 @@ export default class ARC12 {
 
     atc.addMethodCall({
       appID: master,
-      method: algosdk.getMethodByName(this.masterContract.methods, 'create_vault'),
+      method: algosdk.getMethodByName(this.masterContract.methods, 'createVault'),
       methodArgs: [receiver, { txn: payTxn, signer }],
       sender,
       suggestedParams: appSp,
@@ -262,7 +262,7 @@ export default class ARC12 {
 
     atc.addMethodCall({
       appID: vault,
-      method: algosdk.getMethodByName(this.vaultContract.methods, 'opt_in'),
+      method: algosdk.getMethodByName(this.vaultContract.methods, 'optIn'),
       methodArgs: [asa, { txn: payTxn, signer }],
       sender,
       suggestedParams: appSp,

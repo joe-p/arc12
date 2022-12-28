@@ -1,16 +1,14 @@
 {
   "name": "Vault",
-  "networks": {
-  },
+  "desc": "",
   "methods": [
     {
       "name": "create",
-      "desc": "Method called for creation of the vault",
       "args": [
         {
           "name": "receiver",
           "type": "account",
-          "desc": "The account that can claim ASAs from this vault"
+          "desc": ""
         },
         {
           "name": "sender",
@@ -18,21 +16,22 @@
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     },
     {
       "name": "reject",
-      "desc": "",
       "args": [
         {
-          "name": "asa_creator",
+          "name": "asaCreator",
           "type": "account",
           "desc": ""
         },
         {
-          "name": "fee_sink",
+          "name": "feeSink",
           "type": "account",
           "desc": ""
         },
@@ -42,66 +41,69 @@
           "desc": ""
         },
         {
-          "name": "vault_creator",
+          "name": "vaultCreator",
           "type": "account",
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     },
     {
-      "name": "opt_in",
-      "desc": "Opts into the given asa",
+      "name": "optIn",
       "args": [
         {
           "name": "asa",
           "type": "asset",
-          "desc": "The asset to opt-in to"
+          "desc": ""
         },
         {
-          "name": "mbr_payment",
+          "name": "mbrPayment",
           "type": "pay",
-          "desc": "The payment to cover this contracts MBR"
+          "desc": ""
         }
       ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "delete",
       "desc": "",
-      "args": [
-
-      ],
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     },
     {
       "name": "claim",
-      "desc": "Sends the ASA to the intended receiver",
       "args": [
         {
           "name": "asa",
           "type": "asset",
-          "desc": "The ASA to send"
+          "desc": ""
         },
         {
           "name": "creator",
           "type": "account",
-          "desc": "The account that funded the MBR for the application"
+          "desc": ""
         },
         {
-          "name": "asa_mbr_funder",
+          "name": "asaMbrFunder",
           "type": "account",
-          "desc": "The account that funded the MBR for the ASA"
+          "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "delete",
+      "args": [],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
       }
     }
   ]
