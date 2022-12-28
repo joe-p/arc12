@@ -12,7 +12,7 @@ from algosdk.atomic_transaction_composer import (
 import pytest
 from contracts import Vault, Master
 
-ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, "artifacts")
+ARTIFACTS = Path.joinpath(Path(__file__).parent.parent)
 
 
 class ARC12TestClass:
@@ -47,7 +47,7 @@ class ARC12TestClass:
     def create_master(self, request, setup):
         master_app = Master(version=8)
         master_app.approval_program = Path.joinpath(
-            ARTIFACTS, "master.teal"
+            ARTIFACTS, "Master.teal"
         ).read_text()
 
         master_client = client.ApplicationClient(
@@ -85,7 +85,7 @@ class ARC12TestClass:
         )
 
         vault_id = request.cls.master_client.call(
-            method=Master.create_vault,
+            method=Master.createVault,
             receiver=request.cls.receiver.address,
             mbr_payment=pay_txn,
             boxes=[
@@ -97,7 +97,7 @@ class ARC12TestClass:
         ).return_value
 
         vault_app = Vault(version=8)
-        vault_app.approval_program = Path.joinpath(ARTIFACTS, "vault.teal").read_text()
+        vault_app.approval_program = Path.joinpath(ARTIFACTS, "Vault.teal").read_text()
 
         request.cls.vault_client = client.ApplicationClient(
             client=sandbox.get_algod_client(),
@@ -140,7 +140,7 @@ class ARC12TestClass:
         )
 
         request.cls.vault_client.call(
-            method=Vault.opt_in,
+            method=Vault.optIn,
             asa=request.cls.asa_id,
             mbr_payment=pay_txn,
             boxes=[
@@ -162,7 +162,7 @@ class ARC12TestClass:
         )
 
         request.cls.master_client.call(
-            method=Master.verify_axfer,
+            method=Master.verifyAxfer,
             receiver=request.cls.receiver.address,
             vault_axfer=axfer,
             vault=request.cls.vault_client.app_id,
@@ -210,7 +210,7 @@ class ARC12TestClass:
             sender=claimer.address,
             signer=claimer.signer,
             sp=del_sp,
-            method=application.get_method_spec(Master.delete_vault),
+            method=application.get_method_spec(Master.deleteVault),
             method_args=[self.vault_client.app_id, self.creator.address],
             boxes=[
                 (
@@ -267,7 +267,7 @@ class ARC12TestClass:
             sender=request.cls.receiver.address,
             signer=request.cls.receiver.signer,
             sp=del_sp,
-            method=application.get_method_spec(Master.delete_vault),
+            method=application.get_method_spec(Master.deleteVault),
             method_args=[request.cls.vault_client.app_id, request.cls.creator.address],
             boxes=[
                 (
@@ -313,7 +313,7 @@ class ARC12TestClass:
         )
 
         request.cls.vault_client.call(
-            method=Vault.opt_in,
+            method=Vault.optIn,
             asa=request.cls.second_asa_id,
             mbr_payment=pay_txn,
             boxes=[
@@ -342,7 +342,7 @@ class ARC12TestClass:
         )
 
         request.cls.master_client.call(
-            method=Master.verify_axfer,
+            method=Master.verifyAxfer,
             receiver=request.cls.receiver.address,
             vault_axfer=axfer,
             vault=request.cls.vault_client.app_id,

@@ -1,21 +1,18 @@
 {
   "name": "Master",
-  "networks": {
-  },
+  "desc": "",
   "methods": [
     {
       "name": "create",
+      "args": [],
       "desc": "",
-      "args": [
-
-      ],
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     },
     {
-      "name": "create_vault",
-      "desc": "Create Vault",
+      "name": "createVault",
       "args": [
         {
           "name": "receiver",
@@ -23,18 +20,19 @@
           "desc": ""
         },
         {
-          "name": "mbr_payment",
+          "name": "mbrPayment",
           "type": "pay",
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "uint64"
+        "type": "uint64",
+        "desc": ""
       }
     },
     {
-      "name": "verify_axfer",
-      "desc": "",
+      "name": "verifyAxfer",
       "args": [
         {
           "name": "receiver",
@@ -42,7 +40,7 @@
           "desc": ""
         },
         {
-          "name": "vault_axfer",
+          "name": "vaultAxfer",
           "type": "axfer",
           "desc": ""
         },
@@ -52,13 +50,14 @@
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     },
     {
-      "name": "get_vault_id",
-      "desc": "",
+      "name": "getVaultId",
       "args": [
         {
           "name": "receiver",
@@ -66,13 +65,14 @@
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "uint64"
+        "type": "uint64",
+        "desc": ""
       }
     },
     {
-      "name": "get_vault_addr",
-      "desc": "",
+      "name": "getVaultAddr",
       "args": [
         {
           "name": "receiver",
@@ -80,13 +80,14 @@
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "address"
+        "type": "address",
+        "desc": ""
       }
     },
     {
-      "name": "delete_vault",
-      "desc": "",
+      "name": "deleteVault",
       "args": [
         {
           "name": "vault",
@@ -99,8 +100,10 @@
           "desc": ""
         }
       ],
+      "desc": "",
       "returns": {
-        "type": "void"
+        "type": "void",
+        "desc": ""
       }
     }
   ]
