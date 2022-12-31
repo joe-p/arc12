@@ -36,10 +36,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@joe-p/tealscript@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@joe-p/tealscript/-/tealscript-0.2.0.tgz#2804a379d5547c7c34bee20151089468fb868901"
-  integrity sha512-nKwb1oHEYdX7ZtKFlK1F4RXQ0DTvJq2yyciPunCZzahs87ByMQy6+Tfd2sSMVxjRo5GPxo7Pryw0ZhhgJ58hJw==
+"@joe-p/tealscript@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@joe-p/tealscript/-/tealscript-0.2.1.tgz#e001b6f309b79985537d3a57c1eef9be6804acf7"
+  integrity sha512-rqMeTzUz2Fj/quQjsbPnm+MjVj1HCI2wuq1jR8nXjaOA0FKdhwOO+GIYFEmEur22Nn5pqcrSSDKveMnfHMmMoA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.44.0"
     "@typescript-eslint/parser" "^5.44.0"
