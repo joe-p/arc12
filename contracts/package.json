@@ -1,5 +1,8 @@
 {
+  "scripts": {
+    "start": "tealscript arc12.ts"
+  },
   "dependencies": {
-    "@joe-p/tealscript": "0.1.6"
+    "@joe-p/tealscript": "0.2.0"
   }
 }
