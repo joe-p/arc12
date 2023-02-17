@@ -136,9 +136,7 @@ class Master extends Contract {
   vaultMap = new BoxMap<Account, Application>({ defaultSize: 8 });
 
   @createApplication
-  create(): void {
-    assert(this.txn.applicationID === new Application(0));
-  }
+  create(): void {}
 
   createVault(receiver: Account, mbrPayment: PayTxn): Application {
     assert(!this.vaultMap.exists(receiver));
