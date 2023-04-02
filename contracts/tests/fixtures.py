@@ -47,7 +47,7 @@ class ARC12TestClass:
     def create_master(self, request, setup):
         master_app = Master(version=8)
         master_app.approval_program = Path.joinpath(
-            ARTIFACTS, "Master.teal"
+            ARTIFACTS, "Master.approval.teal"
         ).read_text()
 
         master_client = client.ApplicationClient(
@@ -56,7 +56,7 @@ class ARC12TestClass:
             signer=request.cls.creator.signer,
         )
 
-        master_client.create(args=[get_method_spec(Master.create).get_selector()])
+        master_client.create()
         master_client.fund(100_000)
 
         request.cls.master_client = master_client
@@ -97,7 +97,9 @@ class ARC12TestClass:
         ).return_value
 
         vault_app = Vault(version=8)
-        vault_app.approval_program = Path.joinpath(ARTIFACTS, "Vault.teal").read_text()
+        vault_app.approval_program = Path.joinpath(
+            ARTIFACTS, "Vault.approval.teal"
+        ).read_text()
 
         request.cls.vault_client = client.ApplicationClient(
             client=sandbox.get_algod_client(),
