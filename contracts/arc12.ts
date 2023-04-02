@@ -6,13 +6,13 @@ import { Contract } from '@joe-p/tealscript';
 
 // eslint-disable-next-line no-unused-vars
 class Vault extends Contract {
-  creator = new GlobalReference<Address>({ key: 'creator' });
+  creator = new GlobalReference<Address>();
 
-  master = new GlobalReference<Application>({ key: 'master' });
+  master = new GlobalReference<Application>();
 
-  receiver = new GlobalReference<Address>({ key: 'receiver' });
+  receiver = new GlobalReference<Address>();
 
-  funderMap = new BoxMap<Asset, Address>({ defaultSize: 32 });
+  funderMap = new BoxMap<Asset, Address>();
 
   private closeAcct(vaultCreator: Account): void {
     assert(vaultCreator === this.creator.get());
@@ -133,7 +133,7 @@ class Vault extends Contract {
 
 // eslint-disable-next-line no-unused-vars
 class Master extends Contract {
-  vaultMap = new BoxMap<Address, Application>({ defaultSize: 8 });
+  vaultMap = new BoxMap<Address, Application>();
 
   @handle.createApplication
   create(): void {}
