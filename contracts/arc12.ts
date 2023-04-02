@@ -142,7 +142,6 @@ class Master extends Contract {
     assert(!this.vaultMap.exists(receiver));
     assert(mbrPayment.receiver === globals.currentApplicationAddress);
     assert(mbrPayment.sender === this.txn.sender);
-    assert(mbrPayment.closeRemainderTo === globals.zeroAddress);
 
     const preCreateMBR = globals.currentApplicationAddress.minBalance;
 
