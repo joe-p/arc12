@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "tealscript arc12.ts && pytest tests/",
-    "build": "tealscript arc12.ts",
+    "start": "yarn build && yarn test",
+    "build": "tealscript arc12.ts artifacts/",
     "test": "pytest tests/"
   },
   "dependencies": {

@@ -12,7 +12,7 @@ from algosdk.atomic_transaction_composer import (
 import pytest
 from contracts import Vault, Master
 
-ARTIFACTS = Path.joinpath(Path(__file__).parent.parent)
+ARTIFACTS = Path.joinpath(Path(__file__).parent.parent, 'artifacts')
 
 
 class ARC12TestClass:
