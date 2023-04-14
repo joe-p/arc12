@@ -1,6 +1,6 @@
 import algosdk from 'algosdk';
-import vaultABI from '../../contracts/Vault.abi.json';
-import masterABI from '../../contracts/Master.abi.json';
+import vaultABI from '../../contracts/artifacts/Vault.abi.json';
+import masterABI from '../../contracts/artifacts/Master.abi.json';
 
 interface Holding {
   optedIn: boolean,

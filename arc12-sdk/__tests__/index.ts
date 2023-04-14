@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 // eslint-disable-next-line import/extensions,import/no-unresolved
 import ARC12 from '../src/index';
-import masterABI from '../../contracts/Master.abi.json';
+import masterABI from '../../contracts/artifacts/Master.abi.json';
 
 const token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const server = 'http://localhost';
@@ -95,13 +95,12 @@ async function createMaster(state: TestState) {
     creator.addr,
     await algodClient.getTransactionParams().do(),
     algosdk.OnApplicationComplete.NoOpOC,
-    await compileProgram(fs.readFileSync(path.join(__dirname, '../../contracts/Master.teal')).toString()),
+    await compileProgram(fs.readFileSync(path.join(__dirname, '../../contracts/artifacts/Master.approval.teal')).toString()),
     await compileProgram(fs.readFileSync(path.join(__dirname, 'clear.teal')).toString()),
     0,
     0,
     0,
     0,
-    [algosdk.getMethodByName(masterContract.methods, 'create').getSelector()],
   ).signTxn(creator.sk);
 
   const { txId } = await algodClient.sendRawTransaction(txn).do();
