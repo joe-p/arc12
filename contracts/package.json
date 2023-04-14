@@ -5,6 +5,6 @@
     "test": "pytest tests/"
   },
   "dependencies": {
-    "@joe-p/tealscript": "^0.8.0"
+    "@algorandfoundation/tealscript": "^0.10.0"
   }
 }

@@ -2,7 +2,7 @@
 /* eslint-disable max-classes-per-file */
 
 // eslint-disable-next-line import/no-unresolved, import/extensions
-import { Contract } from '@joe-p/tealscript';
+import { Contract } from '@algorandfoundation/tealscript';
 
 // eslint-disable-next-line no-unused-vars
 class Vault extends Contract {
@@ -134,9 +134,6 @@ class Vault extends Contract {
 // eslint-disable-next-line no-unused-vars
 class Master extends Contract {
   vaultMap = new BoxMap<Address, Application>();
-
-  @handle.createApplication
-  create(): void {}
 
   createVault(receiver: Account, mbrPayment: PayTxn): Application {
     assert(!this.vaultMap.exists(receiver));
