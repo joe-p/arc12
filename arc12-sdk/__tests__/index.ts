@@ -4,7 +4,6 @@ import fs from 'fs';
 import path from 'path';
 // eslint-disable-next-line import/extensions,import/no-unresolved
 import ARC12 from '../src/index';
-import masterABI from '../../contracts/artifacts/Master.abi.json';
 
 const token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const server = 'http://localhost';
@@ -88,7 +87,6 @@ async function createASA(state: TestState, amount: number = 1): Promise<number> 
 }
 
 async function createMaster(state: TestState) {
-  const masterContract = new algosdk.ABIContract(masterABI);
   const creator = state.sender as algosdk.Account;
 
   const txn = algosdk.makeApplicationCreateTxn(
