@@ -87,11 +87,7 @@ abi_route_create:
 	&&
 	assert
 	txna ApplicationArgs 2
-	btoi
-	txnas Accounts
 	txna ApplicationArgs 1
-	btoi
-	txnas Accounts
 	callsub create
 	int 1
 	return
@@ -102,13 +98,13 @@ create:
 	// arc12.ts:38
 	// this.creator.put(sender)
 	byte "creator"
-	frame_dig -2 // sender: account
+	frame_dig -2 // sender: address
 	app_global_put
 
 	// arc12.ts:39
 	// this.receiver.put(receiver)
 	byte "receiver"
-	frame_dig -1 // receiver: account
+	frame_dig -1 // receiver: address
 	app_global_put
 
 	// arc12.ts:40
@@ -590,7 +586,7 @@ main:
 	match bare_route_DeleteApplication
 
 route_abi:
-	method "create(account,account)void"
+	method "create(address,address)void"
 	method "reject(account,account,asset,account)void"
 	method "optIn(asset,pay)void"
 	method "claim(asset,account,account)void"

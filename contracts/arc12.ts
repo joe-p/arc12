@@ -34,7 +34,7 @@ class Vault extends Contract {
   }
 
   @handle.createApplication
-  create(receiver: Account, sender: Account): void {
+  create(receiver: Address, sender: Address): void {
     this.creator.put(sender);
     this.receiver.put(receiver);
     this.master.put(globals.callerApplicationID);
@@ -135,7 +135,7 @@ class Vault extends Contract {
 class Master extends Contract {
   vaultMap = new BoxMap<Address, Application>();
 
-  createVault(receiver: Account, mbrPayment: PayTxn): Application {
+  createVault(receiver: Address, mbrPayment: PayTxn): Application {
     assert(!this.vaultMap.exists(receiver));
     assert(mbrPayment.receiver === globals.currentApplicationAddress);
     assert(mbrPayment.sender === this.txn.sender);
@@ -143,7 +143,7 @@ class Master extends Contract {
     const preCreateMBR = globals.currentApplicationAddress.minBalance;
 
     /// Create the vault
-    sendMethodCall<[Account, Account], void>({
+    sendMethodCall<[Address, Address], void>({
       name: 'create',
       onCompletion: 'NoOp',
       fee: 0,
@@ -171,7 +171,7 @@ class Master extends Contract {
     return vault;
   }
 
-  verifyAxfer(receiver: Account, vaultAxfer: AssetTransferTxn, vault: Application): void {
+  verifyAxfer(receiver: Address, vaultAxfer: AssetTransferTxn, vault: Application): void {
     assert(this.vaultMap.exists(receiver));
 
     assert(this.vaultMap.get(receiver) === vault);
@@ -179,26 +179,25 @@ class Master extends Contract {
     assert(vaultAxfer.assetCloseTo === globals.zeroAddress);
   }
 
-  hasVault(receiver: Account): uint64 {
+  hasVault(receiver: Address): uint64 {
     return this.vaultMap.exists(receiver);
   }
 
-  getVaultId(receiver: Account): Application {
+  getVaultId(receiver: Address): Application {
     return this.vaultMap.get(receiver);
   }
 
-  getVaultAddr(receiver: Account): Address {
+  getVaultAddr(receiver: Address): Address {
     return this.vaultMap.get(receiver).address;
   }
 
-  deleteVault(vault: Application, creator: Account): void {
+  deleteVault(vault: Application, vaultCreator: Account): void {
     /// The fee needs to be 0 because all of the fees need to paid by the vault call
     /// This ensures the sender will be refunded for all fees if they are rejecting the last ASA
     assert(this.txn.fee === 0);
     assert(vault === this.vaultMap.get(this.txn.sender));
 
-    const vaultCreator = vault.global('creator') as Address;
-    assert(vaultCreator === creator);
+    assert(vault.global('creator') as Account === vaultCreator);
 
     const preDeleteMBR = globals.currentApplicationAddress.minBalance;
 

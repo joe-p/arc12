@@ -7,12 +7,12 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         },
         {
           "name": "sender",
-          "type": "account",
+          "type": "address",
           "desc": ""
         }
       ],

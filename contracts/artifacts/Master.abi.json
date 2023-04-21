@@ -7,7 +7,7 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         },
         {
@@ -27,7 +27,7 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         },
         {
@@ -52,7 +52,7 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         }
       ],
@@ -67,7 +67,7 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         }
       ],
@@ -82,7 +82,7 @@
       "args": [
         {
           "name": "receiver",
-          "type": "account",
+          "type": "address",
           "desc": ""
         }
       ],
@@ -101,7 +101,7 @@
           "desc": ""
         },
         {
-          "name": "creator",
+          "name": "vaultCreator",
           "type": "account",
           "desc": ""
         }

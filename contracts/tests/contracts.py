@@ -10,7 +10,7 @@ class Master(Application):
     @external
     def createVault(
         self,
-        receiver: abi.Account,
+        receiver: abi.Address,
         mbr_payment: abi.PaymentTransaction,
         *,
         output: abi.Uint64,
@@ -20,18 +20,18 @@ class Master(Application):
     @external
     def verifyAxfer(
         self,
-        receiver: abi.Account,
+        receiver: abi.Address,
         vault_axfer: abi.AssetTransferTransaction,
         vault: abi.Application,
     ):
         return Reject()
 
     @external
-    def getVaultID(self, receiver: abi.Account, *, output: abi.Uint64):
+    def getVaultID(self, receiver: abi.Address, *, output: abi.Uint64):
         return Reject()
 
     @external
-    def getVaultAddr(self, receiver: abi.Account, *, output: abi.Address):
+    def getVaultAddr(self, receiver: abi.Address, *, output: abi.Address):
         return Reject()
 
     @external
