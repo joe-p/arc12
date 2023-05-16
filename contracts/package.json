@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "start": "yarn build && yarn test",
+    "build": "tealscript arc12.ts artifacts/",
+    "test": "pytest tests/"
+  },
+  "dependencies": {
+    "@algorandfoundation/tealscript": "^0.10.2"
+  }
+}
