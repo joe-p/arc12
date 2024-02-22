@@ -49,6 +49,10 @@ describe('Arc12', () => {
     alice = testAccount;
   });
 
+  test('routerOptIn', async () => {
+    await appClient.optRouterIn({ asa: assetId }, { sendParams: { fee: algokit.microAlgos(2_000) } });
+  });
+
   test('Brand new account getAssetSendInfo', async () => {
     const res = await appClient.getAssetSendInfo({ asset: assetId, receiver: algosdk.generateAccount().addr });
 
@@ -57,10 +61,6 @@ describe('Arc12', () => {
 
     expect(itxns).toBe(5n);
     expect(mbr).toBe(228_100n);
-  });
-
-  test('routerOptIn', async () => {
-    await appClient.optRouterIn({ asa: assetId }, { sendParams: { fee: algokit.microAlgos(2_000) } });
   });
 
   test('Brand new account sendAsset', async () => {
