@@ -10,7 +10,7 @@ class Vault extends Contract {
 
   master = GlobalStateKey<AppID>();
 
-  receiver = GlobalStateKey<Address>();
+  owner = GlobalStateKey<Address>();
 
   funderMap = BoxMap<AssetID, Address>();
 
@@ -19,8 +19,7 @@ class Vault extends Contract {
     sendPayment({
       receiver: this.creator.value,
       amount: globals.currentApplicationAddress.minBalance,
-      /// Any remaining balance is sent the receiver for the vault
-      closeRemainderTo: this.txn.sender,
+      closeRemainderTo: this.owner.value,
     });
 
     const deleteVaultTxn = this.txnGroup[this.txn.groupIndex + 1];
@@ -31,14 +30,14 @@ class Vault extends Contract {
   }
 
   @allow.create('NoOp')
-  create(receiver: Address, sender: Address): void {
+  create(owner: Address, sender: Address): void {
     this.creator.value = sender;
-    this.receiver.value = receiver;
+    this.owner.value = owner;
     this.master.value = globals.callerApplicationID;
   }
 
   reject(asaCreator: Address, asa: AssetID): void {
-    assert(this.txn.sender === this.receiver.value);
+    assert(this.txn.sender === this.owner.value);
     const feeSink = addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     const preMbr = globals.currentApplicationAddress.minBalance;
 
@@ -90,7 +89,7 @@ class Vault extends Contract {
 
   claim(asa: AssetID): void {
     assert(this.funderMap(asa).exists);
-    assert(this.txn.sender === this.receiver.value);
+    assert(this.txn.sender === this.owner.value);
 
     const initialMbr = globals.currentApplicationAddress.minBalance;
 
@@ -127,8 +126,8 @@ class Master extends Contract {
   @allow.bareCreate()
   create() { }
 
-  createVault(receiver: Address, mbrPayment: PayTxn): AppID {
-    assert(!this.vaultMap(receiver).exists);
+  createVault(owner: Address, mbrPayment: PayTxn): AppID {
+    assert(!this.vaultMap(owner).exists);
     assert(mbrPayment.receiver === globals.currentApplicationAddress);
     assert(mbrPayment.sender === this.txn.sender);
 
@@ -136,7 +135,7 @@ class Master extends Contract {
 
     /// Create the vault
     sendMethodCall<typeof Vault.prototype.create>({
-      methodArgs: [receiver, this.txn.sender],
+      methodArgs: [owner, this.txn.sender],
       clearStateProgram: Vault.clearProgram(),
       approvalProgram: Vault.approvalProgram(),
       globalNumByteSlice: Vault.schema.global.numByteSlice,
@@ -151,32 +150,32 @@ class Master extends Contract {
       amount: globals.minBalance,
     });
 
-    this.vaultMap(receiver).value = vault;
+    this.vaultMap(owner).value = vault;
 
     assert(mbrPayment.amount === (globals.currentApplicationAddress.minBalance - preCreateMBR) + globals.minBalance);
 
     return vault;
   }
 
-  verifyAxfer(receiver: Address, vaultAxfer: AssetTransferTxn, vault: AppID): void {
-    assert(this.vaultMap(receiver).exists);
+  verifyAxfer(owner: Address, vaultAxfer: AssetTransferTxn, vault: AppID): void {
+    assert(this.vaultMap(owner).exists);
 
-    assert(this.vaultMap(receiver).value === vault);
+    assert(this.vaultMap(owner).value === vault);
     assert(vaultAxfer.assetReceiver === vault.address);
     assert(vaultAxfer.assetCloseTo === globals.zeroAddress);
   }
 
-  hasVault(receiver: Address): uint64 {
+  hasVault(owner: Address): uint64 {
     // @ts-expect-error Need to fix the return type for .exists in TEALScript
-    return this.vaultMap(receiver).exists;
+    return this.vaultMap(owner).exists;
   }
 
-  getVaultId(receiver: Address): AppID {
-    return this.vaultMap(receiver).value;
+  getVaultId(owner: Address): AppID {
+    return this.vaultMap(owner).value;
   }
 
-  getVaultAddr(receiver: Address): Address {
-    return this.vaultMap(receiver).value.address;
+  getVaultAddr(owner: Address): Address {
+    return this.vaultMap(owner).value.address;
   }
 
   deleteVault(vault: AppID): void {
