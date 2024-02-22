@@ -36,17 +36,17 @@ class Vault extends Contract {
     this.master.value = globals.callerApplicationID;
   }
 
-  reject(asaCreator: Address, asa: AssetID): void {
+  reject(asa: AssetID): void {
     assert(this.txn.sender === this.owner.value);
     const feeSink = addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     const preMbr = globals.currentApplicationAddress.minBalance;
 
     /// Send asset back to creator since they are guranteed to be opted in
     sendAssetTransfer({
-      assetReceiver: asaCreator,
+      assetReceiver: asa.creator,
       xferAsset: asa,
       assetAmount: 0,
-      assetCloseTo: asaCreator,
+      assetCloseTo: asa.creator,
     });
 
     this.funderMap(asa).delete();
