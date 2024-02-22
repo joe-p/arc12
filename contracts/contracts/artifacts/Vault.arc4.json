@@ -26,16 +26,8 @@
           "type": "address"
         },
         {
-          "name": "feeSink",
-          "type": "address"
-        },
-        {
           "name": "asa",
           "type": "uint64"
-        },
-        {
-          "name": "vaultCreator",
-          "type": "address"
         }
       ],
       "returns": {
@@ -64,14 +56,6 @@
         {
           "name": "asa",
           "type": "uint64"
-        },
-        {
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "name": "asaMbrFunder",
-          "type": "address"
         }
       ],
       "returns": {

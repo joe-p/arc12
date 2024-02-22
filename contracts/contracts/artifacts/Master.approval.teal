@@ -72,7 +72,7 @@ createVault:
 	byte 0x
 	dup
 
-	// contracts/arc12.algo.ts:142
+	// contracts/arc12.algo.ts:131
 	// assert(!this.vaultMap(receiver).exists)
 	frame_dig -1 // receiver: Address
 	box_len
@@ -81,7 +81,7 @@ createVault:
 	!
 	assert
 
-	// contracts/arc12.algo.ts:143
+	// contracts/arc12.algo.ts:132
 	// assert(mbrPayment.receiver === globals.currentApplicationAddress)
 	frame_dig -2 // mbrPayment: PayTxn
 	gtxns Receiver
@@ -89,7 +89,7 @@ createVault:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:144
+	// contracts/arc12.algo.ts:133
 	// assert(mbrPayment.sender === this.txn.sender)
 	frame_dig -2 // mbrPayment: PayTxn
 	gtxns Sender
@@ -97,20 +97,17 @@ createVault:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:146
+	// contracts/arc12.algo.ts:135
 	// preCreateMBR = globals.currentApplicationAddress.minBalance
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	frame_bury 0 // preCreateMBR: uint64
 
-	// contracts/arc12.algo.ts:149
-	// sendMethodCall<[Address, Address], void>({
-	//       name: 'create',
-	//       onCompletion: OnCompletion.NoOp,
-	//       fee: 0,
+	// contracts/arc12.algo.ts:138
+	// sendMethodCall<typeof Vault.prototype.create>({
 	//       methodArgs: [receiver, this.txn.sender],
-	//       clearStateProgram: this.app.clearStateProgram,
+	//       clearStateProgram: Vault.clearProgram(),
 	//       approvalProgram: Vault.approvalProgram(),
 	//       globalNumByteSlice: Vault.schema.global.numByteSlice,
 	//       globalNumUint: Vault.schema.global.numUint,
@@ -121,91 +118,81 @@ createVault:
 	method "create(address,address)void"
 	itxn_field ApplicationArgs
 
-	// contracts/arc12.algo.ts:151
-	// onCompletion: OnCompletion.NoOp
-	int 0 // NoOp
-	itxn_field OnCompletion
-
-	// contracts/arc12.algo.ts:152
-	// fee: 0
-	int 0
-	itxn_field Fee
-
-	// contracts/arc12.algo.ts:153
+	// contracts/arc12.algo.ts:139
 	// methodArgs: [receiver, this.txn.sender]
 	frame_dig -1 // receiver: Address
 	itxn_field ApplicationArgs
 	txn Sender
 	itxn_field ApplicationArgs
 
-	// contracts/arc12.algo.ts:154
-	// clearStateProgram: this.app.clearStateProgram
-	txna Applications 0
-	app_params_get AppClearStateProgram
-	pop
+	// contracts/arc12.algo.ts:140
+	// clearStateProgram: Vault.clearProgram()
+	byte b64 Cg==
 	itxn_field ClearStateProgram
 
-	// contracts/arc12.algo.ts:155
+	// contracts/arc12.algo.ts:141
 	// approvalProgram: Vault.approvalProgram()
-	byte b64 CiAEAQAgBCYEAAdjcmVhdG9yCHJlY2VpdmVyBm1hc3RlcjEYFIEGCzEZCI0MAigAAAAAAAAAAAJHAhoAAAAAAAAAAAJGAIoBACiL/ylkEkSxIrIQi/+yBzIKcwFIsggjsgExALIJszEWIgiMAIsAOBgrZBJEiwA5GgCABJtKZKUSRIsAOTIBNjIAEkSJNhoCSRUkEkQ2GgFJFSQSRIgAAiJDigIAKYv+ZyqL/2crMg1niTYaBEkVJBJENhoDFzYaAkkVJBJENhoBSRUkEkSIAAIiQ4oEAChJMQAqZBJEi/6AIMf8zbJY8NQYnCv4ttaO5pdQhkKwrQAfMfy5GMNUuoWaEkQyCnMBSIwAsSWyEIv/shSL/bIRI7ISi/+yFSOyAbOL/Ra8iwAyCnMBSAmMAbEishCL/rIHiwExAQmyCCOyAbOxIrIQMQCyBzEBsggjsgGzMgpzCUgjEkEABYv8iP7kiTEWIglJOBAiEkQ2GgEXiAACIkOKAgAoi/8WvUxIFESL/jgAMQASRIv+OAcyChJEMgpzAUiMAIv/FjEAv7ElshAyCrIUI7ISI7IBi/+yEbOL/jgIMgpzAUiLAAkSRIk2GgNJFSQSRDYaAkkVJBJENhoBF4gAAiJDigMAKIv/Fr1MSESL/Yv/Fr5EEkQxACpkEkQpZIv+EkQyCnMBSIwAi/8WvLElshAxALIUI7IBMgqL/3AASLISi/+yETEAshWzsSKyEIv9sgeLADIKcwFICbIII7IBszIKcwlIIxJBAAWL/oj9/4mIAAIiQ4oAADIKcwBMSBREMQAyCRJEiYAEipaYDjYaAI4B/iEAgASyEcSHgAQuZcsKgATVqkiWNhoAjgP+KP7Z/zcAADEbQf+3AA==
+	byte b64 CiAEAQAgBCYEAAhyZWNlaXZlcgdjcmVhdG9yBm1hc3RlcjEYFIEGCzEZCI0MAfEAAAAAAAAAAAIQAeMAAAAAAAAAAAIPAIoAACixIrIQKmSyBzIKcwFIsggxALIJI7IBszEWIgiMAIsAOBgrZBJEiwA5GgCABJtKZKUSRIsAOTIBNjIAEkSJNhoCSRUkEkQ2GgFJFSQSRIgAAiJDigIAKov+ZymL/2crMg1niTYaAhc2GgFJFSQSRIgAAiJDigIAKEcCMQApZBJEgCDH/M2yWPDUGJwr+LbWjuaXUIZCsK0AHzH8uRjDVLqFmowAMgpzAUiMAbElshCL/7IUi/6yESOyEov/shUjsgGzi/4WvIsBMgpzAUgJjAKxIrIQiwCyB4sCMQEJsggjsgGzsSKyEDEAsgcxAbIII7IBszIKcwlIIxJBAAOI/v2JMRYiCUk4ECISRDYaAReIAAIiQ4oCACiL/xa9TEgURIv+OAAxABJEi/44BzIKEkQyCnMBSIwAi/8WMQC/sSWyEDIKshQjshKL/7IRI7IBs4v+OAgyCnMBSIsACRJEiTYaAReIAAIiQ4oBACiL/xa9TEhEMQApZBJEMgpzAUiMAIv/FryxJbIQMQCyFDIKi/9wAEiyEov/shExALIVI7IBs7EishCL/xa+RLIHiwAyCnMBSAmyCCOyAbMyCnMJSCMSQQADiP42iYgAAiJDigAAMgpzAExIFEQxADIJEkSJgASKlpgONhoAjgH+UgCABOfnLiyABC5lywqABD0dLw82GgCOA/5Z/vf/VQAAMRtB/7cA
 	itxn_field ApprovalProgram
 
-	// contracts/arc12.algo.ts:156
+	// contracts/arc12.algo.ts:142
 	// globalNumByteSlice: Vault.schema.global.numByteSlice
 	int 2
 	itxn_field GlobalNumByteSlice
 
-	// contracts/arc12.algo.ts:157
+	// contracts/arc12.algo.ts:143
 	// globalNumUint: Vault.schema.global.numUint
 	int 1
 	itxn_field GlobalNumUint
 
-	// Submit inner transaction
-	itxn_submit
-
-	// contracts/arc12.algo.ts:160
-	// vault = this.itxn.createdApplicationID
-	itxn CreatedApplicationID
-	frame_bury 1 // vault: uint64
-
-	// contracts/arc12.algo.ts:163
-	// sendPayment({
-	//       receiver: vault.address,
-	//       amount: globals.minBalance,
-	//       fee: 0,
-	//     })
-	itxn_begin
-	int pay
-	itxn_field TypeEnum
-
-	// contracts/arc12.algo.ts:164
-	// receiver: vault.address
-	frame_dig 1 // vault: uint64
-	app_params_get AppAddress
-	pop
-	itxn_field Receiver
-
-	// contracts/arc12.algo.ts:165
-	// amount: globals.minBalance
-	global MinBalance
-	itxn_field Amount
-
-	// contracts/arc12.algo.ts:166
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/arc12.algo.ts:169
+	// contracts/arc12.algo.ts:146
+	// vault = this.itxn.createdApplicationID
+	itxn CreatedApplicationID
+	frame_bury 1 // vault: uint64
+
+	// contracts/arc12.algo.ts:149
+	// sendPayment({
+	//       receiver: vault.address,
+	//       amount: globals.minBalance,
+	//     })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:150
+	// receiver: vault.address
+	frame_dig 1 // vault: uint64
+	app_params_get AppAddress
+	pop
+	itxn_field Receiver
+
+	// contracts/arc12.algo.ts:151
+	// amount: globals.minBalance
+	global MinBalance
+	itxn_field Amount
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/arc12.algo.ts:154
 	// this.vaultMap(receiver).value = vault
 	frame_dig -1 // receiver: Address
 	frame_dig 1 // vault: uint64
 	itob
 	box_put
 
-	// contracts/arc12.algo.ts:172
+	// contracts/arc12.algo.ts:156
 	// assert(mbrPayment.amount === (globals.currentApplicationAddress.minBalance - preCreateMBR) + globals.minBalance)
 	frame_dig -2 // mbrPayment: PayTxn
 	gtxns Amount
@@ -219,7 +206,7 @@ createVault:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:174
+	// contracts/arc12.algo.ts:158
 	// return vault;
 	frame_dig 1 // vault: uint64
 
@@ -263,7 +250,7 @@ createVault:
 verifyAxfer:
 	proto 3 0
 
-	// contracts/arc12.algo.ts:178
+	// contracts/arc12.algo.ts:162
 	// assert(this.vaultMap(receiver).exists)
 	frame_dig -1 // receiver: Address
 	box_len
@@ -271,7 +258,7 @@ verifyAxfer:
 	pop
 	assert
 
-	// contracts/arc12.algo.ts:180
+	// contracts/arc12.algo.ts:164
 	// assert(this.vaultMap(receiver).value === vault)
 	frame_dig -1 // receiver: Address
 	box_get
@@ -281,7 +268,7 @@ verifyAxfer:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:181
+	// contracts/arc12.algo.ts:165
 	// assert(vaultAxfer.assetReceiver === vault.address)
 	frame_dig -2 // vaultAxfer: AssetTransferTxn
 	gtxns AssetReceiver
@@ -291,7 +278,7 @@ verifyAxfer:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:182
+	// contracts/arc12.algo.ts:166
 	// assert(vaultAxfer.assetCloseTo === globals.zeroAddress)
 	frame_dig -2 // vaultAxfer: AssetTransferTxn
 	gtxns AssetCloseTo
@@ -325,7 +312,7 @@ verifyAxfer:
 hasVault:
 	proto 1 1
 
-	// contracts/arc12.algo.ts:187
+	// contracts/arc12.algo.ts:171
 	// return this.vaultMap(receiver).exists;
 	frame_dig -1 // receiver: Address
 	box_len
@@ -358,7 +345,7 @@ hasVault:
 getVaultId:
 	proto 1 1
 
-	// contracts/arc12.algo.ts:191
+	// contracts/arc12.algo.ts:175
 	// return this.vaultMap(receiver).value;
 	frame_dig -1 // receiver: Address
 	box_get
@@ -366,6 +353,8 @@ getVaultId:
 	btoi
 	retsub
 
+// This ensures the sender will be refunded for all fees if they are rejecting the last ASA
+// The fee needs to be 0 because all of the fees need to paid by the vault call
 // getVaultAddr(address)address
 *abi_route_getVaultAddr:
 	// The ABI return prefix
@@ -390,46 +379,38 @@ getVaultId:
 getVaultAddr:
 	proto 1 1
 
-	// contracts/arc12.algo.ts:195
+	// contracts/arc12.algo.ts:179
 	// return this.vaultMap(receiver).value.address;
 	app_params_get AppAddress
 	pop
 	retsub
 
-// deleteVault(uint64,address)void
+// deleteVault(uint64)void
 *abi_route_deleteVault:
-	// vaultCreator: address
-	txna ApplicationArgs 2
-	dup
-	len
-	int 32
-	==
-	assert
-
 	// vault: uint64
 	txna ApplicationArgs 1
 	btoi
 
-	// execute deleteVault(uint64,address)void
+	// execute deleteVault(uint64)void
 	callsub deleteVault
 	int 1
 	return
 
-// deleteVault(vault: AppID, vaultCreator: Address): void
+// deleteVault(vault: AppID): void
 deleteVault:
-	proto 2 0
+	proto 1 0
 
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/arc12.algo.ts:201
+	// contracts/arc12.algo.ts:185
 	// assert(this.txn.fee === 0)
 	txn Fee
 	int 0
 	==
 	assert
 
-	// contracts/arc12.algo.ts:202
+	// contracts/arc12.algo.ts:186
 	// assert(vault === this.vaultMap(this.txn.sender).value)
 	frame_dig -1 // vault: AppID
 	txn Sender
@@ -439,72 +420,62 @@ deleteVault:
 	==
 	assert
 
-	// contracts/arc12.algo.ts:204
-	// assert(vault.globalState('creator') as Address === vaultCreator)
-	frame_dig -1 // vault: AppID
-	byte 0x63726561746f72 // "creator"
-	app_global_get_ex
-	assert
-	frame_dig -2 // vaultCreator: Address
-	==
-	assert
-
-	// contracts/arc12.algo.ts:206
+	// contracts/arc12.algo.ts:188
 	// preDeleteMBR = globals.currentApplicationAddress.minBalance
 	global CurrentApplicationAddress
 	acct_params_get AcctMinBalance
 	pop
 	frame_bury 0 // preDeleteMBR: uint64
 
-	// contracts/arc12.algo.ts:209
+	// contracts/arc12.algo.ts:191
 	// sendAppCall({
 	//       applicationID: vault,
 	//       onCompletion: OnCompletion.DeleteApplication,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int appl
 	itxn_field TypeEnum
 
-	// contracts/arc12.algo.ts:210
+	// contracts/arc12.algo.ts:192
 	// applicationID: vault
 	frame_dig -1 // vault: AppID
 	itxn_field ApplicationID
 
-	// contracts/arc12.algo.ts:211
+	// contracts/arc12.algo.ts:193
 	// onCompletion: OnCompletion.DeleteApplication
 	int 5 // DeleteApplication
 	itxn_field OnCompletion
 
-	// contracts/arc12.algo.ts:212
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/arc12.algo.ts:215
+	// contracts/arc12.algo.ts:196
 	// this.vaultMap(this.txn.sender).delete()
 	txn Sender
 	box_del
 
-	// contracts/arc12.algo.ts:218
+	// contracts/arc12.algo.ts:199
 	// sendPayment({
-	//       receiver: vaultCreator,
+	//       receiver: vault.globalState('creator') as Address,
 	//       amount: preDeleteMBR - globals.currentApplicationAddress.minBalance,
-	//       fee: 0,
 	//     })
 	itxn_begin
 	int pay
 	itxn_field TypeEnum
 
-	// contracts/arc12.algo.ts:219
-	// receiver: vaultCreator
-	frame_dig -2 // vaultCreator: Address
+	// contracts/arc12.algo.ts:200
+	// receiver: vault.globalState('creator') as Address
+	frame_dig -1 // vault: AppID
+	byte 0x63726561746f72 // "creator"
+	app_global_get_ex
+	assert
 	itxn_field Receiver
 
-	// contracts/arc12.algo.ts:220
+	// contracts/arc12.algo.ts:201
 	// amount: preDeleteMBR - globals.currentApplicationAddress.minBalance
 	frame_dig 0 // preDeleteMBR: uint64
 	global CurrentApplicationAddress
@@ -513,8 +484,7 @@ deleteVault:
 	-
 	itxn_field Amount
 
-	// contracts/arc12.algo.ts:221
-	// fee: 0
+	// Fee field not set, defaulting to 0
 	int 0
 	itxn_field Fee
 
@@ -533,7 +503,7 @@ deleteVault:
 	method "hasVault(address)uint64"
 	method "getVaultId(address)uint64"
 	method "getVaultAddr(address)address"
-	method "deleteVault(uint64,address)void"
+	method "deleteVault(uint64)void"
 	txna ApplicationArgs 0
 	match *abi_route_createVault *abi_route_verifyAxfer *abi_route_hasVault *abi_route_getVaultId *abi_route_getVaultAddr *abi_route_deleteVault
 	err

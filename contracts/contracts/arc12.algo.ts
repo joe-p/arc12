@@ -14,14 +14,11 @@ class Vault extends Contract {
 
   funderMap = BoxMap<AssetID, Address>();
 
-  private closeAcct(vaultCreator: Address): void {
-    assert(vaultCreator === this.creator.value);
-
+  private closeAcct(): void {
     /// Send the MBR to the vault creator
     sendPayment({
-      receiver: vaultCreator,
+      receiver: this.creator.value,
       amount: globals.currentApplicationAddress.minBalance,
-      fee: 0,
       /// Any remaining balance is sent the receiver for the vault
       closeRemainderTo: this.txn.sender,
     });
@@ -40,9 +37,9 @@ class Vault extends Contract {
     this.master.value = globals.callerApplicationID;
   }
 
-  reject(asaCreator: Address, feeSink: Address, asa: AssetID, vaultCreator: Address): void {
+  reject(asaCreator: Address, asa: AssetID): void {
     assert(this.txn.sender === this.receiver.value);
-    assert(feeSink === addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA'));
+    const feeSink = addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA')
     const preMbr = globals.currentApplicationAddress.minBalance;
 
     /// Send asset back to creator since they are guranteed to be opted in
@@ -51,7 +48,6 @@ class Vault extends Contract {
       xferAsset: asa,
       assetAmount: 0,
       assetCloseTo: asaCreator,
-      fee: 0,
     });
 
     this.funderMap(asa).delete();
@@ -62,17 +58,15 @@ class Vault extends Contract {
     sendPayment({
       receiver: feeSink,
       amount: mbrAmt - this.txn.fee,
-      fee: 0,
     });
 
     /// Send fee back to sender
     sendPayment({
       receiver: this.txn.sender,
       amount: this.txn.fee,
-      fee: 0,
     });
 
-    if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct(vaultCreator);
+    if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct();
   }
 
   optIn(asa: AssetID, mbrPayment: PayTxn): void {
@@ -88,18 +82,15 @@ class Vault extends Contract {
     sendAssetTransfer({
       assetReceiver: globals.currentApplicationAddress,
       assetAmount: 0,
-      fee: 0,
       xferAsset: asa,
     });
 
     assert(mbrPayment.amount === globals.currentApplicationAddress.minBalance - preMbr);
   }
 
-  claim(asa: AssetID, creator: Address, asaMbrFunder: Address): void {
+  claim(asa: AssetID): void {
     assert(this.funderMap(asa).exists);
-    assert(asaMbrFunder === this.funderMap(asa).value);
     assert(this.txn.sender === this.receiver.value);
-    assert(this.creator.value === creator);
 
     const initialMbr = globals.currentApplicationAddress.minBalance;
 
@@ -108,7 +99,6 @@ class Vault extends Contract {
     /// Transfer all of the asset to the receiver
     sendAssetTransfer({
       assetReceiver: this.txn.sender,
-      fee: 0,
       assetAmount: globals.currentApplicationAddress.assetBalance(asa),
       xferAsset: asa,
       assetCloseTo: this.txn.sender,
@@ -116,12 +106,11 @@ class Vault extends Contract {
 
     /// Send MBR to the funder
     sendPayment({
-      receiver: asaMbrFunder,
+      receiver: this.funderMap(asa).value,
       amount: initialMbr - globals.currentApplicationAddress.minBalance,
-      fee: 0,
     });
 
-    if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct(creator);
+    if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct();
   }
 
   @allow.bareCall('DeleteApplication')
@@ -146,12 +135,9 @@ class Master extends Contract {
     const preCreateMBR = globals.currentApplicationAddress.minBalance;
 
     /// Create the vault
-    sendMethodCall<[Address, Address], void>({
-      name: 'create',
-      onCompletion: OnCompletion.NoOp,
-      fee: 0,
+    sendMethodCall<typeof Vault.prototype.create>({
       methodArgs: [receiver, this.txn.sender],
-      clearStateProgram: this.app.clearStateProgram,
+      clearStateProgram: Vault.clearProgram(),
       approvalProgram: Vault.approvalProgram(),
       globalNumByteSlice: Vault.schema.global.numByteSlice,
       globalNumUint: Vault.schema.global.numUint,
@@ -163,12 +149,10 @@ class Master extends Contract {
     sendPayment({
       receiver: vault.address,
       amount: globals.minBalance,
-      fee: 0,
     });
 
     this.vaultMap(receiver).value = vault;
 
-    // eslint-disable-next-line max-len
     assert(mbrPayment.amount === (globals.currentApplicationAddress.minBalance - preCreateMBR) + globals.minBalance);
 
     return vault;
@@ -195,13 +179,11 @@ class Master extends Contract {
     return this.vaultMap(receiver).value.address;
   }
 
-  deleteVault(vault: AppID, vaultCreator: Address): void {
+  deleteVault(vault: AppID): void {
     /// The fee needs to be 0 because all of the fees need to paid by the vault call
     /// This ensures the sender will be refunded for all fees if they are rejecting the last ASA
     assert(this.txn.fee === 0);
     assert(vault === this.vaultMap(this.txn.sender).value);
-
-    assert(vault.globalState('creator') as Address === vaultCreator);
 
     const preDeleteMBR = globals.currentApplicationAddress.minBalance;
 
@@ -209,16 +191,14 @@ class Master extends Contract {
     sendAppCall({
       applicationID: vault,
       onCompletion: OnCompletion.DeleteApplication,
-      fee: 0,
     });
 
     this.vaultMap(this.txn.sender).delete();
 
     /// Send the MBR back to the vault creator
     sendPayment({
-      receiver: vaultCreator,
+      receiver: vault.globalState('creator') as Address,
       amount: preDeleteMBR - globals.currentApplicationAddress.minBalance,
-      fee: 0,
     });
   }
 }

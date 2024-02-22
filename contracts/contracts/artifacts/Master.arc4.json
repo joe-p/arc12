@@ -80,10 +80,6 @@
         {
           "name": "vault",
           "type": "uint64"
-        },
-        {
-          "name": "vaultCreator",
-          "type": "address"
         }
       ],
       "returns": {
