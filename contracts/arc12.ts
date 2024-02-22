@@ -6,16 +6,16 @@ import { Contract } from '@algorandfoundation/tealscript';
 
 // eslint-disable-next-line no-unused-vars
 class Vault extends Contract {
-  creator = new GlobalReference<Address>();
+  creator = GlobalStateKey<Address>();
 
-  master = new GlobalReference<Application>();
+  master = GlobalStateKey<AppID>();
 
-  receiver = new GlobalReference<Address>();
+  receiver = GlobalStateKey<Address>();
 
-  funderMap = new BoxMap<Asset, Address>();
+  funderMap = BoxMap<AssetID, Address>();
 
-  private closeAcct(vaultCreator: Account): void {
-    assert(vaultCreator === this.creator.get());
+  private closeAcct(vaultCreator: Address): void {
+    assert(vaultCreator === this.creator.value);
 
     /// Send the MBR to the vault creator
     sendPayment({
@@ -28,20 +28,20 @@ class Vault extends Contract {
 
     const deleteVaultTxn = this.txnGroup[this.txn.groupIndex + 1];
     /// Ensure Master.deleteVault is being called for this vault
-    assert(deleteVaultTxn.applicationID === this.master.get());
+    assert(deleteVaultTxn.applicationID === this.master.value);
     assert(deleteVaultTxn.applicationArgs[0] === method('deleteVault(application,account)void'));
     assert(deleteVaultTxn.applications[1] === this.app);
   }
 
-  @handle.createApplication
+  @allow.create('NoOp')
   create(receiver: Address, sender: Address): void {
-    this.creator.put(sender);
-    this.receiver.put(receiver);
-    this.master.put(globals.callerApplicationID);
+    this.creator.value = sender;
+    this.receiver.value = receiver;
+    this.master.value = globals.callerApplicationID;
   }
 
-  reject(asaCreator: Account, feeSink: Account, asa: Asset, vaultCreator: Account): void {
-    assert(this.txn.sender === this.receiver.get());
+  reject(asaCreator: Address, feeSink: Address, asa: AssetID, vaultCreator: Address): void {
+    assert(this.txn.sender === this.receiver.value);
     assert(feeSink === addr('Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA'));
     const preMbr = globals.currentApplicationAddress.minBalance;
 
@@ -54,7 +54,7 @@ class Vault extends Contract {
       fee: 0,
     });
 
-    this.funderMap.delete(asa);
+    this.funderMap(asa).delete();
 
     const mbrAmt = preMbr - globals.currentApplicationAddress.minBalance;
 
@@ -75,14 +75,14 @@ class Vault extends Contract {
     if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct(vaultCreator);
   }
 
-  optIn(asa: Asset, mbrPayment: PayTxn): void {
-    assert(!this.funderMap.exists(asa));
+  optIn(asa: AssetID, mbrPayment: PayTxn): void {
+    assert(!this.funderMap(asa).exists);
     assert(mbrPayment.sender === this.txn.sender);
     assert(mbrPayment.receiver === globals.currentApplicationAddress);
 
     const preMbr = globals.currentApplicationAddress.minBalance;
 
-    this.funderMap.put(asa, this.txn.sender);
+    this.funderMap(asa).value = this.txn.sender;
 
     /// Opt vault into asa
     sendAssetTransfer({
@@ -95,15 +95,15 @@ class Vault extends Contract {
     assert(mbrPayment.amount === globals.currentApplicationAddress.minBalance - preMbr);
   }
 
-  claim(asa: Asset, creator: Account, asaMbrFunder: Account): void {
-    assert(this.funderMap.exists(asa));
-    assert(asaMbrFunder === this.funderMap.get(asa));
-    assert(this.txn.sender === this.receiver.get());
-    assert(this.creator.get() === creator);
+  claim(asa: AssetID, creator: Address, asaMbrFunder: Address): void {
+    assert(this.funderMap(asa).exists);
+    assert(asaMbrFunder === this.funderMap(asa).value);
+    assert(this.txn.sender === this.receiver.value);
+    assert(this.creator.value === creator);
 
     const initialMbr = globals.currentApplicationAddress.minBalance;
 
-    this.funderMap.delete(asa);
+    this.funderMap(asa).delete();
 
     /// Transfer all of the asset to the receiver
     sendAssetTransfer({
@@ -124,19 +124,22 @@ class Vault extends Contract {
     if (globals.currentApplicationAddress.totalAssets === 0) this.closeAcct(creator);
   }
 
-  @handle.deleteApplication
+  @allow.bareCall('DeleteApplication')
   delete(): void {
-    assert(!globals.currentApplicationAddress.hasBalance);
+    assert(!globals.currentApplicationAddress.isInLedger);
     assert(this.txn.sender === globals.creatorAddress);
   }
 }
 
 // eslint-disable-next-line no-unused-vars
 class Master extends Contract {
-  vaultMap = new BoxMap<Address, Application>();
+  vaultMap = BoxMap<Address, AppID>();
 
-  createVault(receiver: Address, mbrPayment: PayTxn): Application {
-    assert(!this.vaultMap.exists(receiver));
+  @allow.bareCreate()
+  create() { }
+
+  createVault(receiver: Address, mbrPayment: PayTxn): AppID {
+    assert(!this.vaultMap(receiver).exists);
     assert(mbrPayment.receiver === globals.currentApplicationAddress);
     assert(mbrPayment.sender === this.txn.sender);
 
@@ -145,13 +148,13 @@ class Master extends Contract {
     /// Create the vault
     sendMethodCall<[Address, Address], void>({
       name: 'create',
-      onCompletion: 'NoOp',
+      onCompletion: OnCompletion.NoOp,
       fee: 0,
       methodArgs: [receiver, this.txn.sender],
       clearStateProgram: this.app.clearStateProgram,
-      approvalProgram: Vault,
-      globalNumByteSlice: 2,
-      globalNumUint: 1,
+      approvalProgram: Vault.approvalProgram(),
+      globalNumByteSlice: Vault.schema.global.numByteSlice,
+      globalNumUint: Vault.schema.global.numUint,
     });
 
     const vault = this.itxn.createdApplicationID;
@@ -163,7 +166,7 @@ class Master extends Contract {
       fee: 0,
     });
 
-    this.vaultMap.put(receiver, vault);
+    this.vaultMap(receiver).value = vault;
 
     // eslint-disable-next-line max-len
     assert(mbrPayment.amount === (globals.currentApplicationAddress.minBalance - preCreateMBR) + globals.minBalance);
@@ -171,44 +174,45 @@ class Master extends Contract {
     return vault;
   }
 
-  verifyAxfer(receiver: Address, vaultAxfer: AssetTransferTxn, vault: Application): void {
-    assert(this.vaultMap.exists(receiver));
+  verifyAxfer(receiver: Address, vaultAxfer: AssetTransferTxn, vault: AppID): void {
+    assert(this.vaultMap(receiver).exists);
 
-    assert(this.vaultMap.get(receiver) === vault);
+    assert(this.vaultMap(receiver).value === vault);
     assert(vaultAxfer.assetReceiver === vault.address);
     assert(vaultAxfer.assetCloseTo === globals.zeroAddress);
   }
 
   hasVault(receiver: Address): uint64 {
-    return this.vaultMap.exists(receiver);
+    // @ts-expect-error Need to fix the return type for .exists in TEALScript
+    return this.vaultMap(receiver).exists;
   }
 
-  getVaultId(receiver: Address): Application {
-    return this.vaultMap.get(receiver);
+  getVaultId(receiver: Address): AppID {
+    return this.vaultMap(receiver).value;
   }
 
   getVaultAddr(receiver: Address): Address {
-    return this.vaultMap.get(receiver).address;
+    return this.vaultMap(receiver).value.address;
   }
 
-  deleteVault(vault: Application, vaultCreator: Account): void {
+  deleteVault(vault: AppID, vaultCreator: Address): void {
     /// The fee needs to be 0 because all of the fees need to paid by the vault call
     /// This ensures the sender will be refunded for all fees if they are rejecting the last ASA
     assert(this.txn.fee === 0);
-    assert(vault === this.vaultMap.get(this.txn.sender));
+    assert(vault === this.vaultMap(this.txn.sender).value);
 
-    assert(vault.global('creator') as Account === vaultCreator);
+    assert(vault.globalState('creator') as Address === vaultCreator);
 
     const preDeleteMBR = globals.currentApplicationAddress.minBalance;
 
     /// Call delete on the vault
     sendAppCall({
       applicationID: vault,
-      onCompletion: 'DeleteApplication',
+      onCompletion: OnCompletion.DeleteApplication,
       fee: 0,
     });
 
-    this.vaultMap.delete(this.txn.sender);
+    this.vaultMap(this.txn.sender).delete();
 
     /// Send the MBR back to the vault creator
     sendPayment({

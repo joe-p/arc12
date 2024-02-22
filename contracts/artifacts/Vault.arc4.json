@@ -7,19 +7,15 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "sender",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     },
     {
@@ -27,29 +23,23 @@
       "args": [
         {
           "name": "asaCreator",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "feeSink",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "asa",
-          "type": "asset",
-          "desc": ""
+          "type": "uint64"
         },
         {
           "name": "vaultCreator",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     },
     {
@@ -57,19 +47,15 @@
       "args": [
         {
           "name": "asa",
-          "type": "asset",
-          "desc": ""
+          "type": "uint64"
         },
         {
           "name": "mbrPayment",
-          "type": "pay",
-          "desc": ""
+          "type": "pay"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     },
     {
@@ -77,24 +63,19 @@
       "args": [
         {
           "name": "asa",
-          "type": "asset",
-          "desc": ""
+          "type": "uint64"
         },
         {
           "name": "creator",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "asaMbrFunder",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     }
   ]

@@ -7,19 +7,15 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "mbrPayment",
-          "type": "pay",
-          "desc": ""
+          "type": "pay"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "uint64",
-        "desc": ""
+        "type": "uint64"
       }
     },
     {
@@ -27,24 +23,19 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         },
         {
           "name": "vaultAxfer",
-          "type": "axfer",
-          "desc": ""
+          "type": "axfer"
         },
         {
           "name": "vault",
-          "type": "application",
-          "desc": ""
+          "type": "uint64"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     },
     {
@@ -52,14 +43,11 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "uint64",
-        "desc": ""
+        "type": "uint64"
       }
     },
     {
@@ -67,14 +55,11 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "uint64",
-        "desc": ""
+        "type": "uint64"
       }
     },
     {
@@ -82,14 +67,11 @@
       "args": [
         {
           "name": "receiver",
-          "type": "address",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "address",
-        "desc": ""
+        "type": "address"
       }
     },
     {
@@ -97,19 +79,15 @@
       "args": [
         {
           "name": "vault",
-          "type": "application",
-          "desc": ""
+          "type": "uint64"
         },
         {
           "name": "vaultCreator",
-          "type": "account",
-          "desc": ""
+          "type": "address"
         }
       ],
-      "desc": "",
       "returns": {
-        "type": "void",
-        "desc": ""
+        "type": "void"
       }
     }
   ]
