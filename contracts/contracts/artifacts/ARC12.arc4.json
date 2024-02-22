@@ -1,0 +1,66 @@
+{
+  "name": "ARC12",
+  "desc": "",
+  "methods": [
+    {
+      "name": "optRouterIn",
+      "desc": "Opt the ARC12 router into the ASA. This is required before this app can be used to send the ASA to anyone.",
+      "args": [
+        {
+          "name": "asa",
+          "type": "uint64",
+          "desc": "The ASA to opt into"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "getAssetSendInfo",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "address",
+          "desc": "The address to send the asset to"
+        },
+        {
+          "name": "asset",
+          "type": "uint64",
+          "desc": "The asset to send"
+        }
+      ],
+      "returns": {
+        "type": "(uint64,uint64)",
+        "desc": "The number of itxns sent and the MBR required to send the asset to the receiver"
+      }
+    },
+    {
+      "name": "sendAsset",
+      "desc": "Send an asset to the receiver",
+      "args": [
+        {
+          "name": "receiver",
+          "type": "address",
+          "desc": "The address to send the asset to"
+        },
+        {
+          "name": "axfer",
+          "type": "axfer",
+          "desc": "The asset transfer to this app"
+        }
+      ],
+      "returns": {
+        "type": "address",
+        "desc": "The address that the asset was sent to (either the receiver or their vault)"
+      }
+    },
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}
