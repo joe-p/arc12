@@ -104,7 +104,7 @@ export class ARC12 extends Contract {
    *
    * @returns The address that the asset was sent to (either the receiver or their vault)
    */
-  sendAsset(receiver: Address, axfer: AssetTransferTxn): Address {
+  sendAsset(axfer: AssetTransferTxn, receiver: Address): Address {
     verifyAssetTransferTxn(axfer, {
       assetReceiver: this.app.address,
     });
@@ -162,12 +162,61 @@ export class ARC12 extends Contract {
   claim(asa: AssetID): void {
     const vault = this.vaults(this.txn.sender).value;
 
+    const preMBR = vault.minBalance;
+
     sendAssetTransfer({
       sender: vault,
       assetReceiver: this.txn.sender,
       assetAmount: vault.assetBalance(asa),
       xferAsset: asa,
       assetCloseTo: this.txn.sender,
+    });
+
+    sendPayment({
+      sender: vault,
+      receiver: this.txn.sender,
+      amount: preMBR - vault.minBalance,
+    });
+  }
+
+  /**
+   * Burn the ASA from the vault with ARC54
+   *
+   * @param asa The ASA to burn
+   * @param arc54App The ARC54 app to burn the ASA to
+   */
+  burn(asa: AssetID, arc54App: AppID) {
+    const vault = this.vaults(this.txn.sender).value;
+
+    // opt the arc54 app into the ASA if not already opted in
+    if (!arc54App.address.isOptedInToAsset(asa)) {
+      sendPayment({
+        receiver: arc54App.address,
+        amount: globals.assetOptInMinBalance,
+      });
+
+      sendMethodCall<[AssetReference], void>({
+        sender: vault,
+        name: 'arc54_optIntoASA',
+        methodArgs: [asa],
+        applicationID: arc54App,
+      });
+    }
+
+    const preMBR = vault.minBalance;
+
+    sendAssetTransfer({
+      sender: vault,
+      assetReceiver: arc54App.address,
+      assetAmount: vault.assetBalance(asa),
+      xferAsset: asa,
+      assetCloseTo: arc54App.address,
+    });
+
+    sendPayment({
+      sender: vault,
+      receiver: this.txn.sender,
+      amount: preMBR - vault.minBalance,
     });
   }
 }

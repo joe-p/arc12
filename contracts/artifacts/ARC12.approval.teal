@@ -377,10 +377,18 @@ getAssetSendInfo:
 	popn 3
 	retsub
 
-// sendAsset(address,axfer)address
+// sendAsset(axfer,address)address
 *abi_route_sendAsset:
 	// The ABI return prefix
 	byte 0x151f7c75
+
+	// receiver: address
+	txna ApplicationArgs 1
+	dup
+	len
+	int 32
+	==
+	assert
 
 	// axfer: axfer
 	txn GroupIndex
@@ -392,22 +400,14 @@ getAssetSendInfo:
 	==
 	assert
 
-	// receiver: address
-	txna ApplicationArgs 1
-	dup
-	len
-	int 32
-	==
-	assert
-
-	// execute sendAsset(address,axfer)address
+	// execute sendAsset(axfer,address)address
 	callsub sendAsset
 	concat
 	log
 	int 1
 	return
 
-// sendAsset(receiver: Address, axfer: AssetTransferTxn): Address
+// sendAsset(axfer: AssetTransferTxn, receiver: Address): Address
 //
 // Send an asset to the receiver
 //
@@ -427,7 +427,7 @@ sendAsset:
 	//       assetReceiver: this.app.address,
 	//     })
 	// verify assetReceiver
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns AssetReceiver
 	global CurrentApplicationAddress
 	==
@@ -436,8 +436,8 @@ sendAsset:
 	// *if5_condition
 	// contracts/arc12.algo.ts:113
 	// receiver.isOptedInToAsset(axfer.xferAsset)
-	frame_dig -1 // receiver: Address
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -2 // receiver: Address
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	asset_holding_get AssetBalance
 	swap
@@ -457,18 +457,18 @@ sendAsset:
 
 	// contracts/arc12.algo.ts:115
 	// assetReceiver: receiver
-	frame_dig -1 // receiver: Address
+	frame_dig -2 // receiver: Address
 	itxn_field AssetReceiver
 
 	// contracts/arc12.algo.ts:116
 	// assetAmount: axfer.assetAmount
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns AssetAmount
 	itxn_field AssetAmount
 
 	// contracts/arc12.algo.ts:117
 	// xferAsset: axfer.xferAsset
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	itxn_field XferAsset
 
@@ -481,13 +481,13 @@ sendAsset:
 
 	// contracts/arc12.algo.ts:120
 	// return receiver;
-	frame_dig -1 // receiver: Address
+	frame_dig -2 // receiver: Address
 	retsub
 
 *if5_end:
 	// contracts/arc12.algo.ts:123
 	// vaultExisted = this.vaults(receiver).exists
-	frame_dig -1 // receiver: Address
+	frame_dig -2 // receiver: Address
 	box_len
 	swap
 	pop
@@ -495,7 +495,7 @@ sendAsset:
 
 	// contracts/arc12.algo.ts:124
 	// vault = this.getOrCreateVault(receiver)
-	frame_dig -1 // receiver: Address
+	frame_dig -2 // receiver: Address
 	callsub getOrCreateVault
 	frame_bury 1 // vault: address
 
@@ -503,7 +503,7 @@ sendAsset:
 	// contracts/arc12.algo.ts:126
 	// !vault.isOptedInToAsset(axfer.xferAsset)
 	frame_dig 1 // vault: address
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	asset_holding_get AssetBalance
 	swap
@@ -603,7 +603,7 @@ sendAsset:
 
 	// contracts/arc12.algo.ts:143
 	// xferAsset: axfer.xferAsset
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	itxn_field XferAsset
 
@@ -632,13 +632,13 @@ sendAsset:
 
 	// contracts/arc12.algo.ts:150
 	// assetAmount: axfer.assetAmount
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns AssetAmount
 	itxn_field AssetAmount
 
 	// contracts/arc12.algo.ts:151
 	// xferAsset: axfer.xferAsset
-	frame_dig -2 // axfer: AssetTransferTxn
+	frame_dig -1 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	itxn_field XferAsset
 
@@ -681,6 +681,7 @@ claim:
 
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
+	dup
 
 	// contracts/arc12.algo.ts:163
 	// vault = this.vaults(this.txn.sender).value
@@ -690,6 +691,13 @@ claim:
 	frame_bury 0 // vault: address
 
 	// contracts/arc12.algo.ts:165
+	// preMBR = vault.minBalance
+	frame_dig 0 // vault: address
+	acct_params_get AcctMinBalance
+	pop
+	frame_bury 1 // preMBR: uint64
+
+	// contracts/arc12.algo.ts:167
 	// sendAssetTransfer({
 	//       sender: vault,
 	//       assetReceiver: this.txn.sender,
@@ -701,17 +709,17 @@ claim:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/arc12.algo.ts:166
+	// contracts/arc12.algo.ts:168
 	// sender: vault
 	frame_dig 0 // vault: address
 	itxn_field Sender
 
-	// contracts/arc12.algo.ts:167
+	// contracts/arc12.algo.ts:169
 	// assetReceiver: this.txn.sender
 	txn Sender
 	itxn_field AssetReceiver
 
-	// contracts/arc12.algo.ts:168
+	// contracts/arc12.algo.ts:170
 	// assetAmount: vault.assetBalance(asa)
 	frame_dig 0 // vault: address
 	frame_dig -1 // asa: AssetID
@@ -719,15 +727,259 @@ claim:
 	pop
 	itxn_field AssetAmount
 
-	// contracts/arc12.algo.ts:169
+	// contracts/arc12.algo.ts:171
 	// xferAsset: asa
 	frame_dig -1 // asa: AssetID
 	itxn_field XferAsset
 
-	// contracts/arc12.algo.ts:170
+	// contracts/arc12.algo.ts:172
 	// assetCloseTo: this.txn.sender
 	txn Sender
 	itxn_field AssetCloseTo
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/arc12.algo.ts:175
+	// sendPayment({
+	//       sender: vault,
+	//       receiver: this.txn.sender,
+	//       amount: preMBR - vault.minBalance,
+	//     })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:176
+	// sender: vault
+	frame_dig 0 // vault: address
+	itxn_field Sender
+
+	// contracts/arc12.algo.ts:177
+	// receiver: this.txn.sender
+	txn Sender
+	itxn_field Receiver
+
+	// contracts/arc12.algo.ts:178
+	// amount: preMBR - vault.minBalance
+	frame_dig 1 // preMBR: uint64
+	frame_dig 0 // vault: address
+	acct_params_get AcctMinBalance
+	pop
+	-
+	itxn_field Amount
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+	retsub
+
+// burn(uint64,uint64)void
+*abi_route_burn:
+	// arc54App: uint64
+	txna ApplicationArgs 2
+	btoi
+
+	// asa: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// execute burn(uint64,uint64)void
+	callsub burn
+	int 1
+	return
+
+// burn(asa: AssetID, arc54App: AppID): void
+//
+// Burn the ASA from the vault with ARC54
+//
+// @param asa The ASA to burn
+// @param arc54App The ARC54 app to burn the ASA to
+burn:
+	proto 2 0
+
+	// Push empty bytes after the frame pointer to reserve space for local variables
+	byte 0x
+	dup
+
+	// contracts/arc12.algo.ts:189
+	// vault = this.vaults(this.txn.sender).value
+	txn Sender
+	box_get
+	assert
+	frame_bury 0 // vault: address
+
+	// *if9_condition
+	// contracts/arc12.algo.ts:192
+	// !arc54App.address.isOptedInToAsset(asa)
+	frame_dig -2 // arc54App: AppID
+	app_params_get AppAddress
+	pop
+	frame_dig -1 // asa: AssetID
+	asset_holding_get AssetBalance
+	swap
+	pop
+	!
+	bz *if9_end
+
+	// *if9_consequent
+	// contracts/arc12.algo.ts:193
+	// sendPayment({
+	//         receiver: arc54App.address,
+	//         amount: globals.assetOptInMinBalance,
+	//       })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:194
+	// receiver: arc54App.address
+	frame_dig -2 // arc54App: AppID
+	app_params_get AppAddress
+	pop
+	itxn_field Receiver
+
+	// contracts/arc12.algo.ts:195
+	// amount: globals.assetOptInMinBalance
+	global AssetOptInMinBalance
+	itxn_field Amount
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/arc12.algo.ts:198
+	// sendMethodCall<[AssetReference], void>({
+	//         sender: vault,
+	//         name: 'arc54_optIntoASA',
+	//         methodArgs: [asa],
+	//         applicationID: arc54App,
+	//       })
+	itxn_begin
+	int appl
+	itxn_field TypeEnum
+	method "arc54_optIntoASA(asset)void"
+	itxn_field ApplicationArgs
+
+	// contracts/arc12.algo.ts:199
+	// sender: vault
+	frame_dig 0 // vault: address
+	itxn_field Sender
+
+	// contracts/arc12.algo.ts:201
+	// methodArgs: [asa]
+	frame_dig -1 // asa: AssetID
+	itxn_field ApplicationArgs
+
+	// contracts/arc12.algo.ts:202
+	// applicationID: arc54App
+	frame_dig -2 // arc54App: AppID
+	itxn_field ApplicationID
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+*if9_end:
+	// contracts/arc12.algo.ts:206
+	// preMBR = vault.minBalance
+	frame_dig 0 // vault: address
+	acct_params_get AcctMinBalance
+	pop
+	frame_bury 1 // preMBR: uint64
+
+	// contracts/arc12.algo.ts:208
+	// sendAssetTransfer({
+	//       sender: vault,
+	//       assetReceiver: arc54App.address,
+	//       assetAmount: vault.assetBalance(asa),
+	//       xferAsset: asa,
+	//       assetCloseTo: arc54App.address,
+	//     })
+	itxn_begin
+	int axfer
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:209
+	// sender: vault
+	frame_dig 0 // vault: address
+	itxn_field Sender
+
+	// contracts/arc12.algo.ts:210
+	// assetReceiver: arc54App.address
+	frame_dig -2 // arc54App: AppID
+	app_params_get AppAddress
+	pop
+	itxn_field AssetReceiver
+
+	// contracts/arc12.algo.ts:211
+	// assetAmount: vault.assetBalance(asa)
+	frame_dig 0 // vault: address
+	frame_dig -1 // asa: AssetID
+	asset_holding_get AssetBalance
+	pop
+	itxn_field AssetAmount
+
+	// contracts/arc12.algo.ts:212
+	// xferAsset: asa
+	frame_dig -1 // asa: AssetID
+	itxn_field XferAsset
+
+	// contracts/arc12.algo.ts:213
+	// assetCloseTo: arc54App.address
+	frame_dig -2 // arc54App: AppID
+	app_params_get AppAddress
+	pop
+	itxn_field AssetCloseTo
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/arc12.algo.ts:216
+	// sendPayment({
+	//       sender: vault,
+	//       receiver: this.txn.sender,
+	//       amount: preMBR - vault.minBalance,
+	//     })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:217
+	// sender: vault
+	frame_dig 0 // vault: address
+	itxn_field Sender
+
+	// contracts/arc12.algo.ts:218
+	// receiver: this.txn.sender
+	txn Sender
+	itxn_field Receiver
+
+	// contracts/arc12.algo.ts:219
+	// amount: preMBR - vault.minBalance
+	frame_dig 1 // preMBR: uint64
+	frame_dig 0 // vault: address
+	acct_params_get AcctMinBalance
+	pop
+	-
+	itxn_field Amount
 
 	// Fee field not set, defaulting to 0
 	int 0
@@ -750,8 +1002,9 @@ claim:
 *call_NoOp:
 	method "optRouterIn(uint64)void"
 	method "getAssetSendInfo(address,uint64)(uint64,uint64)"
-	method "sendAsset(address,axfer)address"
+	method "sendAsset(axfer,address)address"
 	method "claim(uint64)void"
+	method "burn(uint64,uint64)void"
 	txna ApplicationArgs 0
-	match *abi_route_optRouterIn *abi_route_getAssetSendInfo *abi_route_sendAsset *abi_route_claim
+	match *abi_route_optRouterIn *abi_route_getAssetSendInfo *abi_route_sendAsset *abi_route_claim *abi_route_burn
 	err
