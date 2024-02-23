@@ -29,7 +29,7 @@ import type { ABIResult, TransactionWithSigner } from 'algosdk'
 import { Algodv2, OnApplicationComplete, Transaction, AtomicTransactionComposer, modelsv2 } from 'algosdk'
 export const APP_SPEC: AppSpec = {
   "hints": {
-    "new(address)address": {
+    "new()address": {
       "call_config": {
         "delete_application": "CREATE"
       }
@@ -63,7 +63,7 @@ export const APP_SPEC: AppSpec = {
     }
   },
   "source": {
-    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjg2LjAKLy8gaHR0cHM6Ly9naXRodWIuY29tL2FsZ29yYW5kZm91bmRhdGlvbi9URUFMU2NyaXB0CgovLyBUaGlzIGNvbnRyYWN0IGlzIGNvbXBsaWFudCB3aXRoIGFuZC9vciBpbXBsZW1lbnRzIHRoZSBmb2xsb3dpbmcgQVJDczogWyBBUkM0IF0KCi8vIFRoZSBmb2xsb3dpbmcgdGVuIGxpbmVzIG9mIFRFQUwgaGFuZGxlIGluaXRpYWwgcHJvZ3JhbSBmbG93Ci8vIFRoaXMgcGF0dGVybiBpcyB1c2VkIHRvIG1ha2UgaXQgZWFzeSBmb3IgYW55b25lIHRvIHBhcnNlIHRoZSBzdGFydCBvZiB0aGUgcHJvZ3JhbSBhbmQgZGV0ZXJtaW5lIGlmIGEgc3BlY2lmaWMgYWN0aW9uIGlzIGFsbG93ZWQKLy8gSGVyZSwgYWN0aW9uIHJlZmVycyB0byB0aGUgT25Db21wbGV0ZSBpbiBjb21iaW5hdGlvbiB3aXRoIHdoZXRoZXIgdGhlIGFwcCBpcyBiZWluZyBjcmVhdGVkIG9yIGNhbGxlZAovLyBFdmVyeSBwb3NzaWJsZSBhY3Rpb24gZm9yIHRoaXMgY29udHJhY3QgaXMgcmVwcmVzZW50ZWQgaW4gdGhlIHN3aXRjaCBzdGF0ZW1lbnQKLy8gSWYgdGhlIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhlIGNvbnRyYWN0LCBpdHMgcmVzcGVjdGl2ZSBicmFuY2ggd2lsbCBiZSAiKk5PVF9JTVBMRU1FTlRFRCIgd2hpY2gganVzdCBjb250YWlucyAiZXJyIgp0eG4gQXBwbGljYXRpb25JRAohCmludCA2CioKdHhuIE9uQ29tcGxldGlvbgorCnN3aXRjaCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKmNyZWF0ZV9EZWxldGVBcHBsaWNhdGlvbgoKKk5PVF9JTVBMRU1FTlRFRDoKCWVycgoKLy8gbmV3KGFkZHJlc3MpYWRkcmVzcwoqYWJpX3JvdXRlX25ldzoKCS8vIFRoZSBBQkkgcmV0dXJuIHByZWZpeAoJYnl0ZSAweDE1MWY3Yzc1CgoJLy8gYXV0aEFkZHI6IGFkZHJlc3MKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWR1cAoJbGVuCglpbnQgMzIKCT09Cglhc3NlcnQKCgkvLyBleGVjdXRlIG5ldyhhZGRyZXNzKWFkZHJlc3MKCWNhbGxzdWIgbmV3Cgljb25jYXQKCWxvZwoJaW50IDEKCXJldHVybgoKLy8gbmV3KGF1dGhBZGRyOiBBZGRyZXNzKTogQWRkcmVzcwpuZXc6Cglwcm90byAxIDEKCgkvLyBjb250cmFjdHMvYXJjMTIuYWxnby50czoxMAoJLy8gc2VuZFBheW1lbnQoewoJLy8gICAgICAgcmVrZXlUbzogYXV0aEFkZHIsCgkvLyAgICAgfSkKCWl0eG5fYmVnaW4KCWludCBwYXkKCWl0eG5fZmllbGQgVHlwZUVudW0KCgkvLyBjb250cmFjdHMvYXJjMTIuYWxnby50czoxMQoJLy8gcmVrZXlUbzogYXV0aEFkZHIKCWZyYW1lX2RpZyAtMSAvLyBhdXRoQWRkcjogQWRkcmVzcwoJaXR4bl9maWVsZCBSZWtleVRvCgoJLy8gRmVlIGZpZWxkIG5vdCBzZXQsIGRlZmF1bHRpbmcgdG8gMAoJaW50IDAKCWl0eG5fZmllbGQgRmVlCgoJLy8gU3VibWl0IGlubmVyIHRyYW5zYWN0aW9uCglpdHhuX3N1Ym1pdAoKCS8vIGNvbnRyYWN0cy9hcmMxMi5hbGdvLnRzOjE0CgkvLyByZXR1cm4gdGhpcy5hcHAuYWRkcmVzczsKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglyZXRzdWIKCipjcmVhdGVfRGVsZXRlQXBwbGljYXRpb246CgltZXRob2QgIm5ldyhhZGRyZXNzKWFkZHJlc3MiCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAwCgltYXRjaCAqYWJpX3JvdXRlX25ldwoJZXJy",
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjg2LjAKLy8gaHR0cHM6Ly9naXRodWIuY29tL2FsZ29yYW5kZm91bmRhdGlvbi9URUFMU2NyaXB0CgovLyBUaGlzIGNvbnRyYWN0IGlzIGNvbXBsaWFudCB3aXRoIGFuZC9vciBpbXBsZW1lbnRzIHRoZSBmb2xsb3dpbmcgQVJDczogWyBBUkM0IF0KCi8vIFRoZSBmb2xsb3dpbmcgdGVuIGxpbmVzIG9mIFRFQUwgaGFuZGxlIGluaXRpYWwgcHJvZ3JhbSBmbG93Ci8vIFRoaXMgcGF0dGVybiBpcyB1c2VkIHRvIG1ha2UgaXQgZWFzeSBmb3IgYW55b25lIHRvIHBhcnNlIHRoZSBzdGFydCBvZiB0aGUgcHJvZ3JhbSBhbmQgZGV0ZXJtaW5lIGlmIGEgc3BlY2lmaWMgYWN0aW9uIGlzIGFsbG93ZWQKLy8gSGVyZSwgYWN0aW9uIHJlZmVycyB0byB0aGUgT25Db21wbGV0ZSBpbiBjb21iaW5hdGlvbiB3aXRoIHdoZXRoZXIgdGhlIGFwcCBpcyBiZWluZyBjcmVhdGVkIG9yIGNhbGxlZAovLyBFdmVyeSBwb3NzaWJsZSBhY3Rpb24gZm9yIHRoaXMgY29udHJhY3QgaXMgcmVwcmVzZW50ZWQgaW4gdGhlIHN3aXRjaCBzdGF0ZW1lbnQKLy8gSWYgdGhlIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhlIGNvbnRyYWN0LCBpdHMgcmVzcGVjdGl2ZSBicmFuY2ggd2lsbCBiZSAiKk5PVF9JTVBMRU1FTlRFRCIgd2hpY2gganVzdCBjb250YWlucyAiZXJyIgp0eG4gQXBwbGljYXRpb25JRAohCmludCA2CioKdHhuIE9uQ29tcGxldGlvbgorCnN3aXRjaCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKmNyZWF0ZV9EZWxldGVBcHBsaWNhdGlvbgoKKk5PVF9JTVBMRU1FTlRFRDoKCWVycgoKLy8gbmV3KClhZGRyZXNzCiphYmlfcm91dGVfbmV3OgoJLy8gVGhlIEFCSSByZXR1cm4gcHJlZml4CglieXRlIDB4MTUxZjdjNzUKCgkvLyBleGVjdXRlIG5ldygpYWRkcmVzcwoJY2FsbHN1YiBuZXcKCWNvbmNhdAoJbG9nCglpbnQgMQoJcmV0dXJuCgovLyBuZXcoKTogQWRkcmVzcwpuZXc6Cglwcm90byAwIDEKCgkvLyBjb250cmFjdHMvYXJjMTIuYWxnby50czoxMAoJLy8gc2VuZFBheW1lbnQoewoJLy8gICAgICAgcmVrZXlUbzogdGhpcy50eG4uc2VuZGVyLAoJLy8gICAgIH0pCglpdHhuX2JlZ2luCglpbnQgcGF5CglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gY29udHJhY3RzL2FyYzEyLmFsZ28udHM6MTEKCS8vIHJla2V5VG86IHRoaXMudHhuLnNlbmRlcgoJdHhuIFNlbmRlcgoJaXR4bl9maWVsZCBSZWtleVRvCgoJLy8gRmVlIGZpZWxkIG5vdCBzZXQsIGRlZmF1bHRpbmcgdG8gMAoJaW50IDAKCWl0eG5fZmllbGQgRmVlCgoJLy8gU3VibWl0IGlubmVyIHRyYW5zYWN0aW9uCglpdHhuX3N1Ym1pdAoKCS8vIGNvbnRyYWN0cy9hcmMxMi5hbGdvLnRzOjE0CgkvLyByZXR1cm4gdGhpcy5hcHAuYWRkcmVzczsKCWdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCglyZXRzdWIKCipjcmVhdGVfRGVsZXRlQXBwbGljYXRpb246CgltZXRob2QgIm5ldygpYWRkcmVzcyIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfbmV3CgllcnI=",
     "clear": "I3ByYWdtYSB2ZXJzaW9uIDEw"
   },
   "contract": {
@@ -72,12 +72,7 @@ export const APP_SPEC: AppSpec = {
     "methods": [
       {
         "name": "new",
-        "args": [
-          {
-            "name": "authAddr",
-            "type": "address"
-          }
-        ],
+        "args": [],
         "returns": {
           "type": "address"
         }
@@ -149,11 +144,10 @@ export type ControlledAddress = {
    * Maps method signatures / names to their argument and return types.
    */
   methods:
-    & Record<'new(address)address' | 'new', {
+    & Record<'new()address' | 'new', {
       argsObj: {
-        authAddr: string
       }
-      argsTuple: [authAddr: string]
+      argsTuple: []
       returns: string
     }>
 }
@@ -189,7 +183,7 @@ export type ControlledAddressCreateCalls = (typeof ControlledAddressCallFactory)
  * Defines supported create methods for this smart contract
  */
 export type ControlledAddressCreateCallParams =
-  | (TypedCallParams<'new(address)address'> & (OnCompleteDelApp))
+  | (TypedCallParams<'new()address'> & (OnCompleteDelApp))
 /**
  * Defines arguments required for the deploy method.
  */
@@ -212,16 +206,16 @@ export abstract class ControlledAddressCallFactory {
   static get create() {
     return {
       /**
-       * Constructs a create call for the ControlledAddress smart contract using the new(address)address ABI method
+       * Constructs a create call for the ControlledAddress smart contract using the new()address ABI method
        *
        * @param args Any args for the contract call
        * @param params Any additional parameters for the call
        * @returns A TypedCallParams object for the call
        */
-      new(args: MethodArgs<'new(address)address'>, params: AppClientCallCoreParams & CoreAppCallArgs & AppClientCompilationParams & (OnCompleteDelApp)) {
+      new(args: MethodArgs<'new()address'>, params: AppClientCallCoreParams & CoreAppCallArgs & AppClientCompilationParams & (OnCompleteDelApp)) {
         return {
-          method: 'new(address)address' as const,
-          methodArgs: Array.isArray(args) ? args : [args.authAddr],
+          method: 'new()address' as const,
+          methodArgs: Array.isArray(args) ? args : [],
           ...params,
         }
       },
@@ -305,14 +299,14 @@ export class ControlledAddressClient {
     const $this = this
     return {
       /**
-       * Creates a new instance of the ControlledAddress smart contract using the new(address)address ABI method.
+       * Creates a new instance of the ControlledAddress smart contract using the new()address ABI method.
        *
        * @param args The arguments for the smart contract call
        * @param params Any additional parameters for the call
        * @returns The create result
        */
-      async new(args: MethodArgs<'new(address)address'>, params: AppClientCallCoreParams & AppClientCompilationParams & (OnCompleteDelApp)) {
-        return $this.mapReturnValue<MethodReturn<'new(address)address'>, AppCreateCallTransactionResult>(await $this.appClient.create(ControlledAddressCallFactory.create.new(args, params)))
+      async new(args: MethodArgs<'new()address'>, params: AppClientCallCoreParams & AppClientCompilationParams & (OnCompleteDelApp)) {
+        return $this.mapReturnValue<MethodReturn<'new()address'>, AppCreateCallTransactionResult>(await $this.appClient.create(ControlledAddressCallFactory.create.new(args, params)))
       },
     }
   }

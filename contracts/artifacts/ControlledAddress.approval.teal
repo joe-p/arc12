@@ -21,41 +21,33 @@ switch *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_
 *NOT_IMPLEMENTED:
 	err
 
-// new(address)address
+// new()address
 *abi_route_new:
 	// The ABI return prefix
 	byte 0x151f7c75
 
-	// authAddr: address
-	txna ApplicationArgs 1
-	dup
-	len
-	int 32
-	==
-	assert
-
-	// execute new(address)address
+	// execute new()address
 	callsub new
 	concat
 	log
 	int 1
 	return
 
-// new(authAddr: Address): Address
+// new(): Address
 new:
-	proto 1 1
+	proto 0 1
 
 	// contracts/arc12.algo.ts:10
 	// sendPayment({
-	//       rekeyTo: authAddr,
+	//       rekeyTo: this.txn.sender,
 	//     })
 	itxn_begin
 	int pay
 	itxn_field TypeEnum
 
 	// contracts/arc12.algo.ts:11
-	// rekeyTo: authAddr
-	frame_dig -1 // authAddr: Address
+	// rekeyTo: this.txn.sender
+	txn Sender
 	itxn_field RekeyTo
 
 	// Fee field not set, defaulting to 0
@@ -71,7 +63,7 @@ new:
 	retsub
 
 *create_DeleteApplication:
-	method "new(address)address"
+	method "new()address"
 	txna ApplicationArgs 0
 	match *abi_route_new
 	err

@@ -6,9 +6,9 @@ import { Contract } from '@algorandfoundation/tealscript';
 
 class ControlledAddress extends Contract {
   @allow.create('DeleteApplication')
-  new(authAddr: Address): Address {
+  new(): Address {
     sendPayment({
-      rekeyTo: authAddr,
+      rekeyTo: this.txn.sender,
     });
 
     return this.app.address;
@@ -38,7 +38,6 @@ export class ARC12 extends Contract {
     if (this.vaults(addr).exists) return this.vaults(addr).value;
 
     const vault = sendMethodCall<typeof ControlledAddress.prototype.new>({
-      methodArgs: [this.app.address],
       onCompletion: OnCompletion.DeleteApplication,
       approvalProgram: ControlledAddress.approvalProgram(),
       clearStateProgram: ControlledAddress.clearProgram(),

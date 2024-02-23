@@ -4,12 +4,7 @@
   "methods": [
     {
       "name": "new",
-      "args": [
-        {
-          "name": "authAddr",
-          "type": "address"
-        }
-      ],
+      "args": [],
       "returns": {
         "type": "address"
       }
