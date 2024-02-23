@@ -22,14 +22,6 @@ async function sendAsset(
   const itxns = sendInfo![0];
   const mbr = sendInfo![1];
 
-  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-    from: sender,
-    to: arc12RouterAddress,
-    assetIndex: assetId,
-    amount: 1,
-    suggestedParams: await algod.getTransactionParams().do(),
-  });
-
   const composer = appClient.compose();
 
   if (mbr) {
@@ -42,6 +34,14 @@ async function sendAsset(
 
     composer.addTransaction({ transaction: mbrPayment, signer });
   }
+
+  const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+    from: sender,
+    to: arc12RouterAddress,
+    assetIndex: assetId,
+    amount: 1,
+    suggestedParams: await algod.getTransactionParams().do(),
+  });
 
   await composer
     .sendAsset({ axfer, receiver }, { sendParams: { fee: algokit.microAlgos(1000 + 1000 * Number(itxns)) } })
