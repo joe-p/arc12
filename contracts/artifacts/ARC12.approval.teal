@@ -206,8 +206,6 @@ getAssetSendInfo:
 	// *if1_condition
 	// contracts/arc12.algo.ts:62
 	// receiver.isOptedInToAsset(asset)
-	// One itxns to send MBR
-	// One itxn to opt in
 	frame_dig -1 // receiver: Address
 	frame_dig -2 // asset: AssetID
 	asset_holding_get AssetBalance
@@ -236,7 +234,6 @@ getAssetSendInfo:
 	bz *if2_end
 
 	// *if2_consequent
-	// Calculate the MBR for the vault box
 	// contracts/arc12.algo.ts:68
 	// info.itxns += 4
 	frame_dig 0 // info: { itxns: uint64; mbr: uint64 }
@@ -260,8 +257,6 @@ getAssetSendInfo:
 	// contracts/arc12.algo.ts:72
 	// this.vaults(receiver).value = globals.zeroAddress
 	frame_dig -1 // receiver: Address
-
-	// MBR = MBR for the box + min balance for the vault + ASA MBR
 	global ZeroAddress
 	box_put
 
@@ -323,7 +318,6 @@ getAssetSendInfo:
 	bz *if3_end
 
 	// *if3_consequent
-	// One itxn to send MBR
 	// contracts/arc12.algo.ts:86
 	// info.itxns += 1
 	frame_dig 0 // info: { itxns: uint64; mbr: uint64 }
@@ -337,7 +331,6 @@ getAssetSendInfo:
 	replace3
 	frame_bury 0 // info: { itxns: uint64; mbr: uint64 }
 
-	// MBR = ASA MBR
 	// *if4_condition
 	// contracts/arc12.algo.ts:88
 	// !(vault.balance >= vault.minBalance + globals.assetOptInMinBalance)
@@ -516,8 +509,6 @@ sendAsset:
 	// contracts/arc12.algo.ts:127
 	// !vault.isOptedInToAsset(axfer.xferAsset)
 	frame_dig 1 // vault: address
-
-	// Ensure the vault has enough balance to opt in
 	frame_dig -2 // axfer: AssetTransferTxn
 	gtxns XferAsset
 	asset_holding_get AssetBalance

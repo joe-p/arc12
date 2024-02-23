@@ -62,18 +62,18 @@ export class ARC12 extends Contract {
     if (receiver.isOptedInToAsset(asset)) return info;
 
     if (!this.vaults(receiver).exists) {
-      /// Two itxns to create vault (create + rekey)
-      /// One itxns to send MBR
-      /// One itxn to opt in
+      // Two itxns to create vault (create + rekey)
+      // One itxns to send MBR
+      // One itxn to opt in
       info.itxns += 4;
 
-      /// Calculate the MBR for the vault box
+      // Calculate the MBR for the vault box
       const preMBR = globals.currentApplicationAddress.minBalance;
       this.vaults(receiver).value = globals.zeroAddress;
       const boxMbrDelta = globals.currentApplicationAddress.minBalance - preMBR;
       this.vaults(receiver).delete();
 
-      /// MBR = MBR for the box + min balance for the vault + ASA MBR
+      // MBR = MBR for the box + min balance for the vault + ASA MBR
       info.mbr = boxMbrDelta + globals.minBalance + globals.assetOptInMinBalance;
 
       return info;
@@ -82,14 +82,14 @@ export class ARC12 extends Contract {
     const vault = this.vaults(receiver).value;
 
     if (!vault.isOptedInToAsset(asset)) {
-      /// One itxn to opt in
+      // One itxn to opt in
       info.itxns += 1;
 
       if (!(vault.balance >= vault.minBalance + globals.assetOptInMinBalance)) {
-        /// One itxn to send MBR
+        // One itxn to send MBR
         info.itxns += 1;
 
-        /// MBR = ASA MBR
+        // MBR = ASA MBR
         info.mbr = globals.assetOptInMinBalance;
       }
     }
@@ -110,7 +110,7 @@ export class ARC12 extends Contract {
       assetReceiver: this.app.address,
     });
 
-    /// If the receiver is opted in, send directly to their account
+    // If the receiver is opted in, send directly to their account
     if (receiver.isOptedInToAsset(axfer.xferAsset)) {
       sendAssetTransfer({
         assetReceiver: receiver,
@@ -128,7 +128,7 @@ export class ARC12 extends Contract {
       let vaultMbrDelta = globals.assetOptInMinBalance;
       if (!vaultExisted) vaultMbrDelta += globals.minBalance;
 
-      /// Ensure the vault has enough balance to opt in
+      // Ensure the vault has enough balance to opt in
       if (vault.balance < vault.minBalance + vaultMbrDelta) {
         sendPayment({
           receiver: vault,
@@ -136,7 +136,7 @@ export class ARC12 extends Contract {
         });
       }
 
-      /// Opt the vault in
+      // Opt the vault in
       sendAssetTransfer({
         sender: vault,
         assetReceiver: vault,
@@ -145,7 +145,7 @@ export class ARC12 extends Contract {
       });
     }
 
-    /// Transfer the asset to the vault
+    // Transfer the asset to the vault
     sendAssetTransfer({
       assetReceiver: vault,
       assetAmount: axfer.assetAmount,
