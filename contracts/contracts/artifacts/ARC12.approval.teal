@@ -675,6 +675,83 @@ sendAsset:
 	popn 2
 	retsub
 
+// claim(uint64)void
+*abi_route_claim:
+	// asa: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// execute claim(uint64)void
+	callsub claim
+	int 1
+	return
+
+// claim(asa: AssetID): void
+//
+// Claim an ASA from the vault
+//
+// @param asa The ASA to claim
+claim:
+	proto 1 0
+
+	// Push empty bytes after the frame pointer to reserve space for local variables
+	byte 0x
+
+	// contracts/arc12.algo.ts:164
+	// vault = this.vaults(this.txn.sender).value
+	txn Sender
+	box_get
+	assert
+	frame_bury 0 // vault: address
+
+	// contracts/arc12.algo.ts:166
+	// sendAssetTransfer({
+	//       sender: vault,
+	//       assetReceiver: this.txn.sender,
+	//       assetAmount: vault.assetBalance(asa),
+	//       xferAsset: asa,
+	//       assetCloseTo: this.txn.sender,
+	//     })
+	itxn_begin
+	int axfer
+	itxn_field TypeEnum
+
+	// contracts/arc12.algo.ts:167
+	// sender: vault
+	frame_dig 0 // vault: address
+	itxn_field Sender
+
+	// contracts/arc12.algo.ts:168
+	// assetReceiver: this.txn.sender
+	txn Sender
+	itxn_field AssetReceiver
+
+	// contracts/arc12.algo.ts:169
+	// assetAmount: vault.assetBalance(asa)
+	frame_dig 0 // vault: address
+	frame_dig -1 // asa: AssetID
+	asset_holding_get AssetBalance
+	pop
+	itxn_field AssetAmount
+
+	// contracts/arc12.algo.ts:170
+	// xferAsset: asa
+	frame_dig -1 // asa: AssetID
+	itxn_field XferAsset
+
+	// contracts/arc12.algo.ts:171
+	// assetCloseTo: this.txn.sender
+	txn Sender
+	itxn_field AssetCloseTo
+
+	// Fee field not set, defaulting to 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+	retsub
+
 *abi_route_createApplication:
 	int 1
 	return
@@ -689,6 +766,7 @@ sendAsset:
 	method "optRouterIn(uint64)void"
 	method "getAssetSendInfo(address,uint64)(uint64,uint64)"
 	method "sendAsset(address,axfer)address"
+	method "claim(uint64)void"
 	txna ApplicationArgs 0
-	match *abi_route_optRouterIn *abi_route_getAssetSendInfo *abi_route_sendAsset
+	match *abi_route_optRouterIn *abi_route_getAssetSendInfo *abi_route_sendAsset *abi_route_claim
 	err

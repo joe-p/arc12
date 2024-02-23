@@ -154,4 +154,21 @@ export class ARC12 extends Contract {
 
     return vault;
   }
+
+  /**
+   * Claim an ASA from the vault
+   *
+   * @param asa The ASA to claim
+   */
+  claim(asa: AssetID): void {
+    const vault = this.vaults(this.txn.sender).value;
+
+    sendAssetTransfer({
+      sender: vault,
+      assetReceiver: this.txn.sender,
+      assetAmount: vault.assetBalance(asa),
+      xferAsset: asa,
+      assetCloseTo: this.txn.sender,
+    });
+  }
 }

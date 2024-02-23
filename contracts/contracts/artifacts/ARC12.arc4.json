@@ -56,6 +56,20 @@
       }
     },
     {
+      "name": "claim",
+      "desc": "Claim an ASA from the vault",
+      "args": [
+        {
+          "name": "asa",
+          "type": "uint64",
+          "desc": "The ASA to claim"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "createApplication",
       "args": [],
       "returns": {

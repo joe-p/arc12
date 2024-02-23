@@ -10,6 +10,7 @@ algokit.Config.configure({ populateAppCallResources: true });
 let appClient: Arc12Client;
 let assetId: number;
 let alice: algosdk.Account;
+let arc12RouterAddress: string;
 
 describe('Arc12', () => {
   beforeEach(fixture.beforeEach);
@@ -46,6 +47,7 @@ describe('Arc12', () => {
 
     await appClient.appClient.fundAppAccount({ amount: algokit.microAlgos(200_000) });
 
+    arc12RouterAddress = (await appClient.appClient.getAppReference()).appAddress;
     alice = testAccount;
   });
 
@@ -73,7 +75,7 @@ describe('Arc12', () => {
 
     const axfer = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: alice.addr,
-      to: (await appClient.appClient.getAppReference()).appAddress,
+      to: arc12RouterAddress,
       assetIndex: assetId,
       amount: 1,
       suggestedParams: await algod.getTransactionParams().do(),
@@ -81,7 +83,7 @@ describe('Arc12', () => {
 
     const mbrPayment = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: alice.addr,
-      to: (await appClient.appClient.getAppReference()).appAddress,
+      to: arc12RouterAddress,
       amount: mbr,
       suggestedParams: await algod.getTransactionParams().do(),
     });
